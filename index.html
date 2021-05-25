@@ -6,7 +6,6 @@
     <title>PlayFab - Phaser 3 Example</title>
     <script src="js/phaser.min.js"></script>
     <script type="text/javascript" src="https://download.playfab.com/PlayFabClientApi.js"></script>
-    <!-- <script src="js/main.js"></script> -->
     <style type="text/css">
         body {
             margin: 0;
@@ -54,7 +53,24 @@
         }
 
         function create() {
-            game.PlayFab = game.plugins.add(Phaser.Plugins.PlayFab);
+            PlayFab.settings.titleId = '7343B';
+            var playfabId;
+            var loginRequest = {
+                TitleId: PlayFab.settings.titleId,
+                CustomId: 'GettingStartedGuide',
+                CreateAccount: true
+            };
+
+            var LoginCallback = function (result, error) {
+                if (result !== null) {
+                    console.log('Logged in! PlayFabId: ' + result.data.PlayFabId)
+                } else if (error !== null) {
+                    console.log(error)
+                }
+            }
+
+            PlayFabClientSDK.LoginWithCustomID(loginRequest, LoginCallback);
+
             //  A simple background for our game
             this.add.image(400, 300, 'sky');
 
