@@ -7,4 +7,5 @@ handlers.addUserVirtualCurrency = function (args, context) {
         Amount: amount
     };
     server.AddUserVirtualCurrency(request);
+    return;
 };
