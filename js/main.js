@@ -23,15 +23,16 @@ class GameWonScene extends Phaser.Scene {
 
 
 class StoreScene extends Phaser.Scene {
-    constructor(playfabId) {
+    constructor() {
         super('Store');
         this.items = []
         this.inventory = []
         this.clicks;
-        this.playfabId = playfabId
+        this.clickText;
     }
 
     create() {
+        this.clickText = this.add.text(16, 16, '', { fontSize: '32px', fill: '#ffffff' })
         var store = this;
         var GetCatalogItemsCallback = function (result, error) {
             if (result !== null) {
@@ -39,6 +40,12 @@ class StoreScene extends Phaser.Scene {
                 store.items.forEach((item, i) => {
                     var nameText = store.add.text(200, 200 + i*30, item.DisplayName)
                     var priceText = store.add.text(16, 200 + i*30, `${item.VirtualCurrencyPrices.CL} Clicks`)
+                    nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+                        PlayFabClientSDK.PurchaseItem({ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL'}, (result, error) => {
+                            console.log(result)
+                            PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
+                        })
+                    })
                 })
             } else if (error !== null) {
                 console.log(error)
@@ -51,7 +58,7 @@ class StoreScene extends Phaser.Scene {
             if (result !== null) {
                 store.inventory = result.data.inventory
                 store.clicks = result.data.VirtualCurrency.CL
-                var clickText = store.add.text(16, 16, `click: ${store.clicks}`, { fontSize: '32px', fill: '#ffffff' });
+                store.clickText.setText(`click: ${store.clicks}`);
             } else if (error !== null) {
                 console.log(error)
             }
@@ -117,6 +124,7 @@ class LevelOneScene extends Phaser.Scene {
 
         this.graphics = this.add.graphics({ x: 0, y: 0 });
     }
+    
     update() {
         this.graphics.clear();
         this.graphics.fillStyle(Phaser.Display.Color.HSVColorWheel()[8].color, 1);
@@ -150,10 +158,10 @@ class Controller extends Phaser.Scene {
                 console.log(`Logged in! PlayFabId: ${playfabId}`)
                 controller.scene.add('GameOver', GameOverScene);
                 controller.scene.add('GameWon', GameWonScene);
-                controller.scene.add('Store', new StoreScene(playfabId));
+                controller.scene.add('Store', StoreScene);
                 controller.scene.add('Level1', LevelOneScene);
 
-                controller.scene.start('Store');
+                controller.scene.start('Level1');
             } else if (error !== null) {
                 console.log(error)
             }
