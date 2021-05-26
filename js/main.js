@@ -22,6 +22,47 @@ class GameWonScene extends Phaser.Scene {
 }
 
 
+class StoreScene extends Phaser.Scene {
+    constructor(playfabId) {
+        super('Store');
+        this.items = []
+        this.inventory = []
+        this.clicks;
+        this.playfabId = playfabId
+    }
+
+    create() {
+        var store = this;
+        var GetCatalogItemsCallback = function (result, error) {
+            if (result !== null) {
+                store.items = result.data.Catalog
+                store.items.forEach((item) => {
+                    var nameText = store.add.text(400, 300, item.DisplayName)
+                    var priceText = store.add.text(300, 300, `${item.VirtualCurrencyPrices.CL} Clicks`)
+                })
+            } else if (error !== null) {
+                console.log(error)
+            }
+        }
+
+        PlayFabClientSDK.GetCatalogItems({ CatalogVersion: 1 }, GetCatalogItemsCallback)
+
+        var GetInventoryCallback = function (result, error) {
+            if (result !== null) {
+                store.inventory = result.data.inventory
+                store.clicks = result.data.VirtualCurrency.CL
+                var clickText = store.add.text(16, 16, `click: ${store.clicks}`, { fontSize: '32px', fill: '#ffffff' });
+            } else if (error !== null) {
+                console.log(error)
+            }
+        }
+
+        PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
+        var itemText = this.add.text(300, 9, "STORE")
+    }
+}
+
+
 
 
 
@@ -40,31 +81,12 @@ class ChapterOneScene extends Phaser.Scene {
     }
 
     create() {
-
-        PlayFab.settings.titleId = '7343B';
-        var playfabId;
-        var loginRequest = {
-            TitleId: PlayFab.settings.titleId,
-            CustomId: 'GettingStartedGuide',
-            CreateAccount: true
-        };
-
-        var LoginCallback = function (result, error) {
-            if (result !== null) {
-                console.log('Logged in! PlayFabId: ' + result.data.PlayFabId)
-            } else if (error !== null) {
-                console.log(error)
-            }
-        }
-
-        PlayFabClientSDK.LoginWithCustomID(loginRequest, LoginCallback);
-
         this.player = this.add.sprite(100, 450, 'dino').setScale(2);
 
-        var clickText = this.add.text(16, 16, 'click: ' + this.totalClick, { fontSize: '32px', fill: '#ffffff' });
+        var clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontSize: '32px', fill: '#ffffff' });
 
         this.player.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            clickText.setText('click: ' + ++this.totalClick)
+            clickText.setText(`click: ${++this.totalClick}`)
         })
         this.anims.create({
             key: 'bounce',
@@ -80,11 +102,15 @@ class ChapterOneScene extends Phaser.Scene {
     update() {
         var progress = this.timerEvent.getProgress();
         if (progress === 1) {
+            this.timerEvent.remove();
+            this.player.removeInteractive();
+            PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } })
+
             if (this.totalClick >= 10) {
                 this.time.addEvent({
                     delay: 1000,
                     callback() {
-                        this.scene.start('GameWon');
+                        this.scene.start('Store');
                     },
                     callbackScope: this,
                     loop: false,
@@ -99,7 +125,6 @@ class ChapterOneScene extends Phaser.Scene {
                     loop: false,
                 });
             }
-            return;
         }
         this.graphics.clear();
         this.graphics.fillStyle(Phaser.Display.Color.HSVColorWheel()[8].color, 1);
@@ -119,11 +144,30 @@ class Controller extends Phaser.Scene {
     }
 
     create() {
-        this.scene.add('GameOver', GameOverScene);
-        this.scene.add('GameWon', GameWonScene);
-        this.scene.add('Chapter1', ChapterOneScene);
+        var controller = this;
+        PlayFab.settings.titleId = '7343B';
+        var loginRequest = {
+            TitleId: PlayFab.settings.titleId,
+            CustomId: 'GettingStartedGuide',
+            CreateAccount: true
+        };
 
-        this.scene.start('Chapter1');
+        var LoginCallback = function (result, error) {
+            if (result !== null) {
+                var playfabId = result.data.PlayFabId
+                console.log(`Logged in! PlayFabId: ${playfabId}`)
+                controller.scene.add('GameOver', GameOverScene);
+                controller.scene.add('GameWon', GameWonScene);
+                controller.scene.add('Store', new StoreScene(playfabId));
+                controller.scene.add('Chapter1', ChapterOneScene);
+
+                controller.scene.start('Chapter1');
+            } else if (error !== null) {
+                console.log(error)
+            }
+        }
+
+        PlayFabClientSDK.LoginWithCustomID(loginRequest, LoginCallback);
     }
 }
 
