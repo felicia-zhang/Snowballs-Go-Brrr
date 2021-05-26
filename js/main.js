@@ -36,9 +36,9 @@ class StoreScene extends Phaser.Scene {
         var GetCatalogItemsCallback = function (result, error) {
             if (result !== null) {
                 store.items = result.data.Catalog
-                store.items.forEach((item) => {
-                    var nameText = store.add.text(400, 300, item.DisplayName)
-                    var priceText = store.add.text(300, 300, `${item.VirtualCurrencyPrices.CL} Clicks`)
+                store.items.forEach((item, i) => {
+                    var nameText = store.add.text(200, 200 + i*30, item.DisplayName)
+                    var priceText = store.add.text(16, 200 + i*30, `${item.VirtualCurrencyPrices.CL} Clicks`)
                 })
             } else if (error !== null) {
                 console.log(error)
@@ -59,6 +59,11 @@ class StoreScene extends Phaser.Scene {
 
         PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
         var itemText = this.add.text(300, 9, "STORE")
+
+        var nextButton = this.add.text(700, 400, "NEXT" );
+        nextButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+            this.scene.start('Level1');
+        })
     }
 }
 
@@ -66,9 +71,9 @@ class StoreScene extends Phaser.Scene {
 
 
 
-class ChapterOneScene extends Phaser.Scene {
+class LevelOneScene extends Phaser.Scene {
     constructor() {
-        super('Chapter1');
+        super('Level1');
         this.player;
         this.totalClick = 0;
         this.graphics;
@@ -146,9 +151,9 @@ class Controller extends Phaser.Scene {
                 controller.scene.add('GameOver', GameOverScene);
                 controller.scene.add('GameWon', GameWonScene);
                 controller.scene.add('Store', new StoreScene(playfabId));
-                controller.scene.add('Chapter1', ChapterOneScene);
+                controller.scene.add('Level1', LevelOneScene);
 
-                controller.scene.start('Chapter1');
+                controller.scene.start('Store');
             } else if (error !== null) {
                 console.log(error)
             }
