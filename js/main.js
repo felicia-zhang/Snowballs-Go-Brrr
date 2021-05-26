@@ -104,7 +104,9 @@ class ChapterOneScene extends Phaser.Scene {
         if (progress === 1) {
             this.timerEvent.remove();
             this.player.removeInteractive();
-            PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } })
+            PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
+                console.log(result)
+            })
 
             if (this.totalClick >= 10) {
                 this.time.addEvent({
