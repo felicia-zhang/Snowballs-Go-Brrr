@@ -33,3 +33,23 @@ handlers.syncInventoryToCatalog = function (args, context) {
     })
     return;
 };
+
+handlers.completeLevelAndUpdateStatistics = function (args, context) {
+    var level = args.level;
+    var clicks = args.clicks;
+    
+    server.UpdateUserInternalData({
+        PlayFabId: currentPlayerId,
+        Data: {
+            lastLevelCompleted: level
+        }
+    });
+
+    server.UpdatePlayerStatistics({
+        PlayFabId: currentPlayerId, 
+        Statistics: [{
+                StatisticName: "level_clicks",
+                Value: clicks
+            }]
+    });
+};
