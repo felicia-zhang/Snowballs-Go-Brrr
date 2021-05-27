@@ -96,12 +96,14 @@ class LevelOneScene extends Phaser.Scene {
         this.bar;
         this.consumables;
         this.durables;
+        this.consumed;
     }
 
     init() {
         this.totalClick = 0
         this.consumables = []
         this.durables = []
+        this.consumed = {}
     }
 
     preload() {
@@ -128,9 +130,19 @@ class LevelOneScene extends Phaser.Scene {
                     scene.add.text(200, 200 + i * 100, durable.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                 })
                 scene.consumables.forEach((consumable, i) => {
-                    scene.add.text(600, 200 + i * 100, consumable.item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-                    scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-            
+                    var item = consumable.item
+                    var nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    var remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+                        scene.consumed[item.DisplayName] = scene.consumed[item.DisplayName] || 0
+                        scene.consumed[item.DisplayName]++
+                        if (consumable.remainingUses - scene.consumed[item.DisplayName] > 0) {
+                        remainingUsesText.setText(consumable.remainingUses - scene.consumed[item.DisplayName])
+                        } else {
+                            nameText.destroy()
+                            remainingUsesText.destroy()
+                        }
+                    })
                 })
             } else if (error !== null) {
                 console.log(error)
@@ -160,19 +172,19 @@ class LevelOneScene extends Phaser.Scene {
         });
         this.player.anims.play('bounce');
 
-        this.timerEvent = this.time.addEvent({
-            delay: 4000,
-            callback: () => {
-                this.player.removeInteractive();
-                PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
-                    if (this.totalClick >= 10) {
-                        this.scene.start('Store');
-                    } else {
-                        this.scene.start('GameOver');
-                    }
-                })
-            }
-        });
+        // this.timerEvent = this.time.addEvent({
+        //     delay: 4000,
+        //     callback: () => {
+        //         this.player.removeInteractive();
+        //         PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
+        //             if (this.totalClick >= 10) {
+        //                 this.scene.start('Store');
+        //             } else {
+        //                 this.scene.start('GameOver');
+        //             }
+        //         })
+        //     }
+        // });
 
         this.graphics = this.add.graphics({ x: 0, y: 0 });
     }
@@ -180,7 +192,7 @@ class LevelOneScene extends Phaser.Scene {
     update() {
         this.graphics.clear();
         this.graphics.fillStyle(0xFFFFFF, 1.0);
-        this.graphics.fillRect(0, 46, 800 * this.timerEvent.getProgress(), 8);
+        // this.graphics.fillRect(0, 46, 800 * this.timerEvent.getProgress(), 8);
     }
 }
 
