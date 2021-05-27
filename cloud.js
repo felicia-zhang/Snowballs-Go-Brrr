@@ -25,7 +25,7 @@ handlers.syncInventoryToCatalog = function (args, context) {
                 var request = {
                     ItemInstanceId: instanceId,
                     PlayFabId: currentPlayerId,
-                    Data: {"Description": item.Description, "image": JSON.parse(item.CustomData)['image']}
+                    Data: {"Description": item.Description, "ImageData": item.CustomData}
                 }
                 server.UpdateUserInventoryItemCustomData(request);
             })
