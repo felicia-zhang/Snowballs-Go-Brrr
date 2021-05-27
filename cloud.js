@@ -11,7 +11,7 @@ handlers.addUserVirtualCurrency = function (args, context) {
 };
 
 handlers.syncInventoryToCatalog = function (args, context) {
-    var catalogItems = server.GetCatalogItems({CatalogVersion: 1})
+    var catalogItems = server.GetCatalogItems({CatalogVersion: 1}).Catalog
     catalogItems.forEach((item) => {
         var request = {
             ItemInstanceId: item,
