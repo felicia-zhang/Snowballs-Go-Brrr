@@ -6,6 +6,17 @@ class LeaderboardScene extends Phaser.Scene {
     create() {
         this.add.image(400, 300, 'sky');
         this.title = this.add.text(400, 300, 'Leaderboard', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        PlayFabClientSDK.GetLeaderboard({StatisticName: 'level_clicks'}, (result, error) => {console.log(result)})
+
+        var storeButton = this.add.text(700, 400, "store", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        storeButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+            this.scene.start('Store');
+        })
+
+        var gameButton = this.add.text(700, 450, "game", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        gameButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+            this.scene.start('Scene');
+        })
     }
 }
 
@@ -62,7 +73,7 @@ class StoreScene extends Phaser.Scene {
         PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
         var itemText = this.add.text(300, 9, "STORE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
 
-        var nextButton = this.add.text(700, 400, "NEXT", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        var nextButton = this.add.text(700, 400, "game", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         nextButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Scene');
         })
@@ -174,7 +185,7 @@ class GameScene extends Phaser.Scene {
                 })
                 PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
                     PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: this.totalClick, time: 4000 } })
-                    this.scene.start('Store');
+                    this.scene.start('Leaderboard');
                 })
             }
         });
@@ -224,7 +235,7 @@ class Controller extends Phaser.Scene {
                     controller.scene.add('Store', StoreScene);
                     controller.scene.add('Scene', GameScene);
 
-                    controller.scene.start('Scene');
+                    controller.scene.start('Store');
                 })
             } else if (error !== null) {
                 console.log(error)
