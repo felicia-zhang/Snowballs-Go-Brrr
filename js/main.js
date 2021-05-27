@@ -5,7 +5,7 @@ class GameOverScene extends Phaser.Scene {
 
     create() {
         this.add.image(400, 300, 'sky');
-        this.title = this.add.text(400, 300, 'GAME OVER');
+        this.title = this.add.text(400, 300, 'GAME OVER', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
     }
 }
 
@@ -19,7 +19,7 @@ class GameWonScene extends Phaser.Scene {
 
     create() {
         this.add.image(400, 300, 'sky');
-        this.title = this.add.text(400, 300, 'GAME WON');
+        this.title = this.add.text(400, 300, 'GAME WON', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
     }
 }
 
@@ -35,14 +35,14 @@ class StoreScene extends Phaser.Scene {
 
     create() {
         this.add.image(400, 300, 'sky');
-        this.clickText = this.add.text(16, 16, '', { fontSize: '32px', fill: '#ffffff' })
+        this.clickText = this.add.text(16, 16, '', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
         var store = this;
         var GetCatalogItemsCallback = function (result, error) {
             if (result !== null) {
                 store.items = result.data.Catalog
                 store.items.forEach((item, i) => {
-                    var nameText = store.add.text(200, 200 + i*30, item.DisplayName)
-                    var priceText = store.add.text(16, 200 + i*30, `${item.VirtualCurrencyPrices.CL} Clicks`)
+                    var nameText = store.add.text(200, 200 + i*30, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    var priceText = store.add.text(16, 200 + i*30, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                     nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
                         PlayFabClientSDK.PurchaseItem({ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL'}, (result, error) => {
                             console.log(result)
@@ -68,9 +68,9 @@ class StoreScene extends Phaser.Scene {
         }
 
         PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
-        var itemText = this.add.text(300, 9, "STORE")
+        var itemText = this.add.text(300, 9, "STORE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
 
-        var nextButton = this.add.text(700, 400, "NEXT" );
+        var nextButton = this.add.text(700, 400, "NEXT", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' } );
         nextButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Level1');
         })
@@ -107,7 +107,7 @@ class LevelOneScene extends Phaser.Scene {
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
         this.fire = this.add.sprite(200, 450, 'fire').setScale(0.3)
 
-        var clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontSize: '32px', fill: '#ffffff' });
+        var clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
 
         this.player.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             clickText.setText(`click: ${++this.totalClick}`)
@@ -144,8 +144,8 @@ class LevelOneScene extends Phaser.Scene {
 
     update() {
         this.graphics.clear();
-        this.graphics.fillStyle(Phaser.Display.Color.HSVColorWheel()[8].color, 1);
-        this.graphics.fillRect(0, 16, 800 * this.timerEvent.getProgress(), 8);
+        this.graphics.fillStyle(0xFFFFFF, 1.0);
+        this.graphics.fillRect(0, 46, 800 * this.timerEvent.getProgress(), 8);
     }
 }
 
