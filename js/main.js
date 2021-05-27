@@ -132,6 +132,9 @@ class GameScene extends Phaser.Scene {
                         } else {
                             nameText.destroy()
                             remainingUsesText.destroy()
+                            if (image !== undefined) {
+                                image.destroy()
+                            }
                         }
                     })
                 })
