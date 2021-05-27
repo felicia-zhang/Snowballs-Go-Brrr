@@ -113,6 +113,10 @@ class LevelOneScene extends Phaser.Scene {
     }
 
     create() {
+        PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (result, error) => {
+            console.log(result)
+        })
+
         var scene = this
         var GetInventoryCallback = function (result, error) {
             if (result !== null) {
