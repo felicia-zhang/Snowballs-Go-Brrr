@@ -4,9 +4,20 @@ class LeaderboardScene extends Phaser.Scene {
     }
 
     create() {
+        var leaderboard = this
         this.add.image(400, 300, 'sky');
-        this.title = this.add.text(400, 300, 'Leaderboard', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
-        PlayFabClientSDK.GetLeaderboard({StatisticName: 'level_clicks'}, (result, error) => {console.log(result)})
+        this.title = this.add.text(300, 9, 'Leaderboard', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        PlayFabClientSDK.GetLeaderboard({ StatisticName: 'level_clicks' }, (result, error) => {
+            leaderboard.add.text(200, 300, "PLACE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+            leaderboard.add.text(300, 300, "NAME", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+            leaderboard.add.text(400, 300, "STATISTIC", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+            var players = result.data.Leaderboard
+            players.forEach((player, i) => {
+                leaderboard.add.text(200, 320, i + 1, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                leaderboard.add.text(300, 320, player.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                leaderboard.add.text(400, 320, player.StatValue, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+            })
+        })
 
         var storeButton = this.add.text(700, 400, "store", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         storeButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
