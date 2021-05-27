@@ -94,10 +94,14 @@ class LevelOneScene extends Phaser.Scene {
         this.graphics;
         this.timerEvent;
         this.bar;
+        this.consumables;
+        this.durables;
     }
 
     init() {
         this.totalClick = 0
+        this.consumables = []
+        this.durables = []
     }
 
     preload() {
@@ -107,6 +111,34 @@ class LevelOneScene extends Phaser.Scene {
     }
 
     create() {
+        var scene = this
+        var GetInventoryCallback = function (result, error) {
+            if (result !== null) {
+                var inventory = result.data.Inventory
+                inventory.forEach((inventory, i) => {
+                    if (inventory.RemainingUses !== undefined) {
+                        var remainingUses = inventory.RemainingUses
+                        scene.consumables.push({item: inventory, remainingUses: remainingUses})
+                    } else {
+                        scene.durables.push(inventory)
+                    }
+                })
+
+                scene.durables.forEach((durable, i) => {
+                    scene.add.text(200, 200 + i * 100, durable.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                })
+                scene.consumables.forEach((consumable, i) => {
+                    scene.add.text(600, 200 + i * 100, consumable.item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+            
+                })
+            } else if (error !== null) {
+                console.log(error)
+            }
+        }
+
+        PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
+
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
 
