@@ -1,27 +1,14 @@
-class GameOverScene extends Phaser.Scene {
+class LeaderboardScene extends Phaser.Scene {
     constructor() {
-        super('GameOver');
+        super('Leaderboard');
     }
 
     create() {
         this.add.image(400, 300, 'sky');
-        this.title = this.add.text(400, 300, 'GAME OVER', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        this.title = this.add.text(400, 300, 'Leaderboard', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
     }
 }
 
-
-
-
-class GameWonScene extends Phaser.Scene {
-    constructor() {
-        super('GameWon');
-    }
-
-    create() {
-        this.add.image(400, 300, 'sky');
-        this.title = this.add.text(400, 300, 'GAME WON', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
-    }
-}
 
 
 class StoreScene extends Phaser.Scene {
@@ -77,7 +64,7 @@ class StoreScene extends Phaser.Scene {
 
         var nextButton = this.add.text(700, 400, "NEXT", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         nextButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            this.scene.start('Level1');
+            this.scene.start('Scene');
         })
     }
 }
@@ -86,9 +73,9 @@ class StoreScene extends Phaser.Scene {
 
 
 
-class LevelOneScene extends Phaser.Scene {
+class GameScene extends Phaser.Scene {
     constructor() {
-        super('Level1');
+        super('Scene');
         this.player;
         this.totalClick;
         this.graphics;
@@ -183,11 +170,8 @@ class LevelOneScene extends Phaser.Scene {
                     PlayFabClientSDK.ConsumeItem({ ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1] }, (result, error) => console.log(result))
                 })
                 PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
-                    if (this.totalClick >= 10) {
-                        this.scene.start('Store');
-                    } else {
-                        this.scene.start('GameOver');
-                    }
+                    PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: this.totalClick, time: 4000 } })
+                    this.scene.start('Store');
                 })
             }
         });
@@ -233,12 +217,11 @@ class Controller extends Phaser.Scene {
                     console.log(r)
                     var playfabId = result.data.PlayFabId
                     console.log(`Logged in! PlayFabId: ${playfabId}`)
-                    controller.scene.add('GameOver', GameOverScene);
-                    controller.scene.add('GameWon', GameWonScene);
+                    controller.scene.add('Leaderboard', LeaderboardScene);
                     controller.scene.add('Store', StoreScene);
-                    controller.scene.add('Level1', LevelOneScene);
+                    controller.scene.add('Scene', GameScene);
 
-                    controller.scene.start('Level1');
+                    controller.scene.start('Scene');
                 })
             } else if (error !== null) {
                 console.log(error)
