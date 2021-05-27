@@ -82,14 +82,19 @@ class LevelOneScene extends Phaser.Scene {
     constructor() {
         super('Level1');
         this.player;
-        this.totalClick = 0;
+        this.totalClick;
         this.graphics;
         this.timerEvent;
         this.bar;
     }
 
+    init() {
+        this.totalClick = 0
+    }
+
     preload() {
         this.load.image('sky', 'assets/sky.png');
+        this.load.image('fire', 'assets/fire.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin1', 'assets/penguin1.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin2', 'assets/penguin2.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin3', 'assets/penguin3.png', { frameWidth: 355, frameHeight: 450 });
@@ -99,6 +104,7 @@ class LevelOneScene extends Phaser.Scene {
         this.add.image(400, 300, 'sky');
 
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
+        this.fire = this.add.sprite(200, 450, 'fire').setScale(0.3)
 
         var clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontSize: '32px', fill: '#ffffff' });
 
