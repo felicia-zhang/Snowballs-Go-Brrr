@@ -134,10 +134,10 @@ class LevelOneScene extends Phaser.Scene {
                     var nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                     var remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                     nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-                        scene.consumed[item.DisplayName] = scene.consumed[item.DisplayName] || 0
-                        scene.consumed[item.DisplayName]++
-                        if (consumable.remainingUses - scene.consumed[item.DisplayName] > 0) {
-                        remainingUsesText.setText(consumable.remainingUses - scene.consumed[item.DisplayName])
+                        scene.consumed[item.ItemInstanceId] = scene.consumed[item.ItemInstanceId] || 0
+                        scene.consumed[item.ItemInstanceId]++
+                        if (consumable.remainingUses - scene.consumed[item.ItemInstanceId] > 0) {
+                        remainingUsesText.setText(consumable.remainingUses - scene.consumed[item.ItemInstanceId])
                         } else {
                             nameText.destroy()
                             remainingUsesText.destroy()
@@ -172,19 +172,21 @@ class LevelOneScene extends Phaser.Scene {
         });
         this.player.anims.play('bounce');
 
-        // this.timerEvent = this.time.addEvent({
-        //     delay: 4000,
-        //     callback: () => {
-        //         this.player.removeInteractive();
-        //         PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
-        //             if (this.totalClick >= 10) {
-        //                 this.scene.start('Store');
-        //             } else {
-        //                 this.scene.start('GameOver');
-        //             }
-        //         })
-        //     }
-        // });
+        this.timerEvent = this.time.addEvent({
+            delay: 4000,
+            callback: () => {
+                Object.entries(this.consumed).forEach((consumedItem) => {
+                    PlayFabClientSDK.ConsumeItem({ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1]}, (result, error) => console.log(result))
+                })
+                PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
+                    if (this.totalClick >= 10) {
+                        this.scene.start('Store');
+                    } else {
+                        this.scene.start('GameOver');
+                    }
+                })
+            }
+        });
 
         this.graphics = this.add.graphics({ x: 0, y: 0 });
     }
@@ -192,7 +194,7 @@ class LevelOneScene extends Phaser.Scene {
     update() {
         this.graphics.clear();
         this.graphics.fillStyle(0xFFFFFF, 1.0);
-        // this.graphics.fillRect(0, 46, 800 * this.timerEvent.getProgress(), 8);
+        this.graphics.fillRect(0, 46, 800 * this.timerEvent.getProgress(), 8);
     }
 }
 
