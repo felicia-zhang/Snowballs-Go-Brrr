@@ -41,10 +41,15 @@ class StoreScene extends Phaser.Scene {
             if (result !== null) {
                 store.items = result.data.Catalog
                 store.items.forEach((item, i) => {
-                    var nameText = store.add.text(200, 200 + i*30, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-                    var priceText = store.add.text(16, 200 + i*30, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    console.log(item)
+                    var nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    var priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    if (item.CustomData !== undefined && JSON.parse(item.CustomData).hasOwnProperty('image')) {
+                        var customData = JSON.parse(item.CustomData)
+                        var image = store.add.sprite(160, 200 + i * 100, customData['image']).setScale(0.3)
+                    }
                     nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-                        PlayFabClientSDK.PurchaseItem({ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL'}, (result, error) => {
+                        PlayFabClientSDK.PurchaseItem({ ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL' }, (result, error) => {
                             console.log(result)
                             PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
                         })
@@ -70,7 +75,7 @@ class StoreScene extends Phaser.Scene {
         PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
         var itemText = this.add.text(300, 9, "STORE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
 
-        var nextButton = this.add.text(700, 400, "NEXT", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' } );
+        var nextButton = this.add.text(700, 400, "NEXT", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         nextButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Level1');
         })
@@ -96,7 +101,6 @@ class LevelOneScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('fire', 'assets/fire.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin1', 'assets/penguin1.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin2', 'assets/penguin2.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin3', 'assets/penguin3.png', { frameWidth: 355, frameHeight: 450 });
@@ -105,7 +109,6 @@ class LevelOneScene extends Phaser.Scene {
     create() {
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
-        this.fire = this.add.sprite(200, 450, 'fire').setScale(0.3)
 
         var clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
 
@@ -119,7 +122,7 @@ class LevelOneScene extends Phaser.Scene {
                 { key: 'penguin2' },
                 { key: 'penguin1' },
                 { key: 'penguin2' }
-                ],
+            ],
             frameRate: 8,
             repeat: -1
         });
@@ -162,6 +165,7 @@ class Controller extends Phaser.Scene {
 
     preload() {
         this.load.image('sky', 'assets/sky.png');
+        this.load.image('fire', 'assets/fire.png', { frameWidth: 355, frameHeight: 450 });
     }
 
     create() {
