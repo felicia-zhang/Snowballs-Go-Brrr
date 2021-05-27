@@ -34,21 +34,15 @@ handlers.syncInventoryToCatalog = function (args, context) {
     return;
 };
 
-handlers.completeLevel = function (args, context) {
-    server.UpdateUserInternalData({
-        PlayFabId: currentPlayerId,
-        Data: {
-            lastLevelCompleted: args.level
-        }
-    });
-};
-
 handlers.updateStatistics = function (args, context) {
     server.UpdatePlayerStatistics({
         PlayFabId: currentPlayerId, 
         Statistics: [{
                 StatisticName: "level_clicks",
                 Value: args.clicks
+            }, {
+                StatisticName: "time",
+                Value: args.time
             }]
     });
 };
