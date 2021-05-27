@@ -113,10 +113,6 @@ class LevelOneScene extends Phaser.Scene {
     }
 
     create() {
-        PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (result, error) => {
-            console.log(result)
-        })
-
         var scene = this
         var GetInventoryCallback = function (result, error) {
             if (result !== null) {
@@ -124,7 +120,7 @@ class LevelOneScene extends Phaser.Scene {
                 inventory.forEach((inventory, i) => {
                     if (inventory.RemainingUses !== undefined) {
                         var remainingUses = inventory.RemainingUses
-                        scene.consumables.push({item: inventory, remainingUses: remainingUses})
+                        scene.consumables.push({ item: inventory, remainingUses: remainingUses })
                     } else {
                         scene.durables.push(inventory)
                     }
@@ -135,13 +131,17 @@ class LevelOneScene extends Phaser.Scene {
                 })
                 scene.consumables.forEach((consumable, i) => {
                     var item = consumable.item
+                    if (consumable.item.CustomData !== undefined && JSON.parse(consumable.item.CustomData.ImageData).hasOwnProperty('image')) {
+                        var imageData = JSON.parse(consumable.item.CustomData.ImageData)
+                        var image = scene.add.sprite(550, 200 + i * 100, imageData['image']).setScale(0.3)
+                    }
                     var nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                     var remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                     nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
                         scene.consumed[item.ItemInstanceId] = scene.consumed[item.ItemInstanceId] || 0
                         scene.consumed[item.ItemInstanceId]++
                         if (consumable.remainingUses - scene.consumed[item.ItemInstanceId] > 0) {
-                        remainingUsesText.setText(consumable.remainingUses - scene.consumed[item.ItemInstanceId])
+                            remainingUsesText.setText(consumable.remainingUses - scene.consumed[item.ItemInstanceId])
                         } else {
                             nameText.destroy()
                             remainingUsesText.destroy()
@@ -180,7 +180,7 @@ class LevelOneScene extends Phaser.Scene {
             delay: 4000,
             callback: () => {
                 Object.entries(this.consumed).forEach((consumedItem) => {
-                    PlayFabClientSDK.ConsumeItem({ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1]}, (result, error) => console.log(result))
+                    PlayFabClientSDK.ConsumeItem({ ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1] }, (result, error) => console.log(result))
                 })
                 PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
                     if (this.totalClick >= 10) {
@@ -229,14 +229,17 @@ class Controller extends Phaser.Scene {
 
         var LoginCallback = function (result, error) {
             if (result !== null) {
-                var playfabId = result.data.PlayFabId
-                console.log(`Logged in! PlayFabId: ${playfabId}`)
-                controller.scene.add('GameOver', GameOverScene);
-                controller.scene.add('GameWon', GameWonScene);
-                controller.scene.add('Store', StoreScene);
-                controller.scene.add('Level1', LevelOneScene);
+                PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
+                    console.log(r)
+                    var playfabId = result.data.PlayFabId
+                    console.log(`Logged in! PlayFabId: ${playfabId}`)
+                    controller.scene.add('GameOver', GameOverScene);
+                    controller.scene.add('GameWon', GameWonScene);
+                    controller.scene.add('Store', StoreScene);
+                    controller.scene.add('Level1', LevelOneScene);
 
-                controller.scene.start('Level1');
+                    controller.scene.start('Level1');
+                })
             } else if (error !== null) {
                 console.log(error)
             }
