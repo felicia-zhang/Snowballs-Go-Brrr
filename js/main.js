@@ -89,11 +89,16 @@ class LevelOneScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.spritesheet('dino', 'assets/dino.png', { frameWidth: 24, frameHeight: 20 });
+        this.load.image('sky', 'assets/sky.png');
+        this.load.image('penguin1', 'assets/penguin1.png', { frameWidth: 355, frameHeight: 450 });
+        this.load.image('penguin2', 'assets/penguin2.png', { frameWidth: 355, frameHeight: 450 });
+        this.load.image('penguin3', 'assets/penguin3.png', { frameWidth: 355, frameHeight: 450 });
     }
 
     create() {
-        this.player = this.add.sprite(100, 450, 'dino').setScale(2);
+        this.add.image(400, 300, 'sky');
+
+        this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
 
         var clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontSize: '32px', fill: '#ffffff' });
 
@@ -102,8 +107,13 @@ class LevelOneScene extends Phaser.Scene {
         })
         this.anims.create({
             key: 'bounce',
-            frames: this.anims.generateFrameNumbers('dino', { start: 0, end: 3 }),
-            frameRate: 5,
+            frames: [
+                { key: 'penguin3' },
+                { key: 'penguin2' },
+                { key: 'penguin1' },
+                { key: 'penguin2' }
+                ],
+            frameRate: 8,
             repeat: -1
         });
         this.player.anims.play('bounce');
@@ -124,7 +134,7 @@ class LevelOneScene extends Phaser.Scene {
 
         this.graphics = this.add.graphics({ x: 0, y: 0 });
     }
-    
+
     update() {
         this.graphics.clear();
         this.graphics.fillStyle(Phaser.Display.Color.HSVColorWheel()[8].color, 1);
