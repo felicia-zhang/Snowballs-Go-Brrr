@@ -34,22 +34,21 @@ handlers.syncInventoryToCatalog = function (args, context) {
     return;
 };
 
-handlers.completeLevelAndUpdateStatistics = function (args, context) {
-    var level = args.level;
-    var clicks = args.clicks;
-    
+handlers.completeLevel = function (args, context) {
     server.UpdateUserInternalData({
         PlayFabId: currentPlayerId,
         Data: {
-            lastLevelCompleted: level
+            lastLevelCompleted: args.level
         }
     });
+};
 
+handlers.updateStatistics = function (args, context) {
     server.UpdatePlayerStatistics({
         PlayFabId: currentPlayerId, 
         Statistics: [{
                 StatisticName: "level_clicks",
-                Value: clicks
+                Value: args.clicks
             }]
     });
 };
