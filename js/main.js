@@ -4,6 +4,7 @@ class GameOverScene extends Phaser.Scene {
     }
 
     create() {
+        this.add.image(400, 300, 'sky');
         this.title = this.add.text(400, 300, 'GAME OVER');
     }
 }
@@ -17,6 +18,7 @@ class GameWonScene extends Phaser.Scene {
     }
 
     create() {
+        this.add.image(400, 300, 'sky');
         this.title = this.add.text(400, 300, 'GAME WON');
     }
 }
@@ -32,6 +34,7 @@ class StoreScene extends Phaser.Scene {
     }
 
     create() {
+        this.add.image(400, 300, 'sky');
         this.clickText = this.add.text(16, 16, '', { fontSize: '32px', fill: '#ffffff' })
         var store = this;
         var GetCatalogItemsCallback = function (result, error) {
@@ -93,7 +96,6 @@ class LevelOneScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('sky', 'assets/sky.png');
         this.load.image('fire', 'assets/fire.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin1', 'assets/penguin1.png', { frameWidth: 355, frameHeight: 450 });
         this.load.image('penguin2', 'assets/penguin2.png', { frameWidth: 355, frameHeight: 450 });
@@ -102,7 +104,6 @@ class LevelOneScene extends Phaser.Scene {
 
     create() {
         this.add.image(400, 300, 'sky');
-
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
         this.fire = this.add.sprite(200, 450, 'fire').setScale(0.3)
 
@@ -157,6 +158,10 @@ class LevelOneScene extends Phaser.Scene {
 class Controller extends Phaser.Scene {
     constructor() {
         super('Controller');
+    }
+
+    preload() {
+        this.load.image('sky', 'assets/sky.png');
     }
 
     create() {
