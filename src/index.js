@@ -1,3 +1,6 @@
+import Phaser from 'phaser';
+import "playfab-web-sdk/src/PlayFab/PlayFabClientApi.js";
+
 class LeaderboardScene extends Phaser.Scene {
     constructor() {
         super('Leaderboard');
