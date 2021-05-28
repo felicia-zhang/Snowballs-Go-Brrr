@@ -17,11 +17,12 @@ class LeaderboardScene extends Phaser.Scene {
 
         this.add.image(400, 300, 'sky');
         var title = this.add.text(300, 9, 'Leaderboard', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
-        PlayFabClient.GetLeaderboard({ StatisticName: 'level_clicks', StartPosition: 1 }, (error, result) => {
+        PlayFabClient.GetLeaderboard({ StatisticName: 'level_clicks', StartPosition: 0 }, (error, result) => {
             leaderboard.add.text(200, 300, "PLACE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
             leaderboard.add.text(300, 300, "NAME", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
             leaderboard.add.text(400, 300, "STATISTIC", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
             var players = result.data.Leaderboard
+            console.log(players)
             players.forEach((player, i) => {
                 leaderboard.add.text(200, 320, (i + 1).toString(), { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                 leaderboard.add.text(300, 320, player.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
@@ -62,7 +63,6 @@ class StoreScene extends Phaser.Scene {
         const GetCatalogItemsCallback = (error, result) => {
             store.items = result.data.Catalog
             store.items.forEach((item, i) => {
-                console.log(item)
                 var nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                 var priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                 if (item.CustomData !== undefined && JSON.parse(item.CustomData).hasOwnProperty('image')) {
