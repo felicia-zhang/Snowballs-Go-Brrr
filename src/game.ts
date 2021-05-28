@@ -1,10 +1,11 @@
 import Phaser from 'phaser'; 
-import "playfab-web-sdk/src/PlayFab/PlayFabClientApi.js";
+import * as PlayFab from  "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import sky from "./assets/sky.png";
 import fire from "./assets/fire.png";
 import penguin1 from "./assets/penguin1.png";
 import penguin2 from "./assets/penguin2.png";
 import penguin3 from "./assets/penguin3.png";
+import { PlayFabClient } from 'playfab-sdk';
 
 class LeaderboardScene extends Phaser.Scene {
     constructor() {
@@ -43,8 +44,8 @@ class LeaderboardScene extends Phaser.Scene {
 
 
 class StoreScene extends Phaser.Scene {
-    items: [];
-    inventory: [];
+    items: PlayFab.CatalogItem[];
+    inventory: PlayFab.ItemInstance[];
     clicks: number;
     clickText: any;
     constructor() {
@@ -58,42 +59,34 @@ class StoreScene extends Phaser.Scene {
         this.add.image(400, 300, 'sky');
         this.clickText = this.add.text(16, 16, '', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
         var store = this;
-        // var GetCatalogItemsCallback = function (result, error) {
-        //     if (result !== null) {
-        //         store.items = result.data.Catalog
-        //         store.items.forEach((item, i) => {
-        //             console.log(item)
-        //             var nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-        //             var priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-        //             if (item.CustomData !== undefined && JSON.parse(item.CustomData).hasOwnProperty('image')) {
-        //                 var customData = JSON.parse(item.CustomData)
-        //                 var image = store.add.sprite(160, 200 + i * 100, customData['image']).setScale(0.3)
-        //             }
-        //             nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-        //                 PlayFabClientSDK.PurchaseItem({ ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL' }, (result, error) => {
-        //                     console.log(result)
-        //                     PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
-        //                 })
-        //             })
-        //         })
-        //     } else if (error !== null) {
-        //         console.log(error)
-        //     }
-        // }
+        const GetCatalogItemsCallback = (error, result) => {
+            store.items = result.data.Catalog
+            store.items.forEach((item, i) => {
+                console.log(item)
+                var nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                var priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                if (item.CustomData !== undefined && JSON.parse(item.CustomData).hasOwnProperty('image')) {
+                    var customData = JSON.parse(item.CustomData)
+                    var image = store.add.sprite(160, 200 + i * 100, customData['image']).setScale(0.3)
+                }
+                nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+                    PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL' }, (result, error) => {
+                        console.log(result)
+                        PlayFabClient.GetUserInventory({}, GetInventoryCallback)
+                    })
+                })
+            })
+        }
 
-        // PlayFabClientSDK.GetCatalogItems({ CatalogVersion: 1 }, GetCatalogItemsCallback)
+        PlayFabClient.GetCatalogItems({ CatalogVersion: '1' }, GetCatalogItemsCallback)
 
-        // var GetInventoryCallback = function (result, error) {
-        //     if (result !== null) {
-        //         store.inventory = result.data.inventory
-        //         store.clicks = result.data.VirtualCurrency.CL
-        //         store.clickText.setText(`click: ${store.clicks}`);
-        //     } else if (error !== null) {
-        //         console.log(error)
-        //     }
-        // }
+        const GetInventoryCallback = (error, result) => {
+            store.inventory = result.data.inventory
+            store.clicks = result.data.VirtualCurrency.CL
+            store.clickText.setText(`click: ${store.clicks}`);
+        }
 
-        // PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
+        PlayFabClient.GetUserInventory({}, GetInventoryCallback)
         var itemText = this.add.text(300, 9, "STORE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
 
         var nextButton = this.add.text(700, 400, "game", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
@@ -115,19 +108,17 @@ class GameScene extends Phaser.Scene {
     bar: any;
     consumables: any;
     durables: any;
-    consumed: any;
+    consumed: { [id: string] : number; };
     constructor() {
         super('Scene');
-        /*
-        this.player;
-        this.totalClick;
-        this.graphics;
-        this.timerEvent;
-        this.bar;
-        this.consumables;
-        this.durables;
-        this.consumed;
-        */
+        // this.player;
+        // this.totalClick;
+        // this.graphics;
+        // this.timerEvent;
+        // this.bar;
+        // this.consumables;
+        // this.durables;
+        // this.consumed;
     }
 
     init() {
@@ -145,49 +136,45 @@ class GameScene extends Phaser.Scene {
 
     create() {
         var scene = this
-        // var GetInventoryCallback = function (result, error) {
-        //     if (result !== null) {
-        //         var inventory = result.data.Inventory
-        //         inventory.forEach((inventory, i) => {
-        //             if (inventory.RemainingUses !== undefined) {
-        //                 var remainingUses = inventory.RemainingUses
-        //                 scene.consumables.push({ item: inventory, remainingUses: remainingUses })
-        //             } else {
-        //                 scene.durables.push(inventory)
-        //             }
-        //         })
+        var GetInventoryCallback = function (error, result) {
+                const inventory: PlayFab.ItemInstance[] = result.data.Inventory
+                inventory.forEach((inventory, i) => {
+                    if (inventory.RemainingUses !== undefined) {
+                        var remainingUses = inventory.RemainingUses
+                        scene.consumables.push({ item: inventory, remainingUses: remainingUses })
+                    } else {
+                        scene.durables.push(inventory)
+                    }
+                })
 
-        //         scene.durables.forEach((durable, i) => {
-        //             scene.add.text(200, 200 + i * 100, durable.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-        //         })
-        //         scene.consumables.forEach((consumable, i) => {
-        //             var item = consumable.item
-        //             if (consumable.item.CustomData !== undefined && JSON.parse(consumable.item.CustomData.ImageData).hasOwnProperty('image')) {
-        //                 var imageData = JSON.parse(consumable.item.CustomData.ImageData)
-        //                 var image = scene.add.sprite(550, 200 + i * 100, imageData['image']).setScale(0.3)
-        //             }
-        //             var nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-        //             var remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-        //             nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-        //                 scene.consumed[item.ItemInstanceId] = scene.consumed[item.ItemInstanceId] || 0
-        //                 scene.consumed[item.ItemInstanceId]++
-        //                 if (consumable.remainingUses - scene.consumed[item.ItemInstanceId] > 0) {
-        //                     remainingUsesText.setText(consumable.remainingUses - scene.consumed[item.ItemInstanceId])
-        //                 } else {
-        //                     nameText.destroy()
-        //                     remainingUsesText.destroy()
-        //                     if (image !== undefined) {
-        //                         image.destroy()
-        //                     }
-        //                 }
-        //             })
-        //         })
-        //     } else if (error !== null) {
-        //         console.log(error)
-        //     }
-        // }
+                scene.durables.forEach((durable, i) => {
+                    scene.add.text(200, 200 + i * 100, durable.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                })
+                scene.consumables.forEach((consumable, i) => {
+                    var item = consumable.item
+                    if (consumable.item.CustomData !== undefined && JSON.parse(consumable.item.CustomData.ImageData).hasOwnProperty('image')) {
+                        var imageData = JSON.parse(consumable.item.CustomData.ImageData)
+                        var image = scene.add.sprite(550, 200 + i * 100, imageData['image']).setScale(0.3)
+                    }
+                    var nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    var remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+                        scene.consumed[item.ItemInstanceId] = scene.consumed[item.ItemInstanceId] || 0
+                        scene.consumed[item.ItemInstanceId]++
+                        if (consumable.remainingUses - scene.consumed[item.ItemInstanceId] > 0) {
+                            remainingUsesText.setText((consumable.remainingUses - scene.consumed[item.ItemInstanceId]).toString())
+                        } else {
+                            nameText.destroy()
+                            remainingUsesText.destroy()
+                            if (image !== undefined) {
+                                image.destroy()
+                            }
+                        }
+                    })
+                })
+        }
 
-        // PlayFabClientSDK.GetUserInventory({}, GetInventoryCallback)
+        PlayFabClient.GetUserInventory({}, GetInventoryCallback)
 
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
@@ -213,13 +200,13 @@ class GameScene extends Phaser.Scene {
         this.timerEvent = this.time.addEvent({
             delay: 4000,
             callback: () => {
-                // Object.entries(this.consumed).forEach((consumedItem) => {
-                //     PlayFabClientSDK.ConsumeItem({ ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1] }, (result, error) => console.log(result))
-                // })
-                // PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
-                //     PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: this.totalClick, time: 4000 } })
-                //     this.scene.start('Leaderboard');
-                // })
+                Object.entries(this.consumed).forEach((consumedItem) => {
+                    PlayFabClient.ConsumeItem({ ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1] }, (result, error) => console.log(result))
+                })
+                PlayFabClient.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
+                    PlayFabClient.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: this.totalClick, time: 4000 } }, () => {})
+                    this.scene.start('Leaderboard');
+                })
             }
         });
 
@@ -252,30 +239,26 @@ class Controller extends Phaser.Scene {
     create() {
         var controller = this;
         PlayFab.settings.titleId = '7343B';
-        var loginRequest = {
+        const loginRequest = {
             TitleId: PlayFab.settings.titleId,
             CustomId: 'GettingStartedGuide',
             CreateAccount: true
         };
 
-        var LoginCallback = function (result, error) {
-            if (result !== null) {
-                PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
-                    console.log(r)
-                    var playfabId = result.data.PlayFabId
-                    console.log(`Logged in! PlayFabId: ${playfabId}`)
-                    controller.scene.add('Leaderboard', LeaderboardScene);
-                    controller.scene.add('Store', StoreScene);
-                    controller.scene.add('Scene', GameScene);
+        const LoginCallback = (error, result) => {
+            var playfabId = result.data.PlayFabId
+            console.log(`Logged in! PlayFabId: ${playfabId}`)
 
-                    controller.scene.start('Store');
-                })
-            } else if (error !== null) {
-                console.log(error)
-            }
+            PlayFabClient.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
+                controller.scene.add('Leaderboard', LeaderboardScene);
+                controller.scene.add('Store', StoreScene);
+                controller.scene.add('Scene', GameScene);
+
+                controller.scene.start('Store');
+            })
         }
 
-        PlayFabClientSDK.LoginWithCustomID(loginRequest, LoginCallback);
+        PlayFabClient.LoginWithCustomID(loginRequest, LoginCallback);
     }
 }
 

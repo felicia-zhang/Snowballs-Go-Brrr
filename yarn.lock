@@ -8026,10 +8026,10 @@ pkg-up@3.1.0:
   dependencies:
     find-up "^3.0.0"
 
-playfab-web-sdk@^1.87.210521:
-  version "1.87.210521"
-  resolved "https://registry.yarnpkg.com/playfab-web-sdk/-/playfab-web-sdk-1.87.210521.tgz#31b468f57720fc3e31fcd0433d8ea9572d4abb26"
-  integrity sha512-9omhXz0gToEEXOk8j8GX8Mqs9bMShUBeNCCdwWSxC3AetKg6iTjJpN726y9ugxccHHgTYQzXE4DLkLZacfUTew==
+playfab-sdk@^2.69.210521:
+  version "2.69.210521"
+  resolved "https://registry.yarnpkg.com/playfab-sdk/-/playfab-sdk-2.69.210521.tgz#e143404e9f1d44a8ef5d7a8e95de5b43b1c8927a"
+  integrity sha512-Ax661FpngGJoBAW/dOoSedej3KCLDahQ1nHbml+FwrR5wdQH2lxNBmAz3BWEV/0kTtmK9t+1GQnKo9VGbF0HaQ==
 
 pnp-webpack-plugin@1.6.4:
   version "1.6.4"
