@@ -3,6 +3,7 @@ import { PlayFabClient } from 'playfab-sdk';
 import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
 import penguin3 from "../assets/penguin3.png";
+import {font} from '../utils/font'
 
 class GameScene extends Phaser.Scene {
     player: any;
@@ -44,7 +45,7 @@ class GameScene extends Phaser.Scene {
                 })
 
                 scene.durables.forEach((durable, i) => {
-                    scene.add.text(200, 200 + i * 100, durable.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    scene.add.text(200, 200 + i * 100, durable.DisplayName, font)
                 })
                 scene.consumables.forEach((consumable, i) => {
                     var image;
@@ -53,8 +54,8 @@ class GameScene extends Phaser.Scene {
                         const imageData = JSON.parse(consumable.item.CustomData.ImageData)
                         image = scene.add.sprite(550, 200 + i * 100, imageData['image']).setScale(0.3)
                     }
-                    const nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-                    const remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    const nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, font)
+                    const remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, font)
                     nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
                         scene.consumed[item.ItemInstanceId] = scene.consumed[item.ItemInstanceId] || 0
                         scene.consumed[item.ItemInstanceId]++
@@ -76,7 +77,7 @@ class GameScene extends Phaser.Scene {
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
 
-        const clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        const clickText = this.add.text(16, 16, `click: ${this.totalClick}`, font);
 
         this.player.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             clickText.setText(`click: ${++this.totalClick}`)

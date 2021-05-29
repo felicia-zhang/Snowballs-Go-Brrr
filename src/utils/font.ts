@@ -1,0 +1,1 @@
+export const font = { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' }
