@@ -1,11 +1,18 @@
 import { Game } from "./game";
+import React from 'react';
 
-function App() {
-  var game = new Game();
+class App extends React.PureComponent {
+  game;
+constructor(props) {
+  super(props)
+  this.game = new Game();
+}
 
-  return (
-    <></>
-  );
+  render() {
+    return (
+      <></>
+    );
+  }
 }
 
 export default App;

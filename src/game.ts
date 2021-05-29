@@ -13,16 +13,15 @@ class LeaderboardScene extends Phaser.Scene {
     }
 
     create() {
-        var leaderboard = this
+        const leaderboard = this
 
         this.add.image(400, 300, 'sky');
-        var title = this.add.text(300, 9, 'Leaderboard', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        const title = this.add.text(300, 9, 'Leaderboard', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         PlayFabClient.GetLeaderboard({ StatisticName: 'level_clicks', StartPosition: 0 }, (error, result) => {
             leaderboard.add.text(200, 300, "PLACE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
             leaderboard.add.text(300, 300, "NAME", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
             leaderboard.add.text(400, 300, "STATISTIC", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-            var players = result.data.Leaderboard
-            console.log(players)
+            const players = result.data.Leaderboard
             players.forEach((player, i) => {
                 leaderboard.add.text(200, 320, (i + 1).toString(), { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                 leaderboard.add.text(300, 320, player.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
@@ -30,12 +29,12 @@ class LeaderboardScene extends Phaser.Scene {
             })
         })
 
-        var storeButton = this.add.text(700, 400, "store", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        const storeButton = this.add.text(700, 400, "store", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         storeButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Store');
         })
 
-        var gameButton = this.add.text(700, 450, "game", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        const gameButton = this.add.text(700, 450, "game", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         gameButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Scene');
         })
@@ -59,18 +58,18 @@ class StoreScene extends Phaser.Scene {
     create() {
         this.add.image(400, 300, 'sky');
         this.clickText = this.add.text(16, 16, '', { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-        var store = this;
+        const store = this;
         const GetCatalogItemsCallback = (error, result) => {
             store.items = result.data.Catalog
             store.items.forEach((item, i) => {
-                var nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-                var priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                const nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                const priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                 if (item.CustomData !== undefined && JSON.parse(item.CustomData).hasOwnProperty('image')) {
-                    var customData = JSON.parse(item.CustomData)
-                    var image = store.add.sprite(160, 200 + i * 100, customData['image']).setScale(0.3)
+                    const customData = JSON.parse(item.CustomData)
+                    const image = store.add.sprite(160, 200 + i * 100, customData['image']).setScale(0.3)
                 }
                 nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-                    PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL' }, (result, error) => {
+                    PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.CL, VirtualCurrency: 'CL' }, (error, result) => {
                         console.log(result)
                         PlayFabClient.GetUserInventory({}, GetInventoryCallback)
                     })
@@ -87,9 +86,9 @@ class StoreScene extends Phaser.Scene {
         }
 
         PlayFabClient.GetUserInventory({}, GetInventoryCallback)
-        var itemText = this.add.text(300, 9, "STORE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+        const itemText = this.add.text(300, 9, "STORE", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
 
-        var nextButton = this.add.text(700, 400, "game", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        const nextButton = this.add.text(700, 400, "game", { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
         nextButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Scene');
         })
@@ -111,14 +110,6 @@ class GameScene extends Phaser.Scene {
     consumed: { [id: string] : number; };
     constructor() {
         super('Scene');
-        // this.player;
-        // this.totalClick;
-        // this.graphics;
-        // this.timerEvent;
-        // this.bar;
-        // this.consumables;
-        // this.durables;
-        // this.consumed;
     }
 
     init() {
@@ -135,12 +126,12 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        var scene = this
-        var GetInventoryCallback = function (error, result) {
+        const scene = this
+        const GetInventoryCallback = function (error, result) {
                 const inventory: PlayFab.ItemInstance[] = result.data.Inventory
                 inventory.forEach((inventory, i) => {
                     if (inventory.RemainingUses !== undefined) {
-                        var remainingUses = inventory.RemainingUses
+                        const remainingUses = inventory.RemainingUses
                         scene.consumables.push({ item: inventory, remainingUses: remainingUses })
                     } else {
                         scene.durables.push(inventory)
@@ -151,13 +142,14 @@ class GameScene extends Phaser.Scene {
                     scene.add.text(200, 200 + i * 100, durable.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                 })
                 scene.consumables.forEach((consumable, i) => {
-                    var item = consumable.item
+                    var image;
+                    const item = consumable.item
                     if (consumable.item.CustomData !== undefined && JSON.parse(consumable.item.CustomData.ImageData).hasOwnProperty('image')) {
-                        var imageData = JSON.parse(consumable.item.CustomData.ImageData)
-                        var image = scene.add.sprite(550, 200 + i * 100, imageData['image']).setScale(0.3)
+                        const imageData = JSON.parse(consumable.item.CustomData.ImageData)
+                        image = scene.add.sprite(550, 200 + i * 100, imageData['image']).setScale(0.3)
                     }
-                    var nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
-                    var remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    const nameText = scene.add.text(600, 200 + i * 100, item.DisplayName, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
+                    const remainingUsesText = scene.add.text(700, 200 + i * 100, consumable.remainingUses, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' })
                     nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
                         scene.consumed[item.ItemInstanceId] = scene.consumed[item.ItemInstanceId] || 0
                         scene.consumed[item.ItemInstanceId]++
@@ -179,7 +171,7 @@ class GameScene extends Phaser.Scene {
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
 
-        var clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
+        const clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif' });
 
         this.player.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             clickText.setText(`click: ${++this.totalClick}`)
@@ -201,9 +193,9 @@ class GameScene extends Phaser.Scene {
             delay: 4000,
             callback: () => {
                 Object.entries(this.consumed).forEach((consumedItem) => {
-                    PlayFabClient.ConsumeItem({ ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1] }, (result, error) => console.log(result))
+                    PlayFabClient.ConsumeItem({ ItemInstanceId: consumedItem[0], ConsumeCount: consumedItem[1] }, (error, result) => console.log(result))
                 })
-                PlayFabClient.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (result, error) => {
+                PlayFabClient.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (error, result) => {
                     PlayFabClient.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: this.totalClick, time: 4000 } }, () => {})
                     this.scene.start('Leaderboard');
                 })
@@ -237,7 +229,7 @@ class Controller extends Phaser.Scene {
     }
 
     create() {
-        var controller = this;
+        const controller = this;
         PlayFab.settings.titleId = '7343B';
         const loginRequest = {
             TitleId: PlayFab.settings.titleId,
@@ -245,8 +237,8 @@ class Controller extends Phaser.Scene {
             CreateAccount: true
         };
 
-        const LoginCallback = (error, result) => {
-            var playfabId = result.data.PlayFabId
+        const LoginCallback: PlayFabModule.ApiCallback<PlayFabClientModels.LoginResult> = (error, result) => {
+            const playfabId = result.data.PlayFabId
             console.log(`Logged in! PlayFabId: ${playfabId}`)
 
             PlayFabClient.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
@@ -263,7 +255,7 @@ class Controller extends Phaser.Scene {
 }
 
 
-var config = {
+const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600
