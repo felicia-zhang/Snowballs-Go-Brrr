@@ -1,6 +1,6 @@
-import * as PlayFab from  "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
+import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from 'playfab-sdk';
-import {font} from '../utils/font'
+import { fontFamily } from '../utils/font'
 
 class StoreScene extends Phaser.Scene {
     items: PlayFab.CatalogItem[];
@@ -16,13 +16,13 @@ class StoreScene extends Phaser.Scene {
 
     create() {
         this.add.image(400, 300, 'sky');
-        this.clickText = this.add.text(16, 16, '', font)
+        this.clickText = this.add.text(16, 16, '', { fontFamily: fontFamily })
         const store = this;
         const GetCatalogItemsCallback = (error, result) => {
             store.items = result.data.Catalog
             store.items.forEach((item, i) => {
-                const nameText = store.add.text(200, 200 + i * 100, item.DisplayName, font)
-                const priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, font)
+                const nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: fontFamily })
+                const priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.CL} Clicks`, { fontFamily: fontFamily })
                 if (item.CustomData !== undefined && JSON.parse(item.CustomData).hasOwnProperty('image')) {
                     const customData = JSON.parse(item.CustomData)
                     const image = store.add.sprite(160, 200 + i * 100, customData['image']).setScale(0.3)
@@ -45,9 +45,9 @@ class StoreScene extends Phaser.Scene {
         }
 
         PlayFabClient.GetUserInventory({}, GetInventoryCallback)
-        const itemText = this.add.text(300, 9, "STORE", font)
+        const itemText = this.add.text(300, 9, "STORE", { fontFamily: fontFamily })
 
-        const nextButton = this.add.text(700, 400, "game", font);
+        const nextButton = this.add.text(700, 400, "game", { fontFamily: fontFamily });
         nextButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Scene');
         })
