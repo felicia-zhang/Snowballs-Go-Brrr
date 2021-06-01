@@ -23,14 +23,10 @@ class LeaderboardScene extends Phaser.Scene {
             })
         })
 
-        const storeButton = this.add.text(700, 400, "store", { fontFamily: fontFamily });
-        storeButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            this.scene.start('Store');
-        })
 
-        const gameButton = this.add.text(700, 450, "game", { fontFamily: fontFamily });
-        gameButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            this.scene.start('Scene');
+        const backButton = this.add.text(700, 450, "back", { fontFamily: fontFamily });
+        backButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+            this.scene.start('Game');
         })
     }
 }

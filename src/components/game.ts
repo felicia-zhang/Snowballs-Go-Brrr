@@ -15,7 +15,7 @@ class GameScene extends Phaser.Scene {
     durables: any;
     consumed: { [id: string]: number; };
     constructor() {
-        super('Scene');
+        super('Game');
     }
 
     init() {
@@ -103,18 +103,19 @@ class GameScene extends Phaser.Scene {
                 })
                 PlayFabClient.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: this.totalClick, virtualCurrency: 'CL' } }, (error, result) => {
                     PlayFabClient.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: this.totalClick, time: 4000 } }, () => { })
-                    this.scene.start('Leaderboard');
                 })
             }
         });
 
-        this.graphics = this.add.graphics({ x: 0, y: 0 });
-    }
+        const storeButton = this.add.text(700, 400, "store", { fontFamily: fontFamily });
+        storeButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+            this.scene.start('Store');
+        })
 
-    update() {
-        this.graphics.clear();
-        this.graphics.fillStyle(0xFFFFFF, 1.0);
-        this.graphics.fillRect(0, 46, 800 * this.timerEvent.getProgress(), 8);
+        const leaderboardButton = this.add.text(700, 450, "leaderboard", { fontFamily: fontFamily });
+        leaderboardButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+            this.scene.start('Leaderboard');
+        })
     }
 }
 

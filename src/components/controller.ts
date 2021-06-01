@@ -20,7 +20,7 @@ class Controller extends Phaser.Scene {
         this.scene.add('Leaderboard', LeaderboardScene);
         this.scene.add('Store', StoreScene);
         this.scene.add('Login', LoginScene)
-        this.scene.add('Scene', GameScene);
+        this.scene.add('Game', GameScene);
 
         this.scene.start('Login');
     }

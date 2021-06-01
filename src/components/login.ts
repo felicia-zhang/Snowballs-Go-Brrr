@@ -29,7 +29,7 @@ class LoginScene extends Phaser.Scene {
             console.log(`Logged in! PlayFabId: ${playfabId}`)
 
             PlayFabClient.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
-                login.scene.start('Store');
+                login.scene.start('Game');
             })
         }
 
