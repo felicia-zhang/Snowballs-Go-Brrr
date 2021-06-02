@@ -1,8 +1,8 @@
 import BaseItem from "./BaseItem";
 
 export default class Friend extends BaseItem {
-	constructor(scene, x, y, level, totalLevel) {
-		super(scene, x, y, "penguin3", level, totalLevel);
+	constructor(scene, x, y, level, totalLevel, description) {
+		super(scene, x, y, "penguin3", level, totalLevel, description);
 	}
 
 	useItem() {

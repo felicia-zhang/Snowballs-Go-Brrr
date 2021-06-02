@@ -7,6 +7,7 @@ import { fontFamily } from "../utils/font";
 import Torch from "../items/Torch";
 import Friend from "../items/Friend";
 import Igloo from "../items/Igloo";
+import buildItem from "../items/ItemFactory";
 
 class GameScene extends Phaser.Scene {
 	player: any;
@@ -29,7 +30,7 @@ class GameScene extends Phaser.Scene {
 		const GetInventoryCallback = function (error, result) {
 			const inventory: PlayFab.ItemInstance[] = result.data.Inventory;
 			inventory.forEach((inventory, i) => {
-				scene.add.text(300, 200 + i * 100, inventory.DisplayName, { fontFamily: fontFamily });
+				scene.add.existing(buildItem(inventory, scene, 300, 100 + i * 150)).setScale(0.3);
 			});
 		};
 
@@ -44,8 +45,6 @@ class GameScene extends Phaser.Scene {
 
 	create() {
 		this.player = this.add.sprite(100, 450, "penguin3").setScale(0.3);
-
-		this.add.existing(new Igloo(this, 500, 300, 1, 3)).setScale(0.3);
 
 		this.clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: fontFamily });
 

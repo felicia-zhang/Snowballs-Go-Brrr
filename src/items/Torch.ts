@@ -3,8 +3,8 @@ import BaseItem from "./BaseItem";
 
 export default class Torch extends BaseItem {
 	timerEvent: Phaser.Time.TimerEvent;
-	constructor(scene: GameScene, x, y, level, totalLevel) {
-		super(scene, x, y, "fire", level, totalLevel);
+	constructor(scene: GameScene, x, y, level, totalLevel, description) {
+		super(scene, x, y, "fire", level, totalLevel, description);
 	}
 
 	useItem() {
