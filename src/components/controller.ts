@@ -5,6 +5,7 @@ import LoginScene from './login'
 import StoreScene from './store'
 import sky from "../assets/sky.png";
 import fire from "../assets/fire.png";
+import igloo from "../assets/igloo.png";
 
 class Controller extends Phaser.Scene {
     constructor() {
@@ -14,6 +15,7 @@ class Controller extends Phaser.Scene {
     preload() {
         this.load.image('sky', sky);
         this.load.image('fire', fire, { frameWidth: 355, frameHeight: 450 } as PlayFab.ImageFrameConfig);
+        this.load.image('igloo', igloo, { frameWidth: 770, frameHeight: 620 } as PlayFab.ImageFrameConfig);
     }
 
     create() {
