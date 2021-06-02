@@ -1,12 +1,12 @@
 import GameScene from "../components/game";
+import BaseItem from "./BaseItem";
 
-export default class Igloo extends Phaser.GameObjects.Sprite {
-    level: number
-    totalLevel: number
+export default class Igloo extends BaseItem {
+	constructor(scene: GameScene, x, y, level, totalLevel) {
+		super(scene, x, y, "igloo", level, totalLevel);
+	}
 
-    constructor(scene: GameScene, x, y, level, totalLevel) {
-      super(scene, x, y, 'igloo');
-      this.level = level
-      this.totalLevel = totalLevel
-    }
-  }
+	useItem() {
+		console.log("use igloo");
+	}
+}
