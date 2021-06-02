@@ -5,13 +5,11 @@ import { fontFamily } from '../utils/font'
 class StoreScene extends Phaser.Scene {
     items: PlayFab.CatalogItem[];
     inventory: PlayFab.ItemInstance[];
-    clicks: number;
     clickText: any;
     constructor() {
         super('Store');
         this.items = []
         this.inventory = []
-        this.clicks = 0;
     }
 
     create() {
@@ -40,8 +38,7 @@ class StoreScene extends Phaser.Scene {
 
         const GetInventoryCallback = (error, result) => {
             store.inventory = result.data.inventory
-            store.clicks = result.data.VirtualCurrency.CL
-            store.clickText.setText(`click: ${store.clicks}`);
+            store.clickText.setText(`click: ${result.data.VirtualCurrency.CL}`);
         }
 
         PlayFabClient.GetUserInventory({}, GetInventoryCallback)

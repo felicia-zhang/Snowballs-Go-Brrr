@@ -47,7 +47,6 @@ class GameScene extends Phaser.Scene {
     create() {
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
-        this.add.existing(new Friend(this, 400, 300, 1, 3)).setScale(0.3)
 
         this.clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: fontFamily });
 
@@ -70,29 +69,41 @@ class GameScene extends Phaser.Scene {
         this.timerEvent = this.time.addEvent({
             delay: 10000,
             loop: true,
-            callback: () => {
-                const currentTotalClick = this.totalClick
-                const change = currentTotalClick - this.prevTotalClick
-                this.prevTotalClick = currentTotalClick
-                PlayFabClient.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: change, virtualCurrency: 'CL' } }, (error, result) => {
-                    PlayFabClient.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: currentTotalClick } }, () => {console.log(change) })
-                })
-            }
+            callback: () => this.sync()
         });
 
         const storeButton = this.add.text(700, 400, "store", { fontFamily: fontFamily });
         storeButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            this.scene.start('Store');
+            this.sync(() => this.scene.start('Store'))
         })
 
         const leaderboardButton = this.add.text(700, 450, "leaderboard", { fontFamily: fontFamily });
         leaderboardButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            this.scene.start('Leaderboard');
+            this.sync(() => this.scene.start('Leaderboard'))
         })
     }
 
     update() {
         this.clickText.setText(`click: ${this.totalClick}`)
+    }
+
+    sync(transition?: () => any) {
+        const currentTotalClick = this.totalClick
+        const change = currentTotalClick - this.prevTotalClick
+        if (change === 0) {
+            console.log("no change")
+            return
+        }
+
+        this.prevTotalClick = currentTotalClick
+        PlayFabClient.ExecuteCloudScript({ FunctionName: 'addUserVirtualCurrency', FunctionParameter: { amount: change, virtualCurrency: 'CL' } }, (error, result) => {
+            PlayFabClient.ExecuteCloudScript({ FunctionName: 'updateStatistics', FunctionParameter: { clicks: currentTotalClick } }, () => {
+                console.log(change)
+                if (transition !== undefined) {
+                    transition()
+                }
+            })
+        })
     }
 }
 
