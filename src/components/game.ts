@@ -14,7 +14,7 @@ class GameScene extends Phaser.Scene {
     timerEvent: Phaser.Time.TimerEvent;
     items = [];
     clickText;
-    friendsMultiplier: number = 1
+    clickMultiplier: number = 1
 
     constructor() {
         super('Game');
@@ -47,11 +47,12 @@ class GameScene extends Phaser.Scene {
     create() {
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
+        this.add.existing(new Friend(this, 400, 300, 1, 3)).setScale(0.3)
 
         this.clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: fontFamily });
 
         this.player.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            this.totalClick += this.friendsMultiplier
+            this.totalClick += this.clickMultiplier
         })
         this.anims.create({
             key: 'bounce',
