@@ -37,26 +37,9 @@ class LoginScene extends Phaser.Scene {
 
 
         const login = this;
-        PlayFab.settings.titleId = '7343B';
-
-        const LoginCallback = (error, result) => {
-            const playfabId = result.data.PlayFabId
-            console.log(`Logged in! PlayFabId: ${playfabId}`)
-
-            PlayFabClient.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
-                login.scene.start('Game');
-            })
-        }
-
         const loginButton = this.add.text(700, 400, "login", { fontFamily: fontFamily });
         loginButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            this.playerName = inputText.text
-            const loginRequest = {
-                TitleId: PlayFab.settings.titleId,
-                CustomId: this.playerName,
-                CreateAccount: true
-            };
-            PlayFabClient.LoginWithCustomID(loginRequest, LoginCallback);
+            login.scene.start('Game');
         })
     }
 }

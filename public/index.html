@@ -44,13 +44,8 @@
         }
 
         function onPlayFabResponse(response, error) {
-          PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
-            console.log('sync')
-            if (r)
-                console.log(r)
-            if (e)
-                console.log(e)
-            })
+          // testing to see if below api call works
+          PlayFabClientSDK.GetCatalogItems({ CatalogVersion: '1' }, (r, e) => console.log(r, e))
         }
     </script>
     <!--
