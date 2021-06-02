@@ -1,24 +1,24 @@
-import { PlayFabClient } from 'playfab-sdk';
-import { fontFamily } from '../utils/font'
-import InputText from 'phaser3-rex-plugins/plugins/inputtext.js';
+import { fontFamily } from "../utils/font";
+import InputText from "phaser3-rex-plugins/plugins/inputtext.js";
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
+import { PlayFabClient } from 'playfab-sdk';
 
 class LoginScene extends Phaser.Scene {
-    playerName: string
-    constructor() {
-        super('Login');
-    }
+	playerName: string;
+	constructor() {
+		super("Login");
+	}
 
-    create() {
-        this.add.image(400, 300, 'sky');
-        var inputText = new InputText(this, 400, 300, 100, 20, {
-            type: 'textarea',
-            text: 'hello world',
-            fontFamily: fontFamily
-        }).on('textchange', function (inputText) {
-            this.playerName = inputText.text
-        });
-        this.add.existing(inputText);
+	create() {
+		this.add.image(400, 300, "sky");
+		var inputText = new InputText(this, 400, 300, 100, 20, {
+			type: "textarea",
+			text: "hello world",
+			fontFamily: fontFamily,
+		}).on("textchange", function (inputText) {
+			this.playerName = inputText.text;
+		});
+		this.add.existing(inputText);
 
         // const _gapi = window.gapi;
         // _gapi.load('auth2', () => {
@@ -58,7 +58,7 @@ class LoginScene extends Phaser.Scene {
             };
             PlayFabClient.LoginWithCustomID(loginRequest, LoginCallback);
         })
-    }
+	}
 }
 
 export default LoginScene;
