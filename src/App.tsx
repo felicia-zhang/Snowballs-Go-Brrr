@@ -8,6 +8,10 @@ interface IState {
 	isGoogleSignedIn: boolean;
 }
 
+interface LoginWithGoogleAccountRequest extends PlayFabClientModels.LoginWithGoogleAccountRequest {
+	AccessToken: string;
+}
+
 class App extends React.PureComponent<any, IState> {
 	constructor(props: any) {
 		super(props);
@@ -37,9 +41,9 @@ class App extends React.PureComponent<any, IState> {
 		console.log("Google success?", a);
 		PlayFabClient.LoginWithGoogleAccount(
 			{
-				ServerAuthCode: a.accessToken,
+				AccessToken: a.accessToken,
 				CreateAccount: true,
-			},
+			} as LoginWithGoogleAccountRequest,
 			(a, b) => {
 				console.log("Callback", a, b);
 				this.onPlayFabResponse(a, b);
@@ -49,7 +53,7 @@ class App extends React.PureComponent<any, IState> {
 
 	private onPlayFabResponse(response, error) {
 		// testing to see if below api call works
-		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (r, e) => console.log(r, e));
+		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (r, e) => console.log("getcalalogitems", r, e));
 	}
 
 	private onGoogleFailure(a: any) {
