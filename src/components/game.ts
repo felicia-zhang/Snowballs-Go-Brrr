@@ -4,6 +4,7 @@ import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
 import penguin3 from "../assets/penguin3.png";
 import { fontFamily } from '../utils/font'
+import Torch from "../items/Torch";
 
 class GameScene extends Phaser.Scene {
     player: any;
@@ -11,10 +12,13 @@ class GameScene extends Phaser.Scene {
     prevTotalClick: number = 0
     timerEvent: Phaser.Time.TimerEvent;
     items = [];
+    clickText;
 
     constructor() {
         super('Game');
     }
+
+    // TODO: need to sync inventory custom data every time
 
     init() {
         const scene = this
@@ -41,11 +45,13 @@ class GameScene extends Phaser.Scene {
     create() {
         this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
+        const torch = new Torch(this, 400, 300, 1, 3)
+        this.add.existing(torch)
 
-        const clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: fontFamily });
+        this.clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: fontFamily });
 
         this.player.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-            clickText.setText(`click: ${++this.totalClick}`)
+            this.totalClick++
         })
         this.anims.create({
             key: 'bounce',
@@ -82,6 +88,10 @@ class GameScene extends Phaser.Scene {
         leaderboardButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
             this.scene.start('Leaderboard');
         })
+    }
+
+    update() {
+        this.clickText.setText(`click: ${this.totalClick}`)
     }
 }
 
