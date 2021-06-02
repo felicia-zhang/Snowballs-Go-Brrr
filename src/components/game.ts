@@ -6,6 +6,7 @@ import penguin3 from "../assets/penguin3.png";
 import { fontFamily } from '../utils/font'
 import Torch from "../items/Torch";
 import Friend from "../items/Friend";
+import Igloo from "../items/Igloo";
 
 class GameScene extends Phaser.Scene {
     player: any;
@@ -23,15 +24,12 @@ class GameScene extends Phaser.Scene {
     // TODO: need to sync inventory custom data every time
 
     init() {
+        this.add.image(400, 300, 'sky');
         const scene = this
         const GetInventoryCallback = function (error, result) {
             const inventory: PlayFab.ItemInstance[] = result.data.Inventory
             inventory.forEach((inventory, i) => {
                 scene.add.text(300, 200 + i * 100, inventory.DisplayName, { fontFamily: fontFamily })
-                if (inventory.CustomData !== undefined && inventory.CustomData.ImageData !== undefined && JSON.parse(inventory.CustomData.ImageData).hasOwnProperty('image')) {
-                    const imageData = JSON.parse(inventory.CustomData.ImageData)
-                    const image = scene.add.sprite(250, 200 + i * 100, imageData['image']).setScale(0.3)
-                }
             })
         }
 
@@ -45,8 +43,9 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.image(400, 300, 'sky');
         this.player = this.add.sprite(100, 450, 'penguin3').setScale(0.3)
+
+        this.add.existing(new Igloo(this, 500, 300, 1, 3)).setScale(0.3)
 
         this.clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: fontFamily });
 
