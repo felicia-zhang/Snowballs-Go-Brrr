@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="google-signin-client_id" content="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://download.playfab.com/PlayFabClientApi.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -29,6 +32,27 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <script>
+        function onSignIn() {
+            var accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse(true).access_token;
+            PlayFabClientSDK.LoginWithGoogleAccount({
+                AccessToken: accessToken,
+                CreateAccount : true,
+                TitleId: "7343B",
+            }, onPlayFabResponse);
+        }
+
+        function onPlayFabResponse(response, error) {
+          PlayFabClientSDK.ExecuteCloudScript({ FunctionName: 'syncInventoryToCatalog', FunctionParameter: {} }, (r, e) => {
+            console.log('sync')
+            if (r)
+                console.log(r)
+            if (e)
+                console.log(e)
+            })
+        }
+    </script>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
