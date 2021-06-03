@@ -2,12 +2,14 @@ import { PhaserGame } from "./components/phaser";
 import React from "react";
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
-import { Button, ChakraProvider, Input, InputGroup, VStack } from "@chakra-ui/react";
+import { Button, ChakraProvider, Input, InputGroup, Link, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 
 interface IState {
 	game: PhaserGame;
 	isSignedIn: boolean;
+	isRegistering: boolean;
+	email: string;
 	username: string;
 	password: string;
 }
@@ -18,6 +20,8 @@ class App extends React.PureComponent<any, IState> {
 		this.state = {
 			game: null,
 			isSignedIn: false,
+			isRegistering: false,
+			email: "",
 			username: "",
 			password: "",
 		};
@@ -71,6 +75,16 @@ class App extends React.PureComponent<any, IState> {
 				<div style={{ position: "absolute", left: "300px", top: "200px" }}>
 					{this.state.isSignedIn ? null : (
 						<VStack>
+							{this.state.isRegistering ? (
+								<Input
+									color="white"
+									size="md"
+									placeholder="Email"
+									onChange={e => {
+										this.setState({ email: e.target.value });
+									}}
+								/>
+							) : null}
 							<Input
 								color="white"
 								size="md"
@@ -88,8 +102,17 @@ class App extends React.PureComponent<any, IState> {
 									this.setState({ password: e.target.value });
 								}}
 							/>
-							<Button onClick={this.signInWithPlayFab}>Sign in</Button>
-							<Button onClick={this.registerWithPlayFab}>Register</Button>
+							{this.state.isRegistering ? (
+								<>
+									<Button onClick={this.registerWithPlayFab}>Register</Button>
+									<Link onClick={() => this.setState({ isRegistering: false })}>Sign in</Link>
+								</>
+							) : (
+								<>
+									<Button onClick={this.signInWithPlayFab}>Sign in</Button>
+									<Link onClick={() => this.setState({ isRegistering: true })}>Register</Link>
+								</>
+							)}
 							<GoogleLogin
 								clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
 								render={renderProps => (
