@@ -34,29 +34,34 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller");
 	}
 
-	googleSignin(accessToken: string) {
+	signinCallback(error: PlayFabModule.IPlayFabError, result, name: string) {
+		if (result.data.NewlyCreated) {
+			PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
+				console.log("Added new player", name);
+			});
+		}
+		console.log("Signed in as", result.data.PlayFabId);
+	}
+
+	googleSignin(accessToken: string, name: string) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithGoogleAccount(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			} as LoginWithGoogleAccountRequest,
-			(error, result) => {
-				console.log("Signed in as", result.data.PlayFabId);
-			}
+			(error, result) => this.signinCallback(error, result, name)
 		);
 	}
 
-	facebookSignin(accessToken: string) {
+	facebookSignin(accessToken: string, name: string) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithFacebook(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			},
-			(error, result) => {
-				console.log("Signed in as", result.data.PlayFabId);
-			}
+			(error, result) => this.signinCallback(error, result, name)
 		);
 	}
 }

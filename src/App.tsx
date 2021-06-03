@@ -16,7 +16,7 @@ const App: React.FC = () => {
 
 	const onGoogleSuccess = (response: GoogleLoginResponse) => {
 		signIn(true);
-		game.googleSignin(response.accessToken);
+		game.googleSignin(response.accessToken, response.getBasicProfile().getName());
 	};
 
 	const onGoogleFailure = (error: any) => {
@@ -25,7 +25,7 @@ const App: React.FC = () => {
 
 	const onFacebookSignin = response => {
 		signIn(true);
-		game.facebookSignin(response.accessToken);
+		game.facebookSignin(response.accessToken, response.name);
 	};
 
 	return (
