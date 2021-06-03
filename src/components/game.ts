@@ -78,6 +78,9 @@ class GameScene extends Phaser.Scene {
 
 	update() {
 		this.clickText.setText(`click: ${this.totalClick}`);
+		if (!PlayFabClient.IsClientLoggedIn()) {
+			this.scene.start("Login");
+		}
 	}
 
 	sync(transition?: () => any) {

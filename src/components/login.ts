@@ -23,9 +23,7 @@ class LoginScene extends Phaser.Scene {
 
 	update() {
 		if (PlayFabClient.IsClientLoggedIn()) {
-			this.scene.start("Store");
-		} else {
-			this.scene.start("Login");
+			this.scene.start("Menu");
 		}
 	}
 }
