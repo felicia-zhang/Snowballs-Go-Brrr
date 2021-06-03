@@ -8,10 +8,6 @@ interface IState {
 	isGoogleSignedIn: boolean;
 }
 
-interface LoginWithGoogleAccountRequest extends PlayFabClientModels.LoginWithGoogleAccountRequest {
-	AccessToken: string;
-}
-
 class App extends React.PureComponent<any, IState> {
 	constructor(props: any) {
 		super(props);
@@ -20,8 +16,6 @@ class App extends React.PureComponent<any, IState> {
 			game: null,
 			isGoogleSignedIn: false,
 		};
-
-		PlayFab.settings.titleId = "7343B";
 	}
 
 	componentDidMount() {
@@ -38,23 +32,8 @@ class App extends React.PureComponent<any, IState> {
 		this.setState({
 			isGoogleSignedIn: true,
 		});
-		console.log("Google success?", a);
-		PlayFabClient.LoginWithGoogleAccount(
-			{
-				AccessToken: a.accessToken,
-				CreateAccount: true,
-			} as LoginWithGoogleAccountRequest,
-			(a, b) => {
-				console.log("Callback", a, b);
-				this.onPlayFabResponse(a, b);
-			}
-		);
+		this.state.game.signIn(a.accessToken);
 	};
-
-	private onPlayFabResponse(response, error) {
-		// testing to see if below api call works
-		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (r, e) => console.log("getcalalogitems", r, e));
-	}
 
 	private onGoogleFailure(a: any) {
 		console.log("Something went wrong", a);
@@ -62,10 +41,10 @@ class App extends React.PureComponent<any, IState> {
 
 	render() {
 		return (
-			<div>
+			<div style={{ position: "absolute", left: "300px", top: "400px" }}>
 				<GoogleLogin
 					clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
-					buttonText="Login"
+					buttonText="Sign in with Google"
 					onSuccess={this.onGoogleSuccess}
 					onFailure={this.onGoogleFailure}
 					cookiePolicy={"single_host_origin"}
