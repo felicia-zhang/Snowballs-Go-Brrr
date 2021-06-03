@@ -34,13 +34,26 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller");
 	}
 
-	signIn(accessToken: string) {
+	googleSignin(accessToken: string) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithGoogleAccount(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			} as LoginWithGoogleAccountRequest,
+			(error, result) => {
+				console.log("Signed in as", result.data.PlayFabId);
+			}
+		);
+	}
+
+	facebookSignin(accessToken: string) {
+		PlayFab.settings.titleId = "7343B";
+		PlayFabClient.LoginWithFacebook(
+			{
+				AccessToken: accessToken,
+				CreateAccount: true,
+			},
 			(error, result) => {
 				console.log("Signed in as", result.data.PlayFabId);
 			}

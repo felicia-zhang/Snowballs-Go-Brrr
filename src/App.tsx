@@ -1,10 +1,11 @@
 import { PhaserGame } from "./components/phaser";
 import React, { useEffect, useState } from "react";
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
+import FacebookLogin from "react-facebook-login";
 
 const App: React.FC = () => {
 	const [game, setGame] = useState<PhaserGame>();
-	const [isGoogleSignedIn, setGoogleSignedIn] = useState(false);
+	const [isSignedIn, signIn] = useState(false);
 
 	useEffect(() => {
 		setGame(new PhaserGame());
@@ -14,25 +15,38 @@ const App: React.FC = () => {
 	}, []);
 
 	const onGoogleSuccess = (response: GoogleLoginResponse) => {
-		setGoogleSignedIn(true);
-		game.signIn(response.accessToken);
+		signIn(true);
+		game.googleSignin(response.accessToken);
 	};
 
 	const onGoogleFailure = (error: any) => {
 		console.log("Something went wrong", error);
 	};
 
+	const onFacebookSignin = response => {
+		signIn(true);
+		game.facebookSignin(response.accessToken);
+	};
+
 	return (
 		<div style={{ position: "absolute", left: "300px", top: "400px" }}>
-			{isGoogleSignedIn ? null : (
-				<GoogleLogin
-					clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
-					buttonText="Sign in with Google"
-					onSuccess={onGoogleSuccess}
-					onFailure={onGoogleFailure}
-					cookiePolicy={"single_host_origin"}
-					isSignedIn={isGoogleSignedIn}
-				/>
+			{isSignedIn ? null : (
+				<>
+					<GoogleLogin
+						clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
+						buttonText="Sign in with Google"
+						onSuccess={onGoogleSuccess}
+						onFailure={onGoogleFailure}
+						cookiePolicy={"single_host_origin"}
+						isSignedIn={isSignedIn}
+					/>
+					<FacebookLogin
+						appId="533322048080315"
+						autoLoad={true}
+						fields="name,email,picture"
+						callback={onFacebookSignin}
+					/>
+				</>
 			)}
 		</div>
 	);
