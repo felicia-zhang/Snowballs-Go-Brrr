@@ -1,7 +1,9 @@
 import { PhaserGame } from "./components/phaser";
 import React, { useEffect, useState } from "react";
-import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
+import GoogleLogin, { GoogleLoginResponse, useGoogleLogin } from "react-google-login";
 import FacebookLogin from "react-facebook-login";
+import { Button, ChakraProvider, VStack } from "@chakra-ui/react";
+import { FaFacebook, FaGoogle } from "react-icons/fa";
 
 const App: React.FC = () => {
 	const [game, setGame] = useState<PhaserGame>();
@@ -28,27 +30,35 @@ const App: React.FC = () => {
 		game.facebookSignin(response.accessToken, response.name);
 	};
 
+	const { signIn: signInToGoogle, loaded } = useGoogleLogin({
+		clientId: "168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com",
+		cookiePolicy: "single_host_origin",
+		isSignedIn: isSignedIn,
+		onSuccess: onGoogleSuccess,
+		onFailure: onGoogleFailure,
+	});
+
 	return (
-		<div style={{ position: "absolute", left: "300px", top: "400px" }}>
-			{isSignedIn ? null : (
-				<>
-					<GoogleLogin
-						clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
-						buttonText="Sign in with Google"
-						onSuccess={onGoogleSuccess}
-						onFailure={onGoogleFailure}
-						cookiePolicy={"single_host_origin"}
-						isSignedIn={isSignedIn}
-					/>
-					<FacebookLogin
-						appId="533322048080315"
-						autoLoad={true}
-						fields="name,email,picture"
-						callback={onFacebookSignin}
-					/>
-				</>
-			)}
-		</div>
+		<ChakraProvider>
+			<div style={{ position: "absolute", left: "300px", top: "400px" }}>
+				{isSignedIn ? null : (
+					<VStack>
+						<Button colorScheme="red" onClick={signInToGoogle} leftIcon={<FaGoogle />}>
+							Sign in with Google
+						</Button>
+						<Button colorScheme="facebook" leftIcon={<FaFacebook />}>
+							Sign in with Facebook
+						</Button>
+						<FacebookLogin
+							appId="533322048080315"
+							autoLoad={true}
+							fields="name,email,picture"
+							callback={onFacebookSignin}
+						/>
+					</VStack>
+				)}
+			</div>
+		</ChakraProvider>
 	);
 };
 
