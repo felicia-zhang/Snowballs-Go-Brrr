@@ -7,6 +7,7 @@ import StoreScene from "./store";
 import sky from "../assets/sky.png";
 import fire from "../assets/fire.png";
 import igloo from "../assets/igloo.png";
+import MenuScene from "./menu";
 
 class Controller extends Phaser.Scene {
 	constructor() {
@@ -23,10 +24,11 @@ class Controller extends Phaser.Scene {
 		this.scene.add("Leaderboard", LeaderboardScene);
 		this.scene.add("Store", StoreScene);
 		this.scene.add("Login", LoginScene);
+		this.scene.add("Menu", MenuScene);
 		this.scene.add("Game", GameScene);
 
 		if (PlayFabClient.IsClientLoggedIn()) {
-			this.scene.start("Store");
+			this.scene.start("Menu");
 		} else {
 			this.scene.start("Login");
 		}

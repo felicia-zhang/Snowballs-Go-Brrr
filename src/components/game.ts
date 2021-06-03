@@ -22,19 +22,19 @@ class GameScene extends Phaser.Scene {
 		super("Game");
 	}
 
-	// TODO: need to sync inventory custom data every time
-
 	init() {
 		this.add.image(400, 300, "sky");
 		const scene = this;
-		const GetInventoryCallback = function (error, result) {
-			const inventory: PlayFab.ItemInstance[] = result.data.Inventory;
-			inventory.forEach((inventory, i) => {
-				scene.add.existing(buildItem(inventory, scene, 300, 100 + i * 150)).setScale(0.3);
-			});
-		};
-
-		PlayFabClient.GetUserInventory({}, GetInventoryCallback);
+		PlayFabClient.ExecuteCloudScript({ FunctionName: "syncInventoryToCatalog", FunctionParameter: {} }, () => {
+			const GetInventoryCallback = function (error, result) {
+				const inventory: PlayFab.ItemInstance[] = result.data.Inventory;
+				inventory.forEach((inventory, i) => {
+					scene.add.existing(buildItem(inventory, scene, 300, 100 + i * 150)).setScale(0.3);
+				});
+			};
+			// TODO: cloud script and getUserInventory have duplicated API call
+			PlayFabClient.GetUserInventory({}, GetInventoryCallback);
+		});
 	}
 
 	preload() {
@@ -78,6 +78,9 @@ class GameScene extends Phaser.Scene {
 
 	update() {
 		this.clickText.setText(`click: ${this.totalClick}`);
+		if (!PlayFabClient.IsClientLoggedIn()) {
+			this.scene.start("Login");
+		}
 	}
 
 	sync(transition?: () => any) {

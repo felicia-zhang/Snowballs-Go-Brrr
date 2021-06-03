@@ -34,16 +34,71 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller");
 	}
 
-	signIn(accessToken: string) {
+	socialSignInCallback(error: PlayFabModule.IPlayFabError, result, name: string) {
+		if (result === null) {
+			console.log("Failed to sign in", error);
+		} else {
+			if (result.data.NewlyCreated) {
+				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
+					console.log("Added new player", name);
+				});
+			}
+			console.log("Signed in as", result.data.PlayFabId);
+		}
+	}
+
+	playfabSignInCallback(error: PlayFabModule.IPlayFabError, result, handlePlayFab: (success: boolean) => void) {
+		if (result === null) {
+			console.log("Failed to sign in", error);
+		} else {
+			handlePlayFab(true);
+			console.log("Signed in as", result.data.PlayFabId);
+		}
+	}
+
+	signInWithPlayFab(username: string, password: string, handlePlayFab: (success: boolean) => void) {
+		PlayFab.settings.titleId = "7343B";
+		PlayFabClient.LoginWithPlayFab(
+			{
+				Username: username,
+				Password: password,
+			},
+			(error, result) => this.playfabSignInCallback(error, result, handlePlayFab)
+		);
+	}
+
+	registerWithPlayFab(email: string, username: string, password: string, handlePlayFab: (success: boolean) => void) {
+		PlayFab.settings.titleId = "7343B";
+		PlayFabClient.RegisterPlayFabUser(
+			{
+				Email: email,
+				DisplayName: username,
+				Username: username,
+				Password: password,
+			},
+			(error, result) => this.playfabSignInCallback(error, result, handlePlayFab)
+		);
+	}
+
+	signInWithGoogle(accessToken: string, name: string) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithGoogleAccount(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			} as LoginWithGoogleAccountRequest,
-			(error, result) => {
-				console.log("Signed in as", result.data.PlayFabId);
-			}
+			(error, result) => this.socialSignInCallback(error, result, name)
+		);
+	}
+
+	signInWithFacebook(accessToken: string, name: string) {
+		PlayFab.settings.titleId = "7343B";
+		PlayFabClient.LoginWithFacebook(
+			{
+				AccessToken: accessToken,
+				CreateAccount: true,
+			},
+			(error, result) => this.socialSignInCallback(error, result, name)
 		);
 	}
 }
