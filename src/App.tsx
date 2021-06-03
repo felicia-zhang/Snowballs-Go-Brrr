@@ -2,7 +2,7 @@ import { PhaserGame } from "./components/phaser";
 import React from "react";
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
-import { Button, ChakraProvider, Input, InputGroup, Link, VStack } from "@chakra-ui/react";
+import { Button, ChakraProvider, Divider, HStack, Input, InputGroup, Link, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 
 interface IState {
@@ -108,16 +108,17 @@ class App extends React.PureComponent<any, IState> {
 								}}
 							/>
 							{this.state.isRegistering ? (
-								<>
+								<HStack>
 									<Button onClick={this.registerWithPlayFab}>Register</Button>
 									<Link onClick={() => this.setState({ isRegistering: false })}>Sign in</Link>
-								</>
+								</HStack>
 							) : (
-								<>
+								<HStack>
 									<Button onClick={this.signInWithPlayFab}>Sign in</Button>
 									<Link onClick={() => this.setState({ isRegistering: true })}>Register</Link>
-								</>
+								</HStack>
 							)}
+							<Divider />
 							<GoogleLogin
 								clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
 								render={renderProps => (
