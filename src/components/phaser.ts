@@ -67,17 +67,17 @@ export class PhaserGame extends Phaser.Game {
 		);
 	}
 
-	registerWithPlayFab(username: string, password: string) {
+	registerWithPlayFab(email: string, username: string, password: string, handlePlayFab: (success: boolean) => void) {
 		PlayFab.settings.titleId = "7343B";
-		// PlayFabClient.RegisterPlayFabUser(
-		// 	{
-		// 		Email: "",
-		// 		DisplayName: username,
-		// 		Username: username,
-		// 		Password: password,
-		// 	},
-		// 	(error, result) => this.playfabSignInCallback(error, result, username)
-		// );
+		PlayFabClient.RegisterPlayFabUser(
+			{
+				Email: email,
+				DisplayName: username,
+				Username: username,
+				Password: password,
+			},
+			(error, result) => this.playfabSignInCallback(error, result, handlePlayFab)
+		);
 	}
 
 	signInWithGoogle(accessToken: string, name: string) {

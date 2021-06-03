@@ -48,7 +48,12 @@ class App extends React.PureComponent<any, IState> {
 	};
 
 	registerWithPlayFab = () => {
-		this.state.game.registerWithPlayFab(this.state.username, this.state.password);
+		this.state.game.registerWithPlayFab(
+			this.state.email,
+			this.state.username,
+			this.state.password,
+			this.handlePlayFab
+		);
 	};
 
 	onGoogleSuccess = (response: GoogleLoginResponse) => {
