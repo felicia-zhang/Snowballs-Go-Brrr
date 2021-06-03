@@ -9,6 +9,11 @@ class MenuScene extends Phaser.Scene {
 	create() {
 		this.add.image(400, 300, "sky");
 		const title = this.add.text(300, 9, "Menu", { fontFamily: fontFamily });
+
+		const gameButton = this.add.text(700, 450, "game", { fontFamily: fontFamily });
+		gameButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+			this.scene.start("Game");
+		});
 	}
 
 	update() {

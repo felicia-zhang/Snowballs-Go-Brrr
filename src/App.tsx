@@ -1,59 +1,41 @@
 import { PhaserGame } from "./components/phaser";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 
-interface IState {
-	game: PhaserGame;
-	isGoogleSignedIn: boolean;
-}
+const App: React.FC = () => {
+	const [game, setGame] = useState<PhaserGame>();
+	const [isGoogleSignedIn, setGoogleSignedIn] = useState(false);
 
-class App extends React.PureComponent<any, IState> {
-	constructor(props: any) {
-		super(props);
-
-		this.state = {
-			game: null,
-			isGoogleSignedIn: false,
+	useEffect(() => {
+		setGame(new PhaserGame());
+		return () => {
+			game.destroy(true);
 		};
-	}
+	}, []);
 
-	componentDidMount() {
-		this.setState({
-			game: new PhaserGame(),
-		});
-	}
-
-	componentWillUnmount() {
-		this.state.game.destroy(true);
-	}
-
-	private onGoogleSuccess = (response: GoogleLoginResponse) => {
-		this.setState({
-			isGoogleSignedIn: true,
-		});
-		this.state.game.signIn(response.accessToken);
+	const onGoogleSuccess = (response: GoogleLoginResponse) => {
+		setGoogleSignedIn(true);
+		game.signIn(response.accessToken);
 	};
 
-	private onGoogleFailure(error: any) {
+	const onGoogleFailure = (error: any) => {
 		console.log("Something went wrong", error);
-	}
+	};
 
-	render() {
-		return (
-			<div className="sign_in_buttons" style={{ position: "absolute", left: "300px", top: "400px" }}>
-				{this.state.isGoogleSignedIn ? null : (
-					<GoogleLogin
-						clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
-						buttonText="Sign in with Google"
-						onSuccess={this.onGoogleSuccess}
-						onFailure={this.onGoogleFailure}
-						cookiePolicy={"single_host_origin"}
-						isSignedIn={this.state.isGoogleSignedIn}
-					/>
-				)}
-			</div>
-		);
-	}
-}
+	return (
+		<div style={{ position: "absolute", left: "300px", top: "400px" }}>
+			{isGoogleSignedIn ? null : (
+				<GoogleLogin
+					clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
+					buttonText="Sign in with Google"
+					onSuccess={onGoogleSuccess}
+					onFailure={onGoogleFailure}
+					cookiePolicy={"single_host_origin"}
+					isSignedIn={isGoogleSignedIn}
+				/>
+			)}
+		</div>
+	);
+};
 
 export default App;
