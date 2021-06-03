@@ -22,11 +22,84 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
 		<title>React App</title>
+		<script>
+			// This function will be called when Facebook SDK is loaded
+			window.fbAsyncInit = function () {
+				// Make sure to use your own App ID for the configuration
+				FB.init({
+					appId: "533322048080315",
+					xfbml: true,
+					version: "v2.9",
+				});
+
+				// Record PageView event for analytics
+				FB.AppEvents.logPageView();
+			};
+
+			// Facebook SDK loader. Creates a script entry to load the SDK
+			(function (d, s, id) {
+				var js,
+					fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) {
+					return;
+				}
+				js = d.createElement(s);
+				js.id = id;
+				js.src = "//connect.facebook.net/en_US/sdk.js";
+				fjs.parentNode.insertBefore(js, fjs);
+			})(document, "script", "facebook-jssdk");
+		</script>
+		<script src="https://download.playfab.com/PlayFabClientApi.js"></script>
 	</head>
 	<body>
 		<noscript>You need to enable JavaScript to run this app.</noscript>
 		<div id="root"></div>
-		<div class="g-signin2" data-onsuccess="onSignIn"></div>
+		<button onclick="loginWithFacebook()">Log In with Facebook</button>
+		<script>
+			// This method is invoked when you press the button
+			function loginWithFacebook() {
+				logLine("Logging in via Facebook...");
+
+				// Standard practice: make call to FB.login.
+				// This will show Facebook popup window. To prevent browsers from locking it,
+				// always make sure to call it from Button click event
+				FB.login(function (response) {
+					if (!response.authResponse) {
+						logLine("Problem authenticating via Facebook!");
+					} else {
+						loginWithPlayfab(response.authResponse.accessToken);
+					}
+				});
+			}
+
+			function loginWithPlayfab(accessToken) {
+				logLine("Logging in via PlayFab...");
+
+				// When given accessToken, make call to LoginWithFacebook API Call
+				// Make sure to use your own PlayFab Title ID
+				PlayFabClientSDK.LoginWithFacebook(
+					{
+						AccessToken: accessToken,
+						TitleId: "7343B",
+						CreateAccount: true,
+					},
+					onPlayFabResponse
+				);
+			}
+
+			// Handles response from playfab.
+			function onPlayFabResponse(response, error) {
+				if (response) logLine("Response: " + JSON.stringify(response));
+				if (error) logLine("Error: " + JSON.stringify(error));
+			}
+
+			function logLine(message) {
+				var textnode = document.createTextNode(message);
+				document.body.appendChild(textnode);
+				var br = document.createElement("br");
+				document.body.appendChild(br);
+			}
+		</script>
 		<!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
