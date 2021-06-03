@@ -11,14 +11,6 @@ class LoginScene extends Phaser.Scene {
 
 	create() {
 		this.add.image(400, 300, "sky");
-		var inputText = new InputText(this, 400, 300, 100, 20, {
-			type: "textarea",
-			text: "hello world",
-			fontFamily: fontFamily,
-		}).on("textchange", function (inputText) {
-			this.playerName = inputText.text;
-		});
-		this.add.existing(inputText);
 	}
 
 	update() {
