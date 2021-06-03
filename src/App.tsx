@@ -1,7 +1,7 @@
 import { PhaserGame } from "./components/phaser";
 import React, { useEffect, useState } from "react";
 import GoogleLogin, { GoogleLoginResponse, useGoogleLogin } from "react-google-login";
-import FacebookLogin from "react-facebook-login";
+import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 import { Button, ChakraProvider, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 
@@ -46,13 +46,14 @@ const App: React.FC = () => {
 						<Button colorScheme="red" onClick={signInToGoogle} leftIcon={<FaGoogle />}>
 							Sign in with Google
 						</Button>
-						<Button colorScheme="facebook" leftIcon={<FaFacebook />}>
-							Sign in with Facebook
-						</Button>
 						<FacebookLogin
 							appId="533322048080315"
 							autoLoad={true}
-							fields="name,email,picture"
+							render={renderProps => (
+								<Button colorScheme="facebook" onClick={renderProps.onClick} leftIcon={<FaFacebook />}>
+									Sign in with Facebook
+								</Button>
+							)}
 							callback={onFacebookSignin}
 						/>
 					</VStack>
