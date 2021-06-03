@@ -8,6 +8,8 @@ import { FaFacebook, FaGoogle } from "react-icons/fa";
 interface IState {
 	game: PhaserGame;
 	isSignedIn: boolean;
+	username: string;
+	password: string;
 }
 
 class App extends React.PureComponent<any, IState> {
@@ -16,6 +18,8 @@ class App extends React.PureComponent<any, IState> {
 		this.state = {
 			game: null,
 			isSignedIn: false,
+			username: "",
+			password: "",
 		};
 	}
 
@@ -29,11 +33,25 @@ class App extends React.PureComponent<any, IState> {
 		this.state.game.destroy(true);
 	}
 
+	handlePlayFab = (success: boolean) => {
+		this.setState({
+			isSignedIn: success,
+		});
+	};
+
+	signInWithPlayFab = () => {
+		this.state.game.signInWithPlayFab(this.state.username, this.state.password, this.handlePlayFab);
+	};
+
+	registerWithPlayFab = () => {
+		this.state.game.registerWithPlayFab(this.state.username, this.state.password);
+	};
+
 	onGoogleSuccess = (response: GoogleLoginResponse) => {
 		this.setState({
 			isSignedIn: true,
 		});
-		this.state.game.googleSignin(response.accessToken, response.getBasicProfile().getName());
+		this.state.game.signInWithGoogle(response.accessToken, response.getBasicProfile().getName());
 	};
 
 	onGoogleFailure = (error: any) => {
@@ -44,7 +62,7 @@ class App extends React.PureComponent<any, IState> {
 		this.setState({
 			isSignedIn: true,
 		});
-		this.state.game.facebookSignin(response.accessToken, response.name);
+		this.state.game.signInWithFacebook(response.accessToken, response.name);
 	};
 
 	render() {
@@ -53,9 +71,25 @@ class App extends React.PureComponent<any, IState> {
 				<div style={{ position: "absolute", left: "300px", top: "200px" }}>
 					{this.state.isSignedIn ? null : (
 						<VStack>
-							<Input color="white" size="md" placeholder="Username" />
-							<Input color="white" size="md" type="password" placeholder="Enter password" />
-							<Button>Sign in</Button>
+							<Input
+								color="white"
+								size="md"
+								placeholder="Username"
+								onChange={e => {
+									this.setState({ username: e.target.value });
+								}}
+							/>
+							<Input
+								color="white"
+								size="md"
+								type="password"
+								placeholder="Enter password"
+								onChange={e => {
+									this.setState({ password: e.target.value });
+								}}
+							/>
+							<Button onClick={this.signInWithPlayFab}>Sign in</Button>
+							<Button onClick={this.registerWithPlayFab}>Register</Button>
 							<GoogleLogin
 								clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
 								render={renderProps => (
