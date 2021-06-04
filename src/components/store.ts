@@ -49,10 +49,12 @@ class StoreScene extends Phaser.Scene {
 		PlayFabClient.GetUserInventory({}, GetInventoryCallback);
 		const itemText = this.add.text(300, 9, "STORE", { fontFamily: fontFamily });
 
-		const backButton = this.add.text(700, 450, "back", { fontFamily: fontFamily });
-		backButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-			this.scene.start("Game");
-		});
+		this.add
+			.text(700, 450, "GAME", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerdown", () => {
+				this.scene.start("Game");
+			});
 	}
 
 	update() {

@@ -65,15 +65,19 @@ class GameScene extends Phaser.Scene {
 			callback: () => this.sync(),
 		});
 
-		const storeButton = this.add.text(700, 400, "store", { fontFamily: fontFamily });
-		storeButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-			this.sync(() => this.scene.start("Store"));
-		});
+		this.add
+			.text(700, 400, "STORE", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerdown", () => {
+				this.sync(() => this.scene.start("Store"));
+			});
 
-		const leaderboardButton = this.add.text(700, 450, "leaderboard", { fontFamily: fontFamily });
-		leaderboardButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-			this.sync(() => this.scene.start("Leaderboard"));
-		});
+		this.add
+			.text(700, 450, "MENU", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerdown", () => {
+				this.sync(() => this.scene.start("Menu"));
+			});
 	}
 
 	update() {
