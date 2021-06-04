@@ -23,15 +23,17 @@ class LeaderboardScene extends Phaser.Scene {
 			});
 		});
 
-		const backButton = this.add.text(700, 450, "back", { fontFamily: fontFamily });
-		backButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-			this.scene.start("Game");
-		});
+		this.add
+			.text(700, 450, "MENU", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerdown", () => {
+				this.scene.start("Menu");
+			});
 	}
 
 	update() {
 		if (!PlayFabClient.IsClientLoggedIn()) {
-			this.scene.start("Login");
+			this.scene.start("Signin");
 		}
 	}
 }

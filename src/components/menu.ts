@@ -8,17 +8,30 @@ class MenuScene extends Phaser.Scene {
 
 	create() {
 		this.add.image(400, 300, "sky");
-		const title = this.add.text(300, 9, "Menu", { fontFamily: fontFamily });
+		this.add.text(300, 50, "Menu", { fontFamily: fontFamily });
 
-		const gameButton = this.add.text(700, 450, "game", { fontFamily: fontFamily });
-		gameButton.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-			this.scene.start("Game");
-		});
+		this.add
+			.text(300, 200, "GAME", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerdown", () => {
+				this.scene.start("Game");
+			});
+		this.add
+			.text(300, 250, "LEADERBOARD", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerdown", () => {
+				this.scene.start("Leaderboard");
+			});
+		this.add.text(300, 300, "SETTINGS", { fontFamily: fontFamily });
+		// TODO:
+		// .setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+		// 	this.scene.start("Settings");
+		// });
 	}
 
 	update() {
 		if (!PlayFabClient.IsClientLoggedIn()) {
-			this.scene.start("Login");
+			this.scene.start("Signin");
 		}
 	}
 }
