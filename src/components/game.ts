@@ -2,6 +2,7 @@ import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 import buildItem from "../items/buildItem";
+import PopupScene from "./popup";
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
@@ -57,6 +58,10 @@ class GameScene extends Phaser.Scene {
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
+	}
+
+	getDetails(description: string) {
+		this.scene.add("Popup", PopupScene, true, { description: description });
 	}
 
 	sync(transition?: () => any) {

@@ -14,21 +14,23 @@ export default class Penguin extends BaseItem {
 	}
 
 	useItem() {
-		this.on("pointerup", () => {
-			if (this.isDragging) {
-				this.isDragging = false;
-			} else {
-				this.anims.play("bounce");
-				this.disableInteractive();
-				this.timerEvent = this.scene.time.addEvent({
-					delay: 3000,
-					callback() {
-						this.anims.pause();
-						this.setInteractive({ useHandCursor: true });
-						this.scene.totalSnowballs += 1;
-					},
-					callbackScope: this,
-				});
+		this.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+			if (pointer.leftButtonReleased()) {
+				if (this.isDragging) {
+					this.isDragging = false;
+				} else {
+					this.anims.play("bounce");
+					this.disableInteractive();
+					this.timerEvent = this.scene.time.addEvent({
+						delay: 3000,
+						callback() {
+							this.anims.pause();
+							this.setInteractive({ useHandCursor: true });
+							this.scene.totalSnowballs += 1;
+						},
+						callbackScope: this,
+					});
+				}
 			}
 		});
 	}
