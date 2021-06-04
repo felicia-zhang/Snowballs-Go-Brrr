@@ -42,6 +42,12 @@ export class PhaserGame extends Phaser.Game {
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});
+				PlayFabClient.ExecuteCloudScript(
+					{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
+					() => {
+						console.log("Granted initial items to new player");
+					}
+				);
 			}
 			console.log("Signed in as", result.data.PlayFabId);
 		}
