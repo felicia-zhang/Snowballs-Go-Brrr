@@ -7,4 +7,9 @@ export default class Igloo extends BaseItem {
 	}
 
 	useItem() {}
+
+	upgrade() {
+		this.level++;
+		console.log(this.level, this.description);
+	}
 }

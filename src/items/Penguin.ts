@@ -34,4 +34,9 @@ export default class Penguin extends BaseItem {
 			}
 		});
 	}
+
+	upgrade() {
+		this.level++;
+		console.log(this.level, this.description);
+	}
 }

@@ -3,6 +3,7 @@ import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 import buildItem from "../items/buildItem";
 import PopupScene from "./popup";
+import BaseItem from "../items/BaseItem";
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
@@ -30,6 +31,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	create() {
+		this.scene.launch("Popup");
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.timerEvent = this.time.addEvent({
@@ -60,8 +62,9 @@ class GameScene extends Phaser.Scene {
 		}
 	}
 
-	getDetails(description: string) {
-		this.scene.launch("Popup", { description: description });
+	getDetails(item: BaseItem) {
+		const popup = this.scene.get("Popup") as PopupScene;
+		popup.showDetails(item);
 	}
 
 	sync(transition?: () => any) {

@@ -28,7 +28,7 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 			})
 			.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.rightButtonDown()) {
-					this.game.getDetails(this.description);
+					this.game.getDetails(this);
 				}
 			});
 
@@ -36,4 +36,6 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 	}
 
 	abstract useItem();
+
+	abstract upgrade();
 }
