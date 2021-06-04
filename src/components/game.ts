@@ -20,8 +20,11 @@ class GameScene extends Phaser.Scene {
 	init() {
 		this.add.image(400, 300, "sky");
 		const scene = this;
-		const GetInventoryCallback = function (error, result) {
+		const GetInventoryCallback = (error, result) => {
 			const inventory: PlayFab.ItemInstance[] = result.data.Inventory;
+			const sb = result.data.VirtualCurrency.SB;
+			scene.totalSnowballs = sb;
+			scene.prevTotalSnowballs = sb;
 			inventory.forEach((inventory, i) => {
 				scene.add.existing(buildItem(inventory, scene, 300, 100 + i * 150)).setScale(0.3);
 			});
