@@ -2,8 +2,8 @@ import BaseItem from "./BaseItem";
 
 export default class Penguin extends BaseItem {
 	timerEvent: Phaser.Time.TimerEvent;
-	constructor(game, x, y, level, totalLevel, description) {
-		super(game, x, y, "penguin3", level, totalLevel, description);
+	constructor(game, x, y, item) {
+		super(game, x, y, item, "penguin3");
 
 		this.anims.create({
 			key: "bounce",
@@ -33,10 +33,5 @@ export default class Penguin extends BaseItem {
 				}
 			}
 		});
-	}
-
-	upgrade() {
-		this.level++;
-		console.log(this.level, this.description);
 	}
 }

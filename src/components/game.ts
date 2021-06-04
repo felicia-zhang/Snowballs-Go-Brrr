@@ -3,7 +3,6 @@ import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 import buildItem from "../items/buildItem";
 import BaseItem from "../items/BaseItem";
-import PopupScene from "./popup";
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
@@ -21,7 +20,7 @@ class GameScene extends Phaser.Scene {
 		this.add.image(400, 300, "sky");
 		const scene = this;
 		const GetInventoryCallback = (error, result) => {
-			const inventory: PlayFab.ItemInstance[] = result.data.Inventory;
+			const inventory: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
 			scene.prevTotalSnowballs = sb;
@@ -65,16 +64,12 @@ class GameScene extends Phaser.Scene {
 		}
 	}
 
-	getDetails(item: BaseItem) {
-		const popup = this.scene.get("Popup") as PopupScene;
-		popup.showDetails(item);
-	}
-
-	upgradeItemLevel() {
+	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
+		const newLevel = Number(item.CustomData["Level"]) + 1;
 		PlayFabClient.ExecuteCloudScript(
 			{
 				FunctionName: "updateItemLevel",
-				FunctionParameter: { itemId: "1", instanceId: "1809DEE9183FFF38", level: 3 },
+				FunctionParameter: { itemId: item.ItemId, instanceId: item.ItemInstanceId, level: newLevel },
 			},
 			(error, result) => {
 				console.log(result);

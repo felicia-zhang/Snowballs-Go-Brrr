@@ -11,7 +11,6 @@ import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
 import penguin3 from "../assets/penguin3.png";
 import MenuScene from "./menu";
-import PopupScene from "./popup";
 
 class Controller extends Phaser.Scene {
 	constructor() {
@@ -33,7 +32,6 @@ class Controller extends Phaser.Scene {
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Menu", MenuScene);
 		this.scene.add("Game", GameScene);
-		this.scene.add("Popup", PopupScene);
 
 		if (PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Menu");
