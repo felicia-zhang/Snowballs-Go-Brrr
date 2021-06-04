@@ -61,7 +61,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	getDetails(description: string) {
-		this.scene.add("Popup", PopupScene, true, { description: description });
+		this.scene.launch("Popup", { description: description });
 	}
 
 	sync(transition?: () => any) {

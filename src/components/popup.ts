@@ -13,7 +13,7 @@ class PopupScene extends Phaser.Scene {
 		const close = this.add
 			.text(20, 200, "close", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => this.scene.remove("Popup"));
+			.on("pointerup", () => {});
 	}
 }
 

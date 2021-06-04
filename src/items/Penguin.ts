@@ -2,8 +2,8 @@ import BaseItem from "./BaseItem";
 
 export default class Penguin extends BaseItem {
 	timerEvent: Phaser.Time.TimerEvent;
-	constructor(scene, x, y, level, totalLevel, description) {
-		super(scene, x, y, "penguin3", level, totalLevel, description);
+	constructor(game, x, y, level, totalLevel, description) {
+		super(game, x, y, "penguin3", level, totalLevel, description);
 
 		this.anims.create({
 			key: "bounce",
@@ -21,12 +21,12 @@ export default class Penguin extends BaseItem {
 				} else {
 					this.anims.play("bounce");
 					this.disableInteractive();
-					this.timerEvent = this.scene.time.addEvent({
+					this.timerEvent = this.game.time.addEvent({
 						delay: 3000,
 						callback() {
 							this.anims.pause();
 							this.setInteractive({ useHandCursor: true });
-							this.scene.totalSnowballs += 1;
+							this.game.totalSnowballs += 1;
 						},
 						callbackScope: this,
 					});

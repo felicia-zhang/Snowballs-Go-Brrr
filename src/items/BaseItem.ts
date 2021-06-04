@@ -7,18 +7,18 @@ import { Dialog } from "phaser3-rex-plugins/templates/ui/ui-components.js";
 export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 	level: number;
 	totalLevel: number;
-	scene: GameScene;
+	game: GameScene;
 	description: string;
 	isDragging: boolean;
 
-	constructor(scene: GameScene, x, y, texture, level, totalLevel, description) {
-		super(scene, x, y, texture);
-		this.scene = scene;
+	constructor(game: GameScene, x, y, texture, level, totalLevel, description) {
+		super(game, x, y, texture);
+		this.game = game;
 		this.description = description;
 		this.level = level;
 		this.totalLevel = totalLevel;
 
-		this.scene.input.mouse.disableContextMenu();
+		this.game.input.mouse.disableContextMenu();
 
 		this.setInteractive({ useHandCursor: true, draggable: true })
 			.on("drag", (pointer, dragX, dragY) => {
@@ -28,26 +28,12 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 			})
 			.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.rightButtonDown()) {
-					this.scene.getDetails(this.description);
+					this.game.getDetails(this.description);
 				}
 			});
 
 		this.useItem();
 	}
-
-	// createPopup(pointer: Phaser.Input.Pointer, localX, localY, event) {
-	// 	const background = this.scene.add.existing(new RoundRectangle(this.scene, 80, 35, 160, 70, 5, 0xf57f17));
-	// 	const description = this.scene.add.text(0, 0, this.description, { fontFamily: fontFamily });
-	// 	const upgrade = this.scene.add
-	// 		.text(0, 40, "UPGRADE", { fontFamily: fontFamily })
-	// 		.setInteractive({ useHandCursor: true })
-	// 		.on("pointerup", () => console.log("upgrade", this.description));
-	// 	const container = this.scene.add
-	// 		.container(pointer.x, pointer.y, [background, description, upgrade])
-	// 		.setInteractive(new Phaser.Geom.Rectangle(0, 0, 160, 70), Phaser.Geom.Rectangle.Contains);
-
-	// 	this.popup = container;
-	// }
 
 	abstract useItem();
 }
