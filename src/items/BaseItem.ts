@@ -15,7 +15,7 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 		this.level = level;
 		this.totalLevel = totalLevel;
 
-		this.setInteractive()
+		this.setInteractive({ useHandCursor: true })
 			.on("pointerover", this.createDescriptionBox)
 			.on("pointerout", () => {
 				this.descriptionBox.destroy(true);

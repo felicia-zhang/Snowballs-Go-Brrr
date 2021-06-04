@@ -1,9 +1,6 @@
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
-import Torch from "../items/Torch";
-import Friend from "../items/Friend";
-import Igloo from "../items/Igloo";
 import buildItem from "../items/buildItem";
 
 class GameScene extends Phaser.Scene {
