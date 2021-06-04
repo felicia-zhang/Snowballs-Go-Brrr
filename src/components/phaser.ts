@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import Controller from "./controller";
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
-import { PlayFabClient } from "playfab-sdk";
+import { PlayFabClient, PlayFabServer } from "playfab-sdk";
 import InputTextPlugin from "phaser3-rex-plugins/plugins/inputtext-plugin.js";
 
 const config = {
@@ -34,6 +34,25 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller");
 	}
 
+	grantInitialItemsToNewPlayer() {
+		PlayFabClient.ExecuteCloudScript(
+			{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
+			(error, result) => {
+				console.log("Granted initial items to new player");
+				const grantedItems: PlayFabServerModels.GrantedItemInstance[] = result.data.FunctionResult;
+				grantedItems.forEach(item => {
+					PlayFabClient.ExecuteCloudScript(
+						{
+							FunctionName: "UpdateInventoryItemCustomData",
+							FunctionParameter: { instanceId: item.ItemInstanceId, level: 1 },
+						},
+						() => {}
+					);
+				});
+			}
+		);
+	}
+
 	socialSignInCallback(error: PlayFabModule.IPlayFabError, result, name: string) {
 		if (result === null) {
 			console.log("Failed to sign in", error);
@@ -42,12 +61,7 @@ export class PhaserGame extends Phaser.Game {
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});
-				PlayFabClient.ExecuteCloudScript(
-					{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
-					() => {
-						console.log("Granted initial items to new player");
-					}
-				);
+				this.grantInitialItemsToNewPlayer();
 			}
 			console.log("Signed in as", result.data.PlayFabId);
 		}
@@ -82,7 +96,10 @@ export class PhaserGame extends Phaser.Game {
 				Username: username,
 				Password: password,
 			},
-			(error, result) => this.playfabSignInCallback(error, result, handlePlayFab)
+			(error, result) => {
+				this.grantInitialItemsToNewPlayer();
+				this.playfabSignInCallback(error, result, handlePlayFab);
+			}
 		);
 	}
 

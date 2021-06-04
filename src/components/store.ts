@@ -1,11 +1,13 @@
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
+import { resolveModuleName } from "typescript";
 
 class StoreScene extends Phaser.Scene {
 	items: PlayFab.CatalogItem[];
 	inventory: PlayFab.ItemInstance[];
 	snowballText: any;
+	snowballs: number;
 	constructor() {
 		super("Store");
 		this.items = [];
@@ -19,20 +21,27 @@ class StoreScene extends Phaser.Scene {
 		const GetCatalogItemsCallback = (error, result) => {
 			store.items = result.data.Catalog;
 			store.items.forEach((item, i) => {
-				const nameText = store.add.text(200, 200 + i * 100, item.DisplayName, { fontFamily: fontFamily });
-				const priceText = store.add.text(16, 200 + i * 100, `${item.VirtualCurrencyPrices.SB} Snowballs`, {
+				const nameText = store.add.text(200, 200 + i * 30, item.DisplayName, { fontFamily: fontFamily });
+				const priceText = store.add.text(16, 200 + i * 30, `${item.VirtualCurrencyPrices.SB} Snowballs`, {
 					fontFamily: fontFamily,
 				});
 				if (item.CustomData !== undefined && JSON.parse(item.CustomData).hasOwnProperty("image")) {
 					const customData = JSON.parse(item.CustomData);
-					const image = store.add.sprite(160, 200 + i * 100, customData["image"]).setScale(0.3);
+					const image = store.add.sprite(160, 200 + i * 30, customData["image"]).setScale(0.3);
 				}
 				nameText.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
+					const price = item.VirtualCurrencyPrices.SB;
+					store.snowballText.setText(`Snowballs: ${(store.snowballs -= price)}`);
 					PlayFabClient.PurchaseItem(
-						{ ItemId: item.ItemId, Price: item.VirtualCurrencyPrices.SB, VirtualCurrency: "SB" },
+						{ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" },
 						(error, result) => {
-							console.log(result);
-							PlayFabClient.GetUserInventory({}, GetInventoryCallback);
+							PlayFabClient.ExecuteCloudScript(
+								{
+									FunctionName: "UpdateInventoryItemCustomData",
+									FunctionParameter: { instanceId: result.data.Items[0].ItemInstanceId, level: 1 },
+								},
+								() => {}
+							);
 						}
 					);
 				});
@@ -43,7 +52,8 @@ class StoreScene extends Phaser.Scene {
 
 		const GetInventoryCallback = (error, result) => {
 			store.inventory = result.data.inventory;
-			store.snowballText.setText(`Snowballs: ${result.data.VirtualCurrency.SB}`);
+			store.snowballs = result.data.VirtualCurrency.SB;
+			store.snowballText.setText(`Snowballs: ${store.snowballs}`);
 		};
 
 		PlayFabClient.GetUserInventory({}, GetInventoryCallback);
