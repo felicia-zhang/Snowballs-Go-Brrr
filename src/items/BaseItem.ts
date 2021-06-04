@@ -7,6 +7,7 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 	scene: GameScene;
 	description: string;
 	descriptionBox: Phaser.GameObjects.Text;
+	isDragging: boolean;
 
 	constructor(scene: GameScene, x, y, texture, level, totalLevel, description) {
 		super(scene, x, y, texture);
@@ -15,10 +16,16 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 		this.level = level;
 		this.totalLevel = totalLevel;
 
-		this.setInteractive({ useHandCursor: true })
+		this.setInteractive({ useHandCursor: true, draggable: true })
 			.on("pointerover", this.createDescriptionBox)
 			.on("pointerout", () => {
 				this.descriptionBox.destroy(true);
+			})
+			.on("drag", (pointer, dragX, dragY) => {
+				this.descriptionBox.destroy(true);
+				this.isDragging = true;
+				this.x = dragX;
+				this.y = dragY;
 			});
 
 		this.useItem();
