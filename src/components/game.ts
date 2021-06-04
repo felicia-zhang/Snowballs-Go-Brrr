@@ -67,6 +67,18 @@ class GameScene extends Phaser.Scene {
 		popup.showDetails(item);
 	}
 
+	upgradeItemLevel() {
+		PlayFabClient.ExecuteCloudScript(
+			{
+				FunctionName: "updateItemLevel",
+				FunctionParameter: { itemId: "1", instanceId: "1809DEE9183FFF38", level: 3 },
+			},
+			(error, result) => {
+				console.log(result);
+			}
+		);
+	}
+
 	sync(transition?: () => any) {
 		const currentTotalSnowballs = this.totalSnowballs;
 		const change = currentTotalSnowballs - this.prevTotalSnowballs;

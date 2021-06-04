@@ -43,8 +43,8 @@ export class PhaserGame extends Phaser.Game {
 				grantedItems.forEach(item => {
 					PlayFabClient.ExecuteCloudScript(
 						{
-							FunctionName: "UpdateInventoryItemCustomData",
-							FunctionParameter: { instanceId: item.ItemInstanceId, level: 1 },
+							FunctionName: "updateItemLevel",
+							FunctionParameter: { itemId: item.ItemId, instanceId: item.ItemInstanceId, level: 1 },
 						},
 						() => {}
 					);
