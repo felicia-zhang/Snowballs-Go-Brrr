@@ -1,8 +1,5 @@
 import GameScene from "../components/game";
 import { fontFamily } from "../utils/font";
-import PopUp from "phaser3-rex-plugins/plugins/popup.js";
-import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle";
-import { Dialog } from "phaser3-rex-plugins/templates/ui/ui-components.js";
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 
 export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
@@ -41,8 +38,10 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 	abstract useItem();
 
 	showDetails(pointer: Phaser.Input.Pointer, localX, localY, event) {
-		const level = this.game.add.text(20, 20, this.item.CustomData["Level"], { fontFamily: fontFamily });
-		const name = this.game.add.text(20, 60, this.item.DisplayName, { fontFamily: fontFamily });
+		const level = this.game.add.text(20, 20, `Current level: ${this.item.CustomData["Level"]}`, {
+			fontFamily: fontFamily,
+		});
+		const name = this.game.add.text(20, 60, `Name: ${this.item.DisplayName}`, { fontFamily: fontFamily });
 		const container = this.game.add.container(pointer.x, pointer.y, [level, name]);
 		this.popup = container;
 	}
