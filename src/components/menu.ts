@@ -18,7 +18,7 @@ class MenuScene extends Phaser.Scene {
 
 	update() {
 		if (!PlayFabClient.IsClientLoggedIn()) {
-			this.scene.start("Login");
+			this.scene.start("Signin");
 		}
 	}
 }

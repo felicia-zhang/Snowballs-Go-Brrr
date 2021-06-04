@@ -2,7 +2,7 @@ import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import LeaderboardScene from "./leaderboard";
 import GameScene from "./game";
-import LoginScene from "./login";
+import SigninScene from "./signin";
 import StoreScene from "./store";
 import sky from "../assets/sky.png";
 import fire from "../assets/fire.png";
@@ -23,14 +23,14 @@ class Controller extends Phaser.Scene {
 	create() {
 		this.scene.add("Leaderboard", LeaderboardScene);
 		this.scene.add("Store", StoreScene);
-		this.scene.add("Login", LoginScene);
+		this.scene.add("Signin", SigninScene);
 		this.scene.add("Menu", MenuScene);
 		this.scene.add("Game", GameScene);
 
 		if (PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Menu");
 		} else {
-			this.scene.start("Login");
+			this.scene.start("Signin");
 		}
 	}
 }

@@ -11,11 +11,11 @@ import buildItem from "../items/ItemFactory";
 
 class GameScene extends Phaser.Scene {
 	player: any;
-	totalClick: number = 0;
-	prevTotalClick: number = 0;
+	totalSnowballs: number = 0;
+	prevTotalSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
 	items = [];
-	clickText;
+	snowballText;
 	clickMultiplier: number = 1;
 
 	constructor() {
@@ -46,10 +46,10 @@ class GameScene extends Phaser.Scene {
 	create() {
 		this.player = this.add.sprite(100, 450, "penguin3").setScale(0.3);
 
-		this.clickText = this.add.text(16, 16, `click: ${this.totalClick}`, { fontFamily: fontFamily });
+		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.player.setInteractive({ useHandCursor: true }).on("pointerdown", () => {
-			this.totalClick += this.clickMultiplier;
+			this.totalSnowballs += this.clickMultiplier;
 		});
 		this.anims.create({
 			key: "bounce",
@@ -77,30 +77,30 @@ class GameScene extends Phaser.Scene {
 	}
 
 	update() {
-		this.clickText.setText(`click: ${this.totalClick}`);
+		this.snowballText.setText(`Snowballs: ${this.totalSnowballs}`);
 		if (!PlayFabClient.IsClientLoggedIn()) {
-			this.scene.start("Login");
+			this.scene.start("Signin");
 		}
 	}
 
 	sync(transition?: () => any) {
-		const currentTotalClick = this.totalClick;
-		const change = currentTotalClick - this.prevTotalClick;
+		const currentTotalSnowballs = this.totalSnowballs;
+		const change = currentTotalSnowballs - this.prevTotalSnowballs;
 		if (change === 0) {
 			console.log("no change");
 			if (transition !== undefined) {
 				transition();
 			}
 		} else {
-			this.prevTotalClick = currentTotalClick;
+			this.prevTotalSnowballs = currentTotalSnowballs;
 			PlayFabClient.ExecuteCloudScript(
 				{
 					FunctionName: "addUserVirtualCurrency",
-					FunctionParameter: { amount: change, virtualCurrency: "CL" },
+					FunctionParameter: { amount: change, virtualCurrency: "SB" },
 				},
 				(error, result) => {
 					PlayFabClient.ExecuteCloudScript(
-						{ FunctionName: "updateStatistics", FunctionParameter: { clicks: currentTotalClick } },
+						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: currentTotalSnowballs } },
 						() => {
 							console.log(change);
 							if (transition !== undefined) {
