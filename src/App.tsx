@@ -111,12 +111,12 @@ class App extends React.PureComponent<any, IState> {
 							/>
 							{this.state.isRegistering ? (
 								<HStack>
-									<Button onClick={this.registerWithPlayFab}>Register</Button>
+									<Button onClick={this.registerWithPlayFab}>Register With PlayFab</Button>
 									<Link onClick={() => this.setState({ isRegistering: false })}>Sign in</Link>
 								</HStack>
 							) : (
 								<HStack>
-									<Button onClick={this.signInWithPlayFab}>Sign in</Button>
+									<Button onClick={this.signInWithPlayFab}>Sign in With PlayFab</Button>
 									<Link onClick={() => this.setState({ isRegistering: true })}>Register</Link>
 								</HStack>
 							)}

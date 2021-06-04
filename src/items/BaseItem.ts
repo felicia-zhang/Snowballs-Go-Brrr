@@ -38,8 +38,10 @@ export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
 	abstract useItem();
 
 	showDetails(pointer: Phaser.Input.Pointer, localX, localY, event) {
-		const level = this.game.add.text(20, 20, this.item.CustomData["Level"], { fontFamily: fontFamily });
-		const name = this.game.add.text(20, 60, this.item.DisplayName, { fontFamily: fontFamily });
+		const level = this.game.add.text(20, 20, `Current level: ${this.item.CustomData["Level"]}`, {
+			fontFamily: fontFamily,
+		});
+		const name = this.game.add.text(20, 60, `Name: ${this.item.DisplayName}`, { fontFamily: fontFamily });
 		const container = this.game.add.container(pointer.x, pointer.y, [level, name]);
 		this.popup = container;
 	}
