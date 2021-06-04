@@ -10,7 +10,7 @@ class LeaderboardScene extends Phaser.Scene {
 		const leaderboard = this;
 
 		this.add.image(400, 300, "sky");
-		const title = this.add.text(300, 9, "Leaderboard", { fontFamily: fontFamily });
+		this.add.text(300, 9, "Leaderboard", { fontFamily: fontFamily });
 		PlayFabClient.GetLeaderboard({ StatisticName: "level_clicks", StartPosition: 0 }, (error, result) => {
 			leaderboard.add.text(200, 300, "PLACE", { fontFamily: fontFamily });
 			leaderboard.add.text(300, 300, "NAME", { fontFamily: fontFamily });

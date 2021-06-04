@@ -2,8 +2,9 @@ import { PhaserGame } from "./components/phaser";
 import React from "react";
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
-import { Button, ChakraProvider, Divider, HStack, Input, InputGroup, Link, VStack } from "@chakra-ui/react";
+import { Button, ChakraProvider, Divider, HStack, Input, Link, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
+import { PlayFabClient } from "playfab-sdk";
 
 interface IState {
 	game: PhaserGame;
@@ -30,6 +31,7 @@ class App extends React.PureComponent<any, IState> {
 	componentDidMount() {
 		this.setState({
 			game: new PhaserGame(),
+			isSignedIn: PlayFabClient.IsClientLoggedIn(),
 		});
 	}
 

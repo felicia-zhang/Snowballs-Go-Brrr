@@ -1,8 +1,6 @@
-import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 import buildItem from "../items/buildItem";
-import BaseItem from "../items/BaseItem";
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;

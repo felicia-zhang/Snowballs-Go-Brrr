@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import Controller from "./controller";
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
-import { PlayFabClient, PlayFabServer } from "playfab-sdk";
+import { PlayFabClient } from "playfab-sdk";
 import InputTextPlugin from "phaser3-rex-plugins/plugins/inputtext-plugin.js";
 
 const config = {
