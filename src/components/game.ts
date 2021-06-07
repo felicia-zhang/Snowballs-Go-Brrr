@@ -15,7 +15,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	init() {
-		this.items = { Penguin: [], Igloo: [], Torch: [] };
+		this.items = { Penguin: [], Igloo: [], Torch: [], Fishie: [] };
 	}
 
 	create() {
@@ -26,17 +26,9 @@ class GameScene extends Phaser.Scene {
 			repeat: -1,
 		});
 
-		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
-			if (result.data.Data["auto"] !== undefined) {
-				const lastUpdated = result.data.Data["auto"].Value;
-				const elapsed = new Date().valueOf() - Number(lastUpdated);
-				const elapsedSeconds = elapsed / 1000;
-				console.log("elapsed seconds:", elapsedSeconds);
-			}
-		});
-
 		const scene = this;
-		const GetInventoryCallback = (error, result) => {
+		// TODO: cloud script and getUserInventory have duplicated API call
+		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const inventory: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
@@ -75,11 +67,23 @@ class GameScene extends Phaser.Scene {
 						.image(index * 70, 400, "fire")
 						.setOrigin(0, 0)
 						.setScale(0.3);
+				} else if (inventory.DisplayName === "Fishie") {
+					scene.add
+						.image(index * 70, 450, "fish")
+						.setOrigin(0, 0)
+						.setScale(0.3);
 				}
 			});
-		};
-		// TODO: cloud script and getUserInventory have duplicated API call
-		PlayFabClient.GetUserInventory({}, GetInventoryCallback);
+		});
+
+		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
+			if (result.data.Data["auto"] !== undefined) {
+				const lastUpdated = result.data.Data["auto"].Value;
+				const elapsed = new Date().valueOf() - Number(lastUpdated);
+				const elapsedSeconds = elapsed / 1000;
+				console.log("elapsed seconds:", elapsedSeconds);
+			}
+		});
 
 		this.timerEvent = this.time.addEvent({
 			delay: 10000,
