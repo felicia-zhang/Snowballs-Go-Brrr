@@ -31,7 +31,7 @@ class GameScene extends Phaser.Scene {
 				const lastUpdated = result.data.Data["auto"].Value;
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
-				console.log(elapsedSeconds);
+				console.log("elapsed seconds:", elapsedSeconds);
 			}
 		});
 
@@ -121,20 +121,20 @@ class GameScene extends Phaser.Scene {
 				FunctionParameter: { itemId: item.ItemId, instanceId: item.ItemInstanceId, level: newLevel },
 			},
 			(error, result) => {
-				console.log(result);
+				console.log("Update item level result:", result);
 			}
 		);
 	}
 
 	sync(transition?: () => any) {
 		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, (e, r) => {
-			console.log(r);
+			console.log("Update last synced result", r);
 		});
 
 		const currentTotalSnowballs = this.totalSnowballs;
 		const change = currentTotalSnowballs - this.prevTotalSnowballs;
 		if (change === 0) {
-			console.log("no change");
+			console.log("No change to snowballs since last sync");
 			if (transition !== undefined) {
 				transition();
 			}
@@ -149,7 +149,7 @@ class GameScene extends Phaser.Scene {
 					PlayFabClient.ExecuteCloudScript(
 						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: currentTotalSnowballs } },
 						() => {
-							console.log(change);
+							console.log("Amount of snowballs changed:", change);
 							if (transition !== undefined) {
 								transition();
 							}
