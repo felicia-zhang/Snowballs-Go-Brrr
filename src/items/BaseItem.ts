@@ -1,48 +1,49 @@
 import GameScene from "../components/game";
-import { fontFamily } from "../utils/font";
-import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 
-export default abstract class BaseItem extends Phaser.GameObjects.Sprite {
-	item: PlayFabClientModels.ItemInstance;
-	game: GameScene;
+export default class BaseItem extends Phaser.Scene {
 	isDragging: boolean;
+	item: PlayFabClientModels.ItemInstance;
 	popup: Phaser.GameObjects.Container;
+	sprite: Phaser.GameObjects.Sprite;
 
-	constructor(game: GameScene, x, y, item: PlayFab.ItemInstance, texture) {
-		super(game, x, y, texture);
-		this.game = game;
+	constructor(key, sprite, item, popup) {
+		super(key);
 		this.item = item;
-
-		this.game.input.mouse.disableContextMenu();
-
-		this.setInteractive({ useHandCursor: true, draggable: true })
+		this.popup = popup;
+		this.sprite = sprite;
+		this.sprite
+			.setInteractive({ useHandCursor: true, draggable: true })
 			.on("drag", (pointer, dragX, dragY) => {
-				this.popup.destroy(true);
+				this.popup.setX(1000);
+				this.popup.setY(0);
 				this.isDragging = true;
-				this.x = dragX;
-				this.y = dragY;
+				this.sprite.x = dragX;
+				this.sprite.y = dragY;
+				this.refresh();
 			})
-			.on("pointerover", this.showDetails)
+			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) => {
+				this.popup.setX(pointer.x);
+				this.popup.setY(pointer.y);
+				this.popup.setDepth(1);
+			})
 			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-				this.popup.destroy(true);
+				this.popup.setX(1000);
+				this.popup.setY(0);
 			})
 			.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.rightButtonDown()) {
-					this.game.upgradeItemLevel(this.item);
+					let game = this.scene.get("Game") as GameScene;
+					game.upgradeItemLevel(item);
 				}
 			});
-
-		this.useItem();
 	}
 
-	abstract useItem();
+	create() {
+		this.cameras.main.setViewport(this.sprite.x, this.sprite.y, 100, 100);
+	}
 
-	showDetails(pointer: Phaser.Input.Pointer, localX, localY, event) {
-		const level = this.game.add.text(20, 20, `Current level: ${this.item.CustomData["Level"]}`, {
-			fontFamily: fontFamily,
-		});
-		const name = this.game.add.text(20, 60, `Name: ${this.item.DisplayName}`, { fontFamily: fontFamily });
-		const container = this.game.add.container(pointer.x, pointer.y, [level, name]);
-		this.popup = container;
+	refresh() {
+		this.cameras.main.setPosition(this.sprite.x, this.sprite.y);
+		this.scene.bringToTop();
 	}
 }

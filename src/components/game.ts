@@ -1,6 +1,7 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
-import buildItem from "../items/buildItem";
+import BaseItem from "../items/BaseItem";
+import Penguin from "../items/Penguin";
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
@@ -15,6 +16,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	init() {
+		this.game.input.mouse.disableContextMenu();
 		this.add.image(400, 300, "sky");
 		const scene = this;
 		const GetInventoryCallback = (error, result) => {
@@ -23,7 +25,25 @@ class GameScene extends Phaser.Scene {
 			scene.totalSnowballs = sb;
 			scene.prevTotalSnowballs = sb;
 			inventory.forEach((inventory, i) => {
-				scene.add.existing(buildItem(inventory, scene, 300, 100 + i * 150)).setScale(0.3);
+				const level = this.add.text(20, 20, `Current level: ${inventory.CustomData["Level"]}`, {
+					fontFamily: fontFamily,
+				});
+				const name = this.add.text(20, 60, `Name: ${inventory.DisplayName}`, { fontFamily: fontFamily });
+				const container = this.add.container(1000, 0, [level, name]);
+
+				const key = i.toString();
+				let draggable: BaseItem;
+				if (inventory.DisplayName === "Penguin") {
+					const sprite = this.add.sprite(100, 100, "penguin3").setScale(0.3);
+					draggable = new Penguin(key, sprite, inventory, container);
+				} else if (inventory.DisplayName === "Igloo") {
+					const sprite = this.add.sprite(100, 100, "igloo").setScale(0.3);
+					draggable = new BaseItem(key, sprite, inventory, container);
+				} else if (inventory.DisplayName === "Torch") {
+					const sprite = this.add.sprite(100, 100, "fire").setScale(0.3);
+					draggable = new BaseItem(key, sprite, inventory, container);
+				}
+				scene.scene.add(key, draggable);
 			});
 		};
 		// TODO: cloud script and getUserInventory have duplicated API call
@@ -31,7 +51,6 @@ class GameScene extends Phaser.Scene {
 	}
 
 	create() {
-		this.scene.launch("Popup");
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.timerEvent = this.time.addEvent({

@@ -47,6 +47,8 @@ class StoreScene extends Phaser.Scene {
 			});
 		};
 
+		// PlayFabClient.GetPlayerSegments()
+		// PlayFabClient.GetStoreItems()
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, GetCatalogItemsCallback);
 
 		const GetInventoryCallback = (error, result) => {
