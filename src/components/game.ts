@@ -1,12 +1,11 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
-import buildItem from "../items/buildItem";
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
 	prevTotalSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
-	items = [];
+	items;
 	snowballText;
 	clickMultiplier: number = 1;
 
@@ -16,6 +15,7 @@ class GameScene extends Phaser.Scene {
 
 	init() {
 		this.add.image(400, 300, "sky");
+		this.items = { Penguin: [], Igloo: [], Torch: [] };
 		const scene = this;
 		const GetInventoryCallback = (error, result) => {
 			const inventory: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
@@ -23,7 +23,24 @@ class GameScene extends Phaser.Scene {
 			scene.totalSnowballs = sb;
 			scene.prevTotalSnowballs = sb;
 			inventory.forEach((inventory, i) => {
-				scene.add.existing(buildItem(inventory, scene, 300, 100 + i * 150)).setScale(0.3);
+				const index = this.items[inventory.DisplayName].length;
+				this.items[inventory.DisplayName].push(inventory);
+				if (inventory.DisplayName === "Penguin") {
+					scene.add
+						.image(index * 120, 100, "penguin3")
+						.setOrigin(0, 0)
+						.setScale(0.3);
+				} else if (inventory.DisplayName === "Igloo") {
+					scene.add
+						.image(index * 220, 250, "igloo")
+						.setOrigin(0, 0)
+						.setScale(0.3);
+				} else if (inventory.DisplayName === "Torch") {
+					scene.add
+						.image(index * 70, 400, "fire")
+						.setOrigin(0, 0)
+						.setScale(0.3);
+				}
 			});
 		};
 		// TODO: cloud script and getUserInventory have duplicated API call
