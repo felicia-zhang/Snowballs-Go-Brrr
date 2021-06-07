@@ -1,3 +1,4 @@
+import { Data } from "phaser";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 
@@ -14,6 +15,14 @@ class GameScene extends Phaser.Scene {
 	}
 
 	init() {
+		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
+			if (result.data.Data["auto"] !== undefined) {
+				const lastUpdated = result.data.Data["auto"].Value;
+				const elapsed = new Date().valueOf() - Number(lastUpdated);
+				const elapsedSeconds = elapsed / 1000;
+			}
+		});
+
 		this.add.image(400, 300, "sky");
 		this.items = { Penguin: [], Igloo: [], Torch: [] };
 		const scene = this;
@@ -93,6 +102,10 @@ class GameScene extends Phaser.Scene {
 	}
 
 	sync(transition?: () => any) {
+		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, (e, r) => {
+			console.log(r);
+		});
+
 		const currentTotalSnowballs = this.totalSnowballs;
 		const change = currentTotalSnowballs - this.prevTotalSnowballs;
 		if (change === 0) {
