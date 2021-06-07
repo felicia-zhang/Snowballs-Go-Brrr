@@ -69,7 +69,7 @@ class GameScene extends Phaser.Scene {
 						.setScale(0.3);
 				} else if (inventory.DisplayName === "Fishie") {
 					scene.add
-						.image(index * 70, 450, "fish")
+						.image(index * 120, 500, "fish")
 						.setOrigin(0, 0)
 						.setScale(0.3);
 				}
