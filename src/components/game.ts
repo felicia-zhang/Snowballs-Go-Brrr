@@ -15,16 +15,26 @@ class GameScene extends Phaser.Scene {
 	}
 
 	init() {
+		this.items = { Penguin: [], Igloo: [], Torch: [] };
+	}
+
+	create() {
+		this.anims.create({
+			key: "bounce",
+			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
+			frameRate: 8,
+			repeat: -1,
+		});
+
 		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
 			if (result.data.Data["auto"] !== undefined) {
 				const lastUpdated = result.data.Data["auto"].Value;
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
+				console.log(elapsedSeconds);
 			}
 		});
 
-		this.add.image(400, 300, "sky");
-		this.items = { Penguin: [], Igloo: [], Torch: [] };
 		const scene = this;
 		const GetInventoryCallback = (error, result) => {
 			const inventory: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
@@ -35,10 +45,26 @@ class GameScene extends Phaser.Scene {
 				const index = this.items[inventory.DisplayName].length;
 				this.items[inventory.DisplayName].push(inventory);
 				if (inventory.DisplayName === "Penguin") {
-					scene.add
-						.image(index * 120, 100, "penguin3")
+					const penguin = scene.add
+						.sprite(index * 120, 100, "penguin3")
 						.setOrigin(0, 0)
-						.setScale(0.3);
+						.setScale(0.3)
+						.setInteractive({ useHandCursor: true })
+						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+							if (pointer.leftButtonReleased()) {
+								penguin.anims.play("bounce");
+								penguin.disableInteractive();
+								scene.time.addEvent({
+									delay: 3000,
+									callback() {
+										penguin.anims.pause();
+										penguin.setInteractive({ useHandCursor: true });
+										scene.totalSnowballs += 1;
+									},
+									callbackScope: this,
+								});
+							}
+						});
 				} else if (inventory.DisplayName === "Igloo") {
 					scene.add
 						.image(index * 220, 250, "igloo")
@@ -54,17 +80,16 @@ class GameScene extends Phaser.Scene {
 		};
 		// TODO: cloud script and getUserInventory have duplicated API call
 		PlayFabClient.GetUserInventory({}, GetInventoryCallback);
-	}
-
-	create() {
-		this.scene.launch("Popup");
-		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.timerEvent = this.time.addEvent({
 			delay: 10000,
 			loop: true,
 			callback: () => this.sync(),
 		});
+
+		this.add.image(400, 300, "sky");
+
+		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.add
 			.text(700, 400, "STORE", { fontFamily: fontFamily })
