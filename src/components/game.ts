@@ -9,6 +9,7 @@ class GameScene extends Phaser.Scene {
 	items;
 	snowballText;
 	clickMultiplier: number = 1;
+	popup: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
@@ -36,21 +37,22 @@ class GameScene extends Phaser.Scene {
 			inventory.forEach((inventory, i) => {
 				const index = this.items[inventory.DisplayName].length;
 				this.items[inventory.DisplayName].push(inventory);
+				let image;
 				if (inventory.DisplayName === "Penguin") {
-					const penguin = scene.add
+					image = scene.add
 						.sprite(index * 120, 100, "penguin3")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive({ useHandCursor: true })
 						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 							if (pointer.leftButtonReleased()) {
-								penguin.anims.play("bounce");
-								penguin.disableInteractive();
+								image.anims.play("bounce");
+								image.disableInteractive();
 								scene.time.addEvent({
 									delay: 3000,
 									callback() {
-										penguin.anims.pause();
-										penguin.setInteractive({ useHandCursor: true });
+										image.anims.pause();
+										image.setInteractive({ useHandCursor: true });
 										scene.totalSnowballs += 1;
 									},
 									callbackScope: this,
@@ -58,21 +60,36 @@ class GameScene extends Phaser.Scene {
 							}
 						});
 				} else if (inventory.DisplayName === "Igloo") {
-					scene.add
+					image = scene.add
 						.image(index * 220, 250, "igloo")
 						.setOrigin(0, 0)
-						.setScale(0.3);
+						.setScale(0.3)
+						.setInteractive();
 				} else if (inventory.DisplayName === "Torch") {
-					scene.add
+					image = scene.add
 						.image(index * 70, 400, "fire")
 						.setOrigin(0, 0)
-						.setScale(0.3);
+						.setScale(0.3)
+						.setInteractive();
 				} else if (inventory.DisplayName === "Fishie") {
-					scene.add
+					image = scene.add
 						.image(index * 120, 500, "fish")
 						.setOrigin(0, 0)
-						.setScale(0.3);
+						.setScale(0.3)
+						.setInteractive();
 				}
+				image
+					.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
+						this.showDetails(pointer, localX, localY, event, inventory)
+					)
+					.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
+						this.popup.destroy(true);
+					})
+					.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+						if (pointer.rightButtonReleased()) {
+							this.upgradeItemLevel(inventory);
+						}
+					});
 			});
 		});
 
@@ -115,6 +132,15 @@ class GameScene extends Phaser.Scene {
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
+	}
+
+	showDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
+		const level = this.add.text(20, 20, `Current level: ${item.CustomData["Level"]}`, {
+			fontFamily: fontFamily,
+		});
+		const name = this.add.text(20, 60, `Name: ${item.DisplayName}`, { fontFamily: fontFamily });
+		const container = this.add.container(pointer.x, pointer.y, [level, name]);
+		this.popup = container;
 	}
 
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
