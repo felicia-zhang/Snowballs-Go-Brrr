@@ -6,7 +6,7 @@ class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
 	prevTotalSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
-	items;
+	items: { [key: string]: PlayFabClientModels.ItemInstance[] };
 	itemDescriptions = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
 	itemLevels = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
 	snowballText;
@@ -85,6 +85,14 @@ class GameScene extends Phaser.Scene {
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
+					this.time.addEvent({
+						delay: 30000,
+						loop: true,
+						callback: () => {
+							console.log(`${inventory.ItemInstanceId} added 1 snowball`);
+							this.totalSnowballs++;
+						},
+					});
 				}
 				image
 					.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
@@ -99,15 +107,18 @@ class GameScene extends Phaser.Scene {
 						}
 					});
 			});
-		});
 
-		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
-			if (result.data.Data["auto"] !== undefined) {
-				const lastUpdated = result.data.Data["auto"].Value;
-				const elapsed = new Date().valueOf() - Number(lastUpdated);
-				const elapsedSeconds = elapsed / 1000;
-				console.log("elapsed seconds:", elapsedSeconds);
-			}
+			PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
+				if (result.data.Data["auto"] !== undefined) {
+					const lastUpdated = result.data.Data["auto"].Value;
+					const elapsed = new Date().valueOf() - Number(lastUpdated);
+					const elapsedSeconds = elapsed / 1000;
+					console.log("Elapsed seconds:", elapsedSeconds);
+					const sb = Math.floor(elapsedSeconds / 30) * this.items["Fishie"].length;
+					this.totalSnowballs += sb;
+					console.log("Amount of snowballs added by Fishies while player was gone", sb);
+				}
+			});
 		});
 
 		this.timerEvent = this.time.addEvent({
