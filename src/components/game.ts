@@ -7,6 +7,8 @@ class GameScene extends Phaser.Scene {
 	prevTotalSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
 	items;
+	itemDescriptions = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
+	itemLevels = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
 	snowballText;
 	clickMultiplier: number = 1;
 	popup: Phaser.GameObjects.Container;
@@ -28,6 +30,12 @@ class GameScene extends Phaser.Scene {
 		});
 
 		const scene = this;
+		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
+			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
+				this.itemDescriptions[item.DisplayName] = item.Description;
+				this.itemLevels[item.DisplayName] = JSON.parse(item.CustomData)["Levels"];
+			});
+		});
 		// TODO: cloud script and getUserInventory have duplicated API call
 		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const inventory: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
@@ -135,11 +143,28 @@ class GameScene extends Phaser.Scene {
 	}
 
 	showDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
-		const level = this.add.text(20, 20, `Current level: ${item.CustomData["Level"]}`, {
-			fontFamily: fontFamily,
+		const texts: Phaser.GameObjects.Text[] = [];
+		texts.push(this.add.text(0, 0, `Name: ${item.DisplayName}`, { fontFamily: fontFamily }));
+		texts.push(
+			this.add.text(0, 20, `Description: ${this.itemDescriptions[item.DisplayName]}`, {
+				fontFamily: fontFamily,
+			})
+		);
+		texts.push(
+			this.add.text(0, 40, `Current level: ${item.CustomData["Level"]}`, {
+				fontFamily: fontFamily,
+			})
+		);
+		const levels = this.itemLevels[item.DisplayName] as { [key: string]: { Cost: string; Effect: string } };
+		Object.keys(levels).forEach((key, i) => {
+			const levelText = this.add.text(0, 60 + i * 20, key, { fontFamily: fontFamily });
+			const costText = this.add.text(50, 60 + i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
+			const effectText = this.add.text(200, 60 + i * 20, `Effect: ${levels[key]["Effect"]}`, {
+				fontFamily: fontFamily,
+			});
+			texts.push(levelText, costText, effectText);
 		});
-		const name = this.add.text(20, 60, `Name: ${item.DisplayName}`, { fontFamily: fontFamily });
-		const container = this.add.container(pointer.x, pointer.y, [level, name]);
+		const container = this.add.container(pointer.x, pointer.y, texts);
 		this.popup = container;
 	}
 
