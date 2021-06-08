@@ -1,44 +1,140 @@
+import { Data } from "phaser";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
-import buildItem from "../items/buildItem";
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
 	prevTotalSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
-	items = [];
-	snowballText;
+	items: { [key: string]: PlayFabClientModels.ItemInstance[] };
+	itemDescriptions = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
+	itemLevels: { [key: string]: { [key: string]: { Cost: string; Effect: string } } } = {
+		Penguin: {},
+		Igloo: {},
+		Torch: {},
+		Fishie: {},
+	};
+	snowballText: Phaser.GameObjects.Text;
 	clickMultiplier: number = 1;
+	popup: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
 	}
 
 	init() {
-		this.add.image(400, 300, "sky");
+		this.items = { Penguin: [], Igloo: [], Torch: [], Fishie: [] };
+	}
+
+	create() {
+		this.anims.create({
+			key: "bounce",
+			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
+			frameRate: 8,
+			repeat: -1,
+		});
+
 		const scene = this;
-		const GetInventoryCallback = (error, result) => {
+		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
+			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
+				this.itemDescriptions[item.DisplayName] = item.Description;
+				this.itemLevels[item.DisplayName] = JSON.parse(item.CustomData)["Levels"];
+			});
+		});
+		// TODO: cloud script and getUserInventory have duplicated API call
+		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const inventory: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
 			scene.prevTotalSnowballs = sb;
 			inventory.forEach((inventory, i) => {
-				scene.add.existing(buildItem(inventory, scene, 300, 100 + i * 150)).setScale(0.3);
+				const index = this.items[inventory.DisplayName].length;
+				this.items[inventory.DisplayName].push(inventory);
+				let image;
+				if (inventory.DisplayName === "Penguin") {
+					image = scene.add
+						.sprite(index * 120, 60, "penguin3")
+						.setOrigin(0, 0)
+						.setScale(0.3)
+						.setInteractive({ useHandCursor: true })
+						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+							if (pointer.leftButtonReleased()) {
+								image.anims.play("bounce");
+								image.disableInteractive();
+								scene.time.addEvent({
+									delay: 3000,
+									callback() {
+										image.anims.pause();
+										image.setInteractive({ useHandCursor: true });
+										scene.totalSnowballs += 1;
+									},
+									callbackScope: this,
+								});
+							}
+						});
+				} else if (inventory.DisplayName === "Igloo") {
+					image = scene.add
+						.image(index * 220, 210, "igloo")
+						.setOrigin(0, 0)
+						.setScale(0.3)
+						.setInteractive();
+				} else if (inventory.DisplayName === "Torch") {
+					image = scene.add
+						.image(index * 70, 360, "fire")
+						.setOrigin(0, 0)
+						.setScale(0.3)
+						.setInteractive();
+				} else if (inventory.DisplayName === "Fishie") {
+					image = scene.add
+						.image(index * 120, 460, "fish")
+						.setOrigin(0, 0)
+						.setScale(0.3)
+						.setInteractive();
+					this.time.addEvent({
+						delay: 30000,
+						loop: true,
+						callback: () => {
+							console.log(`${inventory.ItemInstanceId} added 1 snowball`);
+							this.totalSnowballs++;
+						},
+					});
+				}
+				image
+					.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
+						this.showDetails(pointer, localX, localY, event, inventory)
+					)
+					.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
+						this.popup.destroy(true);
+					})
+					.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+						if (pointer.rightButtonReleased()) {
+							this.upgradeItemLevel(inventory);
+						}
+					});
 			});
-		};
-		// TODO: cloud script and getUserInventory have duplicated API call
-		PlayFabClient.GetUserInventory({}, GetInventoryCallback);
-	}
 
-	create() {
-		this.scene.launch("Popup");
-		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
+			PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
+				if (result.data.Data["auto"] !== undefined) {
+					const lastUpdated = result.data.Data["auto"].Value;
+					const elapsed = new Date().valueOf() - Number(lastUpdated);
+					const elapsedSeconds = elapsed / 1000;
+					console.log("Elapsed seconds:", elapsedSeconds);
+					const sb = Math.floor(elapsedSeconds / 30) * this.items["Fishie"].length;
+					this.totalSnowballs += sb;
+					console.log("Amount of snowballs added by Fishies while player was gone", sb);
+				}
+			});
+		});
 
 		this.timerEvent = this.time.addEvent({
-			delay: 10000,
+			delay: 60000,
 			loop: true,
 			callback: () => this.sync(),
 		});
+
+		this.add.image(400, 300, "sky");
+
+		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.add
 			.text(700, 400, "STORE", { fontFamily: fontFamily })
@@ -62,24 +158,72 @@ class GameScene extends Phaser.Scene {
 		}
 	}
 
+	showDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
+		const texts: Phaser.GameObjects.Text[] = [];
+		texts.push(this.add.text(0, 0, `Name: ${item.DisplayName}`, { fontFamily: fontFamily }));
+		texts.push(
+			this.add.text(0, 20, `Description: ${this.itemDescriptions[item.DisplayName]}`, {
+				fontFamily: fontFamily,
+			})
+		);
+		texts.push(
+			this.add.text(0, 40, `Current level: ${item.CustomData["Level"]}`, {
+				fontFamily: fontFamily,
+			})
+		);
+		const levels = this.itemLevels[item.DisplayName] as { [key: string]: { Cost: string; Effect: string } };
+		Object.keys(levels).forEach((key, i) => {
+			const levelText = this.add.text(0, 60 + i * 20, key, { fontFamily: fontFamily });
+			const costText = this.add.text(50, 60 + i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
+			const effectText = this.add.text(200, 60 + i * 20, `Effect: ${levels[key]["Effect"]}`, {
+				fontFamily: fontFamily,
+			});
+			texts.push(levelText, costText, effectText);
+		});
+		const container = this.add.container(pointer.x, pointer.y, texts);
+		this.popup = container;
+	}
+
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
 		const newLevel = Number(item.CustomData["Level"]) + 1;
-		PlayFabClient.ExecuteCloudScript(
-			{
-				FunctionName: "updateItemLevel",
-				FunctionParameter: { itemId: item.ItemId, instanceId: item.ItemInstanceId, level: newLevel },
-			},
-			(error, result) => {
-				console.log(result);
+		PlayFabClient.GetUserInventory({}, (error, result) => {
+			const sb = result.data.VirtualCurrency.SB;
+			if (!(newLevel.toString() in this.itemLevels[item.DisplayName])) {
+				console.log(`${newLevel} is not a valid level`);
+				return;
 			}
-		);
+			const cost = this.itemLevels[item.DisplayName][newLevel]["Cost"];
+			if (Number(cost) > sb) {
+				console.log("Insufficient funds");
+				return;
+			}
+			PlayFabClient.ExecuteCloudScript(
+				{
+					FunctionName: "updateItemLevel",
+					FunctionParameter: {
+						instanceId: item.ItemInstanceId,
+						level: newLevel,
+						cost: cost,
+					},
+				},
+				(error, result) => {
+					console.log("Update item level result:", result);
+					this.totalSnowballs -= Number(cost);
+					//update UI for item current level
+				}
+			);
+		});
 	}
 
 	sync(transition?: () => any) {
+		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, (e, r) => {
+			console.log("Last synced result", r);
+		});
+
 		const currentTotalSnowballs = this.totalSnowballs;
 		const change = currentTotalSnowballs - this.prevTotalSnowballs;
 		if (change === 0) {
-			console.log("no change");
+			console.log("No change to snowballs since last sync");
 			if (transition !== undefined) {
 				transition();
 			}
@@ -94,7 +238,7 @@ class GameScene extends Phaser.Scene {
 					PlayFabClient.ExecuteCloudScript(
 						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: currentTotalSnowballs } },
 						() => {
-							console.log(change);
+							console.log("Amount of snowballs changed:", change);
 							if (transition !== undefined) {
 								transition();
 							}
