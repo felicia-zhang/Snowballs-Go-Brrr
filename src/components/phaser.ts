@@ -44,7 +44,7 @@ export class PhaserGame extends Phaser.Game {
 					PlayFabClient.ExecuteCloudScript(
 						{
 							FunctionName: "updateItemLevel",
-							FunctionParameter: { itemId: item.ItemId, instanceId: item.ItemInstanceId, level: 1 },
+							FunctionParameter: { cost: "0", instanceId: item.ItemInstanceId, level: 1 },
 						},
 						() => {}
 					);

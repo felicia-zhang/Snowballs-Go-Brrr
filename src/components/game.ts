@@ -8,7 +8,12 @@ class GameScene extends Phaser.Scene {
 	timerEvent: Phaser.Time.TimerEvent;
 	items: { [key: string]: PlayFabClientModels.ItemInstance[] };
 	itemDescriptions = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
-	itemLevels = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
+	itemLevels: { [key: string]: { [key: string]: { Cost: string; Effect: string } } } = {
+		Penguin: {},
+		Igloo: {},
+		Torch: {},
+		Fishie: {},
+	};
 	snowballText: Phaser.GameObjects.Text;
 	clickMultiplier: number = 1;
 	popup: Phaser.GameObjects.Container;
@@ -122,7 +127,7 @@ class GameScene extends Phaser.Scene {
 		});
 
 		this.timerEvent = this.time.addEvent({
-			delay: 10000,
+			delay: 60000,
 			loop: true,
 			callback: () => this.sync(),
 		});
@@ -181,22 +186,38 @@ class GameScene extends Phaser.Scene {
 
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
 		const newLevel = Number(item.CustomData["Level"]) + 1;
-		PlayFabClient.ExecuteCloudScript(
-			{
-				FunctionName: "updateItemLevel",
-				FunctionParameter: { itemId: item.ItemId, instanceId: item.ItemInstanceId, level: newLevel },
-			},
-			(error, result) => {
-				console.log("Update item level result:", result);
-				const cost: string = this.itemLevels[item.DisplayName][newLevel.toString()]["Cost"];
-				this.totalSnowballs -= Number(cost);
+		PlayFabClient.GetUserInventory({}, (error, result) => {
+			const sb = result.data.VirtualCurrency.SB;
+			if (!(newLevel.toString() in this.itemLevels[item.DisplayName])) {
+				console.log(`${newLevel} is not a valid level`);
+				return;
 			}
-		);
+			const cost = this.itemLevels[item.DisplayName][newLevel]["Cost"];
+			if (Number(cost) > sb) {
+				console.log("Insufficient funds");
+				return;
+			}
+			PlayFabClient.ExecuteCloudScript(
+				{
+					FunctionName: "updateItemLevel",
+					FunctionParameter: {
+						instanceId: item.ItemInstanceId,
+						level: newLevel,
+						cost: cost,
+					},
+				},
+				(error, result) => {
+					console.log("Update item level result:", result);
+					this.totalSnowballs -= Number(cost);
+					//update UI for item current level
+				}
+			);
+		});
 	}
 
 	sync(transition?: () => any) {
 		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, (e, r) => {
-			console.log("Update last synced result", r);
+			console.log("Last synced result", r);
 		});
 
 		const currentTotalSnowballs = this.totalSnowballs;
