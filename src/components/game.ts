@@ -9,8 +9,8 @@ class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
 	prevTotalSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
-	items: { [key: string]: PlayFabClientModels.ItemInstance[] };
-	itemDescriptions = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
+	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } };
+	itemDescriptions: { [key: string]: string } = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
 	itemLevels: { [key: string]: { [key: string]: { Cost: string; Effect: string } } } = {
 		Penguin: {},
 		Igloo: {},
@@ -26,7 +26,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	init() {
-		this.items = { Penguin: [], Igloo: [], Torch: [], Fishie: [] };
+		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
 	}
 
 	create() {
@@ -51,8 +51,8 @@ class GameScene extends Phaser.Scene {
 			scene.totalSnowballs = sb;
 			scene.prevTotalSnowballs = sb;
 			inventory.forEach((inventory, i) => {
-				const index = this.items[inventory.DisplayName].length;
-				this.items[inventory.DisplayName].push(inventory);
+				const index = Object.keys(this.items[inventory.DisplayName]).length;
+				this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
 				let image;
 				if (inventory.DisplayName === "Penguin") {
 					image = scene.add
@@ -122,7 +122,8 @@ class GameScene extends Phaser.Scene {
 					const elapsed = new Date().valueOf() - Number(lastUpdated);
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
-					const sb = Math.floor(elapsedSeconds / (FISHIE_DELAY / 1000)) * this.items["Fishie"].length;
+					const numberOfFishies = Object.keys(this.items["Fishie"]).length;
+					const sb = Math.floor(elapsedSeconds / (FISHIE_DELAY / 1000)) * numberOfFishies;
 					this.totalSnowballs += sb;
 					console.log("Amount of snowballs added by Fishies while player was gone", sb);
 				}
@@ -212,7 +213,7 @@ class GameScene extends Phaser.Scene {
 				(error, result) => {
 					console.log("Update item level result:", result);
 					this.totalSnowballs -= Number(cost);
-					const i = this.items[item.DisplayName].find(i => i.ItemInstanceId === item.ItemInstanceId);
+					const i: PlayFabClientModels.ItemInstance = this.items[item.DisplayName][item.ItemInstanceId];
 					i.CustomData["Level"] = newLevel.toString();
 					const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
 					currentLevelText.setText(`Current level: ${newLevel}`);
