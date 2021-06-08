@@ -48,7 +48,7 @@ class GameScene extends Phaser.Scene {
 				let image;
 				if (inventory.DisplayName === "Penguin") {
 					image = scene.add
-						.sprite(index * 120, 100, "penguin3")
+						.sprite(index * 120, 60, "penguin3")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive({ useHandCursor: true })
@@ -69,19 +69,19 @@ class GameScene extends Phaser.Scene {
 						});
 				} else if (inventory.DisplayName === "Igloo") {
 					image = scene.add
-						.image(index * 220, 250, "igloo")
+						.image(index * 220, 210, "igloo")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
 				} else if (inventory.DisplayName === "Torch") {
 					image = scene.add
-						.image(index * 70, 400, "fire")
+						.image(index * 70, 360, "fire")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
 				} else if (inventory.DisplayName === "Fishie") {
 					image = scene.add
-						.image(index * 120, 500, "fish")
+						.image(index * 120, 460, "fish")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
@@ -177,6 +177,8 @@ class GameScene extends Phaser.Scene {
 			},
 			(error, result) => {
 				console.log("Update item level result:", result);
+				const cost: string = this.itemLevels[item.DisplayName][newLevel.toString()]["Cost"];
+				this.totalSnowballs -= Number(cost);
 			}
 		);
 	}

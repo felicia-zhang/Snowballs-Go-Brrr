@@ -29,6 +29,7 @@ class Controller extends Phaser.Scene {
 	}
 
 	create() {
+		this.game.input.mouse.disableContextMenu();
 		this.scene.add("Leaderboard", LeaderboardScene);
 		this.scene.add("Store", StoreScene);
 		this.scene.add("Signin", SigninScene);
