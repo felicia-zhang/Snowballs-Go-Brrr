@@ -4,13 +4,11 @@ import { fontFamily } from "../utils/font";
 
 class StoreScene extends Phaser.Scene {
 	items: PlayFab.CatalogItem[];
-	inventory: PlayFab.ItemInstance[];
-	snowballText: any;
+	snowballText: Phaser.GameObjects.Text;
 	snowballs: number;
 	constructor() {
 		super("Store");
 		this.items = [];
-		this.inventory = [];
 	}
 
 	create() {
@@ -45,10 +43,10 @@ class StoreScene extends Phaser.Scene {
 		});
 
 		PlayFabClient.GetUserInventory({}, (error, result) => {
-			store.inventory = result.data.Inventory;
 			store.snowballs = result.data.VirtualCurrency.SB;
 			store.snowballText.setText(`Snowballs: ${store.snowballs}`);
 		});
+
 		this.add.text(300, 9, "STORE", { fontFamily: fontFamily });
 
 		this.add

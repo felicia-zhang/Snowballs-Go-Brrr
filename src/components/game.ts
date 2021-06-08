@@ -9,7 +9,7 @@ class GameScene extends Phaser.Scene {
 	items: { [key: string]: PlayFabClientModels.ItemInstance[] };
 	itemDescriptions = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
 	itemLevels = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
-	snowballText;
+	snowballText: Phaser.GameObjects.Text;
 	clickMultiplier: number = 1;
 	popup: Phaser.GameObjects.Container;
 
