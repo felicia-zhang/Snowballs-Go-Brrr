@@ -1,6 +1,9 @@
-import { Data } from "phaser";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
+
+const SYNC_DELAY = 60000;
+const PENGUIN_DELAY = 3000;
+const FISHIE_DELAY = 30000;
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
@@ -62,7 +65,7 @@ class GameScene extends Phaser.Scene {
 								image.anims.play("bounce");
 								image.disableInteractive();
 								scene.time.addEvent({
-									delay: 3000,
+									delay: PENGUIN_DELAY,
 									callback() {
 										image.anims.pause();
 										image.setInteractive({ useHandCursor: true });
@@ -91,7 +94,7 @@ class GameScene extends Phaser.Scene {
 						.setScale(0.3)
 						.setInteractive();
 					this.time.addEvent({
-						delay: 30000,
+						delay: FISHIE_DELAY,
 						loop: true,
 						callback: () => {
 							console.log(`${inventory.ItemInstanceId} added 1 snowball`);
@@ -119,7 +122,7 @@ class GameScene extends Phaser.Scene {
 					const elapsed = new Date().valueOf() - Number(lastUpdated);
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
-					const sb = Math.floor(elapsedSeconds / 30) * this.items["Fishie"].length;
+					const sb = Math.floor(elapsedSeconds / (FISHIE_DELAY / 1000)) * this.items["Fishie"].length;
 					this.totalSnowballs += sb;
 					console.log("Amount of snowballs added by Fishies while player was gone", sb);
 				}
@@ -127,7 +130,7 @@ class GameScene extends Phaser.Scene {
 		});
 
 		this.timerEvent = this.time.addEvent({
-			delay: 60000,
+			delay: SYNC_DELAY,
 			loop: true,
 			callback: () => this.sync(),
 		});
