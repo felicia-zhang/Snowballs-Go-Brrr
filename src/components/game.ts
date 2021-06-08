@@ -212,7 +212,10 @@ class GameScene extends Phaser.Scene {
 				(error, result) => {
 					console.log("Update item level result:", result);
 					this.totalSnowballs -= Number(cost);
-					//update UI for item current level
+					const i = this.items[item.DisplayName].find(i => i.ItemInstanceId === item.ItemInstanceId);
+					i.CustomData["Level"] = newLevel.toString();
+					const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
+					currentLevelText.setText(`Current level: ${newLevel}`);
 				}
 			);
 		});
