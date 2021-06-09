@@ -44,14 +44,14 @@ class GameScene extends Phaser.Scene {
 			repeat: -1,
 		});
 
-		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemDescriptions[item.DisplayName] = item.Description;
 				this.itemLevels[item.DisplayName] = JSON.parse(item.CustomData)["Levels"];
 			});
 		});
-		// TODO: cloud script and getUserInventory have duplicated API call
+
+		const scene = this;
 		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 			const sb = result.data.VirtualCurrency.SB;
