@@ -7,7 +7,7 @@ class GameScene extends Phaser.Scene {
 	IGLOO_DELAY = 30000;
 	TORCH_DELAY = 30000;
 	totalSnowballs: number = 0;
-	prevTotalSnowballs: number = 0;
+	totalAddedSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } };
 	itemDescriptions: { [key: string]: string } = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
@@ -58,7 +58,6 @@ class GameScene extends Phaser.Scene {
 			const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
-			scene.prevTotalSnowballs = sb;
 			inventories.forEach((inventory, i) => {
 				const index = Object.keys(this.items[inventory.DisplayName]).length;
 				this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
@@ -97,6 +96,7 @@ class GameScene extends Phaser.Scene {
 					const numberOfIgloos = Object.keys(this.items["Igloo"]).length;
 					const sb = Math.floor(elapsedSeconds / (this.IGLOO_DELAY / 1000)) * numberOfIgloos;
 					this.totalSnowballs += sb;
+					this.totalAddedSnowballs += sb;
 					console.log("Amount of snowballs added by Igloo factories while player was gone", sb);
 				}
 			});
@@ -150,6 +150,7 @@ class GameScene extends Phaser.Scene {
 							sprite.anims.pause();
 							sprite.setInteractive({ useHandCursor: true });
 							this.totalSnowballs += 1;
+							this.totalAddedSnowballs += 1;
 						},
 						callbackScope: this,
 					});
@@ -170,6 +171,7 @@ class GameScene extends Phaser.Scene {
 			callback: () => {
 				console.log(`${inventory.ItemInstanceId} added 1 snowball`);
 				this.totalSnowballs++;
+				this.totalAddedSnowballs++;
 			},
 		});
 		return sprite;
@@ -194,7 +196,8 @@ class GameScene extends Phaser.Scene {
 						delay: this.TORCH_DELAY,
 						callback() {
 							sprite.destroy(true);
-							this.PENGUIN_DELAY = prevPenguinDelay; //TODO: if player exit before call back, this won't be reset
+							this.PENGUIN_DELAY = prevPenguinDelay;
+							//TODO: if player exit before call back, this won't be reset
 						},
 						callbackScope: this,
 					});
@@ -248,7 +251,6 @@ class GameScene extends Phaser.Scene {
 	}
 
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
-		//TODO: if total change is negative, cannot sync newly added snowballs
 		const newLevel = Number(item.CustomData["Level"]) + 1;
 		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const sb = result.data.VirtualCurrency.SB;
@@ -287,25 +289,23 @@ class GameScene extends Phaser.Scene {
 			console.log("Last synced result", r);
 		});
 
-		const currentTotalSnowballs = this.totalSnowballs;
-		const change = currentTotalSnowballs - this.prevTotalSnowballs;
-		if (change === 0) {
+		if (this.totalAddedSnowballs === 0) {
 			console.log("No change to snowballs since last sync");
 			if (func !== undefined) {
 				func();
 			}
 		} else {
-			this.prevTotalSnowballs = currentTotalSnowballs;
 			PlayFabClient.ExecuteCloudScript(
 				{
 					FunctionName: "addUserVirtualCurrency",
-					FunctionParameter: { amount: change, virtualCurrency: "SB" },
+					FunctionParameter: { amount: this.totalAddedSnowballs, virtualCurrency: "SB" },
 				},
 				(error, result) => {
+					console.log("Amount of snowballs added:", this.totalAddedSnowballs);
+					this.totalAddedSnowballs = 0;
 					PlayFabClient.ExecuteCloudScript(
-						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: currentTotalSnowballs } },
+						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: this.totalSnowballs } },
 						() => {
-							console.log("Amount of snowballs changed:", change);
 							if (func !== undefined) {
 								func();
 							}
