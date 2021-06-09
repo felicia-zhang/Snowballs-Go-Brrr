@@ -44,6 +44,8 @@ class GameScene extends Phaser.Scene {
 			repeat: -1,
 		});
 
+		this.makePopup();
+
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemDescriptions[item.DisplayName] = item.Description;
@@ -75,7 +77,9 @@ class GameScene extends Phaser.Scene {
 						this.showItemDetails(pointer, localX, localY, event, inventory)
 					)
 					.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-						this.popup.destroy(true);
+						const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
+						levelsContainer.removeAll(true);
+						this.popup.setVisible(false);
 					})
 					.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 						if (pointer.rightButtonReleased()) {
@@ -208,30 +212,39 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
+	makePopup() {
+		const nameText = this.add.text(0, 0, "", { fontFamily: fontFamily });
+		const descriptionText = this.add.text(0, 20, "", { fontFamily: fontFamily });
+		const currentLevelText = this.add.text(0, 40, "", { fontFamily: fontFamily });
+		const levelsContainer = this.add.container(0, 60, []);
+		const container = this.add.container(0, 0, [nameText, descriptionText, currentLevelText, levelsContainer]);
+		this.popup = container;
+		this.popup.setVisible(false);
+		this.popup.setDepth(1);
+	}
+
 	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
-		const texts: Phaser.GameObjects.Text[] = [];
-		texts.push(this.add.text(0, 0, `Name: ${item.DisplayName}`, { fontFamily: fontFamily }));
-		texts.push(
-			this.add.text(0, 20, `Description: ${this.itemDescriptions[item.DisplayName]}`, {
-				fontFamily: fontFamily,
-			})
-		);
-		texts.push(
-			this.add.text(0, 40, `Current level: ${item.CustomData["Level"]}`, {
-				fontFamily: fontFamily,
-			})
-		);
+		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
+		nameText.setText(`Name: ${item.DisplayName}`);
+		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
+		descriptionText.setText(`Description: ${this.itemDescriptions[item.DisplayName]}`);
+		const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
+		currentLevelText.setText(`Current level: ${item.CustomData["Level"]}`);
+
+		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
 		const levels = this.itemLevels[item.DisplayName] as { [key: string]: { Cost: string; Effect: string } };
 		Object.keys(levels).forEach((key, i) => {
-			const levelText = this.add.text(0, 60 + i * 20, key, { fontFamily: fontFamily });
-			const costText = this.add.text(50, 60 + i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
-			const effectText = this.add.text(200, 60 + i * 20, `Effect: ${levels[key]["Effect"]}`, {
+			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
+			const costText = this.add.text(50, i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
+			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key]["Effect"]}`, {
 				fontFamily: fontFamily,
 			});
-			texts.push(levelText, costText, effectText);
+			levelsContainer.add([levelText, costText, effectText]);
 		});
-		const container = this.add.container(pointer.x, pointer.y, texts);
-		this.popup = container;
+
+		this.popup.setX(pointer.x);
+		this.popup.setY(pointer.y);
+		this.popup.setVisible(true);
 	}
 
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
@@ -264,7 +277,7 @@ class GameScene extends Phaser.Scene {
 					i.CustomData["Level"] = newLevel.toString();
 					const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
 					currentLevelText.setText(`Current level: ${newLevel}`);
-				} // TODO: sometimes popup is destroyed
+				}
 			);
 		});
 	}
