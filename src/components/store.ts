@@ -101,6 +101,7 @@ class StoreScene extends Phaser.Scene {
 				this.popup.setVisible(false);
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				// TODO: sync before buying
 				const price = item.VirtualCurrencyPrices.SB;
 				PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
 					if (e !== null) {

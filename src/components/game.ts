@@ -60,7 +60,6 @@ class GameScene extends Phaser.Scene {
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
 			inventories.forEach(inventory => this.makeItem(inventory));
-			// TODO: make stackable items differently
 
 			PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
 				if (result.data.Data["auto"] !== undefined) {
@@ -152,7 +151,7 @@ class GameScene extends Phaser.Scene {
 					sprite.anims.play("penguin_bounce");
 					sprite.disableInteractive();
 					this.time.addEvent({
-						delay: this.PENGUIN_DELAY >= 0 ? this.PENGUIN_DELAY : 0,
+						delay: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
 						callback() {
 							sprite.anims.pause();
 							sprite.setInteractive({ useHandCursor: true });
@@ -203,6 +202,7 @@ class GameScene extends Phaser.Scene {
 						callback() {
 							sprite.destroy(true);
 							this.PENGUIN_DELAY += 1000;
+							// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
 						},
 						callbackScope: this,
 					});
@@ -215,8 +215,27 @@ class GameScene extends Phaser.Scene {
 		const sprite = this.add
 			.sprite(index * 120, 460, "fish")
 			.setOrigin(0, 0)
-			.setScale(0.3)
-			.setInteractive();
+			.setScale(0.3);
+		// .setInteractive({ useHandCursor: true })
+		// .on("pointerup", (pointer: Phaser.Input.Pointer) => {
+		// 	if (pointer.leftButtonReleased()) {
+		// 		PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
+		// 			console.log(r)
+		// 		);
+		// 		sprite.anims.play("fire_flame");
+		// 		sprite.disableInteractive();
+		// 		this.FISHIE_DELAY -= 1000;
+		// 		this.time.addEvent({
+		// 			delay: this.TORCH_DELAY,
+		// 			callback() {
+		// 				sprite.destroy(true);
+		// 				delete this.items[inventory.DisplayName][inventory.ItemInstanceId];
+		// 				this.PENGUIN_DELAY += 1000;
+		// 			},
+		// 			callbackScope: this,
+		// 		});
+		// 	}
+		// });
 		return sprite;
 	}
 
