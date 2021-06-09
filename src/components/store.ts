@@ -46,7 +46,7 @@ class StoreScene extends Phaser.Scene {
 
 	makeIcon(item: PlayFabClientModels.CatalogItem) {
 		let index;
-		if (item.IsStackable) {
+		if (item.Consumable !== undefined && item.Consumable.UsageCount !== undefined) {
 			index = this.consumableItems.length;
 			this.consumableItems.push(item);
 		} else {

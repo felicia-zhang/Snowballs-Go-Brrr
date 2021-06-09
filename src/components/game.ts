@@ -152,7 +152,7 @@ class GameScene extends Phaser.Scene {
 					sprite.anims.play("penguin_bounce");
 					sprite.disableInteractive();
 					this.time.addEvent({
-						delay: this.PENGUIN_DELAY,
+						delay: this.PENGUIN_DELAY >= 0 ? this.PENGUIN_DELAY : 0,
 						callback() {
 							sprite.anims.pause();
 							sprite.setInteractive({ useHandCursor: true });
@@ -197,13 +197,12 @@ class GameScene extends Phaser.Scene {
 					);
 					sprite.anims.play("fire_flame");
 					sprite.disableInteractive();
-					const prevPenguinDelay = this.PENGUIN_DELAY;
-					this.PENGUIN_DELAY = prevPenguinDelay / 2;
+					this.PENGUIN_DELAY -= 1000;
 					this.time.addEvent({
 						delay: this.TORCH_DELAY,
 						callback() {
 							sprite.destroy(true);
-							this.PENGUIN_DELAY = prevPenguinDelay;
+							this.PENGUIN_DELAY += 1000;
 						},
 						callbackScope: this,
 					});
