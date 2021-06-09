@@ -111,7 +111,7 @@ class GameScene extends Phaser.Scene {
 					})
 					.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 						if (pointer.rightButtonReleased()) {
-							this.upgradeItemLevel(inventory);
+							this.sync(() => this.upgradeItemLevel(inventory));
 						}
 					});
 			});
