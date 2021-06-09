@@ -8,7 +8,6 @@ class StoreScene extends Phaser.Scene {
 	snowballs: number;
 	constructor() {
 		super("Store");
-		this.items = [];
 	}
 
 	create() {

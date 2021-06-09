@@ -9,7 +9,12 @@ class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
-	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } };
+	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
+		Penguin: {},
+		Igloo: {},
+		Torch: {},
+		Fishie: {},
+	};
 	itemDescriptions: { [key: string]: string } = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
 	itemLevels: { [key: string]: { [key: string]: { Cost: string; Effect: string } } } = {
 		Penguin: {},
@@ -25,11 +30,8 @@ class GameScene extends Phaser.Scene {
 		super("Game");
 	}
 
-	init() {
-		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
-	}
-
 	create() {
+		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
 		this.anims.create({
 			key: "penguin_bounce",
 			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
