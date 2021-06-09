@@ -1,11 +1,11 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 
-const SYNC_DELAY = 60000;
-const PENGUIN_DELAY = 3000;
-const IGLOO_DELAY = 30000;
-
 class GameScene extends Phaser.Scene {
+	SYNC_DELAY = 60000;
+	PENGUIN_DELAY = 3000;
+	IGLOO_DELAY = 30000;
+	TORCH_DELAY = 30000;
 	totalSnowballs: number = 0;
 	prevTotalSnowballs: number = 0;
 	timerEvent: Phaser.Time.TimerEvent;
@@ -31,8 +31,15 @@ class GameScene extends Phaser.Scene {
 
 	create() {
 		this.anims.create({
-			key: "bounce",
+			key: "penguin_bounce",
 			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
+			frameRate: 8,
+			repeat: -1,
+		});
+		// TODO: fix this animation
+		this.anims.create({
+			key: "fire_flame",
+			frames: [{ key: "fire" }, { key: "fish" }],
 			frameRate: 8,
 			repeat: -1,
 		});
@@ -62,10 +69,10 @@ class GameScene extends Phaser.Scene {
 						.setInteractive({ useHandCursor: true })
 						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 							if (pointer.leftButtonReleased()) {
-								image.anims.play("bounce");
+								image.anims.play("penguin_bounce");
 								image.disableInteractive();
 								scene.time.addEvent({
-									delay: PENGUIN_DELAY,
+									delay: this.PENGUIN_DELAY,
 									callback() {
 										image.anims.pause();
 										image.setInteractive({ useHandCursor: true });
@@ -82,7 +89,7 @@ class GameScene extends Phaser.Scene {
 						.setScale(0.3)
 						.setInteractive();
 					this.time.addEvent({
-						delay: IGLOO_DELAY,
+						delay: this.IGLOO_DELAY,
 						loop: true,
 						callback: () => {
 							console.log(`${inventory.ItemInstanceId} added 1 snowball`);
@@ -91,10 +98,27 @@ class GameScene extends Phaser.Scene {
 					});
 				} else if (inventory.DisplayName === "Torch") {
 					image = scene.add
-						.image(index * 70, 360, "fire")
+						.sprite(index * 70, 360, "fire")
 						.setOrigin(0, 0)
 						.setScale(0.3)
-						.setInteractive();
+						.setInteractive({ useHandCursor: true })
+						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+							if (pointer.leftButtonReleased()) {
+								image.anims.play("fire_flame");
+								image.disableInteractive();
+								const prevPenguinDelay = this.PENGUIN_DELAY;
+								this.PENGUIN_DELAY = prevPenguinDelay / 2;
+								scene.time.addEvent({
+									delay: this.TORCH_DELAY,
+									callback() {
+										image.anims.pause();
+										image.setInteractive({ useHandCursor: true });
+										this.PENGUIN_DELAY = prevPenguinDelay;
+									},
+									callbackScope: this,
+								});
+							}
+						});
 				} else if (inventory.DisplayName === "Fishie") {
 					image = scene.add
 						.image(index * 120, 460, "fish")
@@ -123,7 +147,7 @@ class GameScene extends Phaser.Scene {
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
 					const numberOfIgloos = Object.keys(this.items["Igloo"]).length;
-					const sb = Math.floor(elapsedSeconds / (IGLOO_DELAY / 1000)) * numberOfIgloos;
+					const sb = Math.floor(elapsedSeconds / (this.IGLOO_DELAY / 1000)) * numberOfIgloos;
 					this.totalSnowballs += sb;
 					console.log("Amount of snowballs added by Igloo factories while player was gone", sb);
 				}
@@ -131,7 +155,7 @@ class GameScene extends Phaser.Scene {
 		});
 
 		this.timerEvent = this.time.addEvent({
-			delay: SYNC_DELAY,
+			delay: this.SYNC_DELAY,
 			loop: true,
 			callback: () => this.sync(),
 		});
