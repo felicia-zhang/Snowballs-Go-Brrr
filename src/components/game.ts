@@ -8,7 +8,7 @@ class GameScene extends Phaser.Scene {
 	TORCH_DELAY = 30000;
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
-	timerEvent: Phaser.Time.TimerEvent;
+	syncTimer: Phaser.Time.TimerEvent;
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
 		Penguin: {},
 		Igloo: {},
@@ -23,7 +23,6 @@ class GameScene extends Phaser.Scene {
 		Fishie: {},
 	};
 	snowballText: Phaser.GameObjects.Text;
-	clickMultiplier: number = 1;
 	popup: Phaser.GameObjects.Container;
 
 	constructor() {
@@ -76,7 +75,7 @@ class GameScene extends Phaser.Scene {
 			});
 		});
 
-		this.timerEvent = this.time.addEvent({
+		this.syncTimer = this.time.addEvent({
 			delay: this.SYNC_DELAY,
 			loop: true,
 			callback: () => this.sync(),

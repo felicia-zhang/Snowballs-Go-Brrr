@@ -101,31 +101,34 @@ class StoreScene extends Phaser.Scene {
 				this.popup.setVisible(false);
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				// TODO: sync before buying
-				const price = item.VirtualCurrencyPrices.SB;
-				PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
-					if (e !== null) {
-						console.log(e);
-					} else {
-						this.gameScene.totalSnowballs -= price;
-						PlayFabClient.ExecuteCloudScript(
-							{
-								FunctionName: "updateItemLevel",
-								FunctionParameter: {
-									cost: "0",
-									instanceId: r.data.Items[0].ItemInstanceId,
-									level: "1",
-								},
-							},
-							(a, b) => {
-								const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
-								console.log("Update item level to 1 result:", newItem);
-								this.gameScene.makeItem(newItem);
-							}
-						);
-					}
-				});
+				this.gameScene.sync(() => this.purchaseItem(item));
 			});
+	}
+
+	purchaseItem(item: PlayFabClientModels.CatalogItem) {
+		const price = item.VirtualCurrencyPrices.SB;
+		PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
+			if (e !== null) {
+				console.log(e);
+			} else {
+				this.gameScene.totalSnowballs -= price;
+				PlayFabClient.ExecuteCloudScript(
+					{
+						FunctionName: "updateItemLevel",
+						FunctionParameter: {
+							cost: "0",
+							instanceId: r.data.Items[0].ItemInstanceId,
+							level: "1",
+						},
+					},
+					(a, b) => {
+						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
+						console.log("Update item level to 1 result:", newItem);
+						this.gameScene.makeItem(newItem);
+					}
+				);
+			}
+		});
 	}
 
 	makePopup() {
