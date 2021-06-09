@@ -30,7 +30,6 @@ class StoreScene extends Phaser.Scene {
 							console.log(e);
 						} else {
 							this.gameScene.totalSnowballs -= price;
-							// TODO: add item in gamescene
 							PlayFabClient.ExecuteCloudScript(
 								{
 									FunctionName: "updateItemLevel",
@@ -40,7 +39,11 @@ class StoreScene extends Phaser.Scene {
 										level: "1",
 									},
 								},
-								(a, b) => console.log("Update item level to 1 result:", b)
+								(a, b) => {
+									const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
+									console.log("Update item level to 1 result:", newItem);
+									this.gameScene.makeItem(newItem);
+								}
 							);
 						}
 					});

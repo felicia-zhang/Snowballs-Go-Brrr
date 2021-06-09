@@ -60,34 +60,7 @@ class GameScene extends Phaser.Scene {
 			const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
-			inventories.forEach((inventory, i) => {
-				const index = Object.keys(this.items[inventory.DisplayName]).length;
-				this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
-				let sprite: Phaser.GameObjects.Sprite;
-				if (inventory.DisplayName === "Penguin") {
-					sprite = this.makePenguin(index);
-				} else if (inventory.DisplayName === "Igloo") {
-					sprite = this.makeIgloo(index, inventory);
-				} else if (inventory.DisplayName === "Torch") {
-					sprite = this.makeTorch(index, inventory);
-				} else if (inventory.DisplayName === "Fishie") {
-					sprite = this.makeFishie(index);
-				}
-				sprite
-					.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
-						this.showItemDetails(pointer, localX, localY, event, inventory)
-					)
-					.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-						const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-						levelsContainer.removeAll(true);
-						this.popup.setVisible(false);
-					})
-					.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-						if (pointer.rightButtonReleased()) {
-							this.sync(() => this.upgradeItemLevel(inventory));
-						}
-					});
-			});
+			inventories.forEach(inventory => this.makeItem(inventory));
 
 			PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
 				if (result.data.Data["auto"] !== undefined) {
@@ -137,6 +110,35 @@ class GameScene extends Phaser.Scene {
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
+	}
+
+	makeItem(inventory: PlayFabClientModels.ItemInstance) {
+		const index = Object.keys(this.items[inventory.DisplayName]).length;
+		this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
+		let sprite: Phaser.GameObjects.Sprite;
+		if (inventory.DisplayName === "Penguin") {
+			sprite = this.makePenguin(index);
+		} else if (inventory.DisplayName === "Igloo") {
+			sprite = this.makeIgloo(index, inventory);
+		} else if (inventory.DisplayName === "Torch") {
+			sprite = this.makeTorch(index, inventory);
+		} else if (inventory.DisplayName === "Fishie") {
+			sprite = this.makeFishie(index);
+		}
+		sprite
+			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
+				this.showItemDetails(pointer, localX, localY, event, inventory)
+			)
+			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
+				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
+				levelsContainer.removeAll(true);
+				this.popup.setVisible(false);
+			})
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (pointer.rightButtonReleased()) {
+					this.sync(() => this.upgradeItemLevel(inventory));
+				}
+			});
 	}
 
 	makePenguin(index: number) {
@@ -197,6 +199,7 @@ class GameScene extends Phaser.Scene {
 					sprite.disableInteractive();
 					const prevPenguinDelay = this.PENGUIN_DELAY;
 					this.PENGUIN_DELAY = prevPenguinDelay / 2;
+					// TODO: what if it's already decreased by other torches?
 					this.time.addEvent({
 						delay: this.TORCH_DELAY,
 						callback() {
