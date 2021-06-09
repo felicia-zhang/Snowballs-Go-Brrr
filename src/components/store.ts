@@ -25,6 +25,10 @@ class StoreScene extends Phaser.Scene {
 
 		this.add.text(300, 9, "STORE", { fontFamily: fontFamily });
 
+		this.add.text(20, 70, "Consumable Items", { fontFamily: fontFamily });
+
+		this.add.text(20, 170, "Durable Items", { fontFamily: fontFamily });
+
 		this.add
 			.text(700, 450, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
@@ -142,16 +146,16 @@ class StoreScene extends Phaser.Scene {
 		const priceText = this.popup.getAt(2) as Phaser.GameObjects.Text;
 		priceText.setText(`Price: ${item.VirtualCurrencyPrices.SB}`);
 
-		// const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-		// const levels = this.itemLevels[item.DisplayName] as { [key: string]: { Cost: string; Effect: string } };
-		// Object.keys(levels).forEach((key, i) => {
-		// 	const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
-		// 	const costText = this.add.text(50, i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
-		// 	const effectText = this.add.text(200, i * 20, `Effect: ${levels[key]["Effect"]}`, {
-		// 		fontFamily: fontFamily,
-		// 	});
-		// 	levelsContainer.add([levelText, costText, effectText]);
-		// });
+		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
+		const levels = JSON.parse(item.CustomData)["Levels"];
+		Object.keys(levels).forEach((key, i) => {
+			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
+			const costText = this.add.text(50, i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
+			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key]["Effect"]}`, {
+				fontFamily: fontFamily,
+			});
+			levelsContainer.add([levelText, costText, effectText]);
+		});
 
 		this.popup.setX(pointer.x);
 		this.popup.setY(pointer.y);

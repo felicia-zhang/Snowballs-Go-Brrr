@@ -60,6 +60,7 @@ class GameScene extends Phaser.Scene {
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
 			inventories.forEach(inventory => this.makeItem(inventory));
+			// TODO: make stackable items differently
 
 			PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
 				if (result.data.Data["auto"] !== undefined) {
