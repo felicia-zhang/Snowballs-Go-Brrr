@@ -198,7 +198,6 @@ class GameScene extends Phaser.Scene {
 					sprite.disableInteractive();
 					const prevPenguinDelay = this.PENGUIN_DELAY;
 					this.PENGUIN_DELAY = prevPenguinDelay / 2;
-					// TODO: what if it's already decreased by other torches?
 					this.time.addEvent({
 						delay: this.TORCH_DELAY,
 						callback() {
