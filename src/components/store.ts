@@ -1,16 +1,18 @@
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
+import GameScene from "./game";
 
 class StoreScene extends Phaser.Scene {
 	items: PlayFab.CatalogItem[];
 	snowballText: Phaser.GameObjects.Text;
-	snowballs: number;
+	gameScene: GameScene;
 	constructor() {
 		super("Store");
 	}
 
 	create() {
+		this.gameScene = this.scene.get("Game") as GameScene;
 		this.add.image(400, 300, "sky");
 		this.snowballText = this.add.text(16, 16, "", { fontFamily: fontFamily });
 		const store = this;
@@ -27,7 +29,8 @@ class StoreScene extends Phaser.Scene {
 						if (e !== null) {
 							console.log(e);
 						} else {
-							store.snowballText.setText(`Snowballs: ${(store.snowballs -= price)}`);
+							this.gameScene.totalSnowballs -= price;
+							// TODO: add item in gamescene
 							PlayFabClient.ExecuteCloudScript(
 								{
 									FunctionName: "updateItemLevel",
@@ -45,22 +48,18 @@ class StoreScene extends Phaser.Scene {
 			});
 		});
 
-		PlayFabClient.GetUserInventory({}, (error, result) => {
-			store.snowballs = result.data.VirtualCurrency.SB;
-			store.snowballText.setText(`Snowballs: ${store.snowballs}`);
-		});
-
 		this.add.text(300, 9, "STORE", { fontFamily: fontFamily });
 
 		this.add
 			.text(700, 450, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerdown", () => {
-				this.scene.start("Game");
+				this.scene.bringToTop("Game");
 			});
 	}
 
 	update() {
+		this.snowballText.setText(`Snowballs: ${this.gameScene.totalSnowballs}`);
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}

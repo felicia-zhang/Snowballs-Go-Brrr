@@ -118,14 +118,17 @@ class GameScene extends Phaser.Scene {
 			.text(700, 400, "STORE", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerdown", () => {
-				this.sync(() => this.scene.start("Store"));
+				if (!this.scene.isActive("Store")) {
+					this.scene.launch("Store");
+				}
+				this.scene.bringToTop("Store");
 			});
 
 		this.add
 			.text(700, 450, "MENU", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerdown", () => {
-				this.sync(() => this.scene.start("Menu"));
+				this.scene.bringToTop("Menu");
 			});
 	}
 
@@ -199,7 +202,6 @@ class GameScene extends Phaser.Scene {
 						callback() {
 							sprite.destroy(true);
 							this.PENGUIN_DELAY = prevPenguinDelay;
-							//TODO: if player exit before call back, this won't be reset
 						},
 						callbackScope: this,
 					});

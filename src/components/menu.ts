@@ -14,7 +14,10 @@ class MenuScene extends Phaser.Scene {
 			.text(300, 200, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerdown", () => {
-				this.scene.start("Game");
+				if (!this.scene.isActive("Game")) {
+					this.scene.launch("Game");
+				}
+				this.scene.bringToTop("Game");
 			});
 		this.add
 			.text(300, 250, "LEADERBOARD", { fontFamily: fontFamily })
