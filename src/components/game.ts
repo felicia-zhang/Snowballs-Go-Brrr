@@ -3,7 +3,7 @@ import { fontFamily } from "../utils/font";
 
 const SYNC_DELAY = 60000;
 const PENGUIN_DELAY = 3000;
-const FISHIE_DELAY = 30000;
+const IGLOO_DELAY = 30000;
 
 class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
@@ -81,6 +81,14 @@ class GameScene extends Phaser.Scene {
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
+					this.time.addEvent({
+						delay: IGLOO_DELAY,
+						loop: true,
+						callback: () => {
+							console.log(`${inventory.ItemInstanceId} added 1 snowball`);
+							this.totalSnowballs++;
+						},
+					});
 				} else if (inventory.DisplayName === "Torch") {
 					image = scene.add
 						.image(index * 70, 360, "fire")
@@ -93,14 +101,6 @@ class GameScene extends Phaser.Scene {
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
-					this.time.addEvent({
-						delay: FISHIE_DELAY,
-						loop: true,
-						callback: () => {
-							console.log(`${inventory.ItemInstanceId} added 1 snowball`);
-							this.totalSnowballs++;
-						},
-					});
 				}
 				image
 					.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
@@ -122,10 +122,10 @@ class GameScene extends Phaser.Scene {
 					const elapsed = new Date().valueOf() - Number(lastUpdated);
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
-					const numberOfFishies = Object.keys(this.items["Fishie"]).length;
-					const sb = Math.floor(elapsedSeconds / (FISHIE_DELAY / 1000)) * numberOfFishies;
+					const numberOfIgloos = Object.keys(this.items["Igloo"]).length;
+					const sb = Math.floor(elapsedSeconds / (IGLOO_DELAY / 1000)) * numberOfIgloos;
 					this.totalSnowballs += sb;
-					console.log("Amount of snowballs added by Fishies while player was gone", sb);
+					console.log("Amount of snowballs added by Igloo factories while player was gone", sb);
 				}
 			});
 		});
