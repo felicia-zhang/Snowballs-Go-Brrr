@@ -38,10 +38,9 @@ class GameScene extends Phaser.Scene {
 			frameRate: 8,
 			repeat: -1,
 		});
-		// TODO: fix this animation
 		this.anims.create({
 			key: "fire_flame",
-			frames: [{ key: "fire" }, { key: "fish" }],
+			frames: [{ key: "fire2" }, { key: "fire1" }, { key: "fire3" }],
 			frameRate: 8,
 			repeat: -1,
 		});
@@ -186,7 +185,7 @@ class GameScene extends Phaser.Scene {
 
 	makeTorch(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const sprite = this.add
-			.sprite(index * 70, 360, "fire")
+			.sprite(index * 70, 360, "fire2")
 			.setOrigin(0, 0)
 			.setScale(0.3)
 			.setInteractive({ useHandCursor: true })
