@@ -60,22 +60,22 @@ class GameScene extends Phaser.Scene {
 			inventory.forEach((inventory, i) => {
 				const index = Object.keys(this.items[inventory.DisplayName]).length;
 				this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
-				let image;
+				let sprite: Phaser.GameObjects.Sprite;
 				if (inventory.DisplayName === "Penguin") {
-					image = scene.add
+					sprite = scene.add
 						.sprite(index * 120, 60, "penguin3")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive({ useHandCursor: true })
 						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 							if (pointer.leftButtonReleased()) {
-								image.anims.play("penguin_bounce");
-								image.disableInteractive();
+								sprite.anims.play("penguin_bounce");
+								sprite.disableInteractive();
 								scene.time.addEvent({
 									delay: this.PENGUIN_DELAY,
 									callback() {
-										image.anims.pause();
-										image.setInteractive({ useHandCursor: true });
+										sprite.anims.pause();
+										sprite.setInteractive({ useHandCursor: true });
 										scene.totalSnowballs += 1;
 									},
 									callbackScope: this,
@@ -83,8 +83,8 @@ class GameScene extends Phaser.Scene {
 							}
 						});
 				} else if (inventory.DisplayName === "Igloo") {
-					image = scene.add
-						.image(index * 220, 210, "igloo")
+					sprite = scene.add
+						.sprite(index * 220, 210, "igloo")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
@@ -97,22 +97,24 @@ class GameScene extends Phaser.Scene {
 						},
 					});
 				} else if (inventory.DisplayName === "Torch") {
-					image = scene.add
+					sprite = scene.add
 						.sprite(index * 70, 360, "fire")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive({ useHandCursor: true })
 						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 							if (pointer.leftButtonReleased()) {
-								image.anims.play("fire_flame");
-								image.disableInteractive();
+								sprite.anims.play("fire_flame");
+								sprite.disableInteractive();
 								const prevPenguinDelay = this.PENGUIN_DELAY;
 								this.PENGUIN_DELAY = prevPenguinDelay / 2;
 								scene.time.addEvent({
 									delay: this.TORCH_DELAY,
 									callback() {
-										image.anims.pause();
-										image.setInteractive({ useHandCursor: true });
+										PlayFabClient.ConsumeItem(
+											{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
+											(e, r) => sprite.destroy(true)
+										);
 										this.PENGUIN_DELAY = prevPenguinDelay;
 									},
 									callbackScope: this,
@@ -120,13 +122,13 @@ class GameScene extends Phaser.Scene {
 							}
 						});
 				} else if (inventory.DisplayName === "Fishie") {
-					image = scene.add
-						.image(index * 120, 460, "fish")
+					sprite = scene.add
+						.sprite(index * 120, 460, "fish")
 						.setOrigin(0, 0)
 						.setScale(0.3)
 						.setInteractive();
 				}
-				image
+				sprite
 					.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
 						this.showDetails(pointer, localX, localY, event, inventory)
 					)
