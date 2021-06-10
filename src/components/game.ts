@@ -204,22 +204,27 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
-						console.log("Consumed torch")
-					);
-					sprite.anims.play("fire_flame");
-					sprite.disableInteractive();
-					this.speedUpPenguins();
-					const torchTimer = this.time.addEvent({
-						delay: this.TORCH_DELAY,
-						callback() {
-							sprite.destroy(true);
-							this.slowDownPenguins();
-							torchTimer.remove(false);
-							// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
-						},
-						callbackScope: this,
-					});
+					if (this.TIME_SCALE === 13) {
+						console.log("Torches already max out penguin speed");
+					} else {
+						PlayFabClient.ConsumeItem(
+							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
+							(e, r) => console.log("Consumed torch")
+						);
+						sprite.anims.play("fire_flame");
+						sprite.disableInteractive();
+						this.speedUpPenguins();
+						const torchTimer = this.time.addEvent({
+							delay: this.TORCH_DELAY,
+							callback() {
+								sprite.destroy(true);
+								this.slowDownPenguins();
+								torchTimer.remove(false);
+								// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
+							},
+							callbackScope: this,
+						});
+					}
 				}
 			});
 		return sprite;
@@ -301,16 +306,12 @@ class GameScene extends Phaser.Scene {
 	}
 
 	speedUpPenguins() {
-		if (this.TIME_SCALE < 12) {
-			this.TIME_SCALE += 2;
-		}
+		this.TIME_SCALE += 2;
 		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
 	}
 
 	slowDownPenguins() {
-		if (this.TIME_SCALE > 1) {
-			this.TIME_SCALE -= 2;
-		}
+		this.TIME_SCALE -= 2;
 		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
 	}
 
