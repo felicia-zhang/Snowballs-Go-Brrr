@@ -6,11 +6,11 @@ class GameScene extends Phaser.Scene {
 	PENGUIN_DELAY = 3000;
 	IGLOO_DELAY = 30000;
 	TORCH_DELAY = 30000;
-	FISHIE_DELAY = 30000;
+	FISHIE_DELAY = 9000;
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
-	fishieTimer: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent };
+	isAuto = false;
 	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
 	penguinLoopTimers: Phaser.Time.TimerEvent[];
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
@@ -35,7 +35,7 @@ class GameScene extends Phaser.Scene {
 
 	create() {
 		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
-		this.fishieTimer = { Sprite: null, Timer: null };
+		this.isAuto = false;
 		this.penguinRegularTimers = {};
 		this.penguinLoopTimers = [];
 		this.anims.create({
@@ -223,7 +223,6 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
-	//TODO: what happens if players use multiple fishies
 	//TODO: how does fishie and torch interact with eachother
 	makeFishie(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const sprite = this.add
@@ -233,20 +232,27 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
-						console.log("Consumed fishie")
-					);
-					sprite.disableInteractive();
-					this.startPenguins();
-					const fishieTimer = this.time.addEvent({
-						delay: this.FISHIE_DELAY,
-						callback() {
-							sprite.destroy(true);
-							this.stopPenguins();
-							fishieTimer.remove(false);
-						},
-						callbackScope: this,
-					});
+					if (this.isAuto) {
+						console.log("Fishie already clicked");
+					} else {
+						PlayFabClient.ConsumeItem(
+							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
+							(e, r) => console.log("Consumed fishie")
+						);
+						sprite.disableInteractive();
+						this.isAuto = true;
+						this.startPenguins();
+						const fishieTimer = this.time.addEvent({
+							delay: this.FISHIE_DELAY,
+							callback() {
+								sprite.destroy(true);
+								this.isAuto = false;
+								this.stopPenguins();
+								fishieTimer.remove(false);
+							},
+							callbackScope: this,
+						});
+					}
 				}
 			});
 		return sprite;
