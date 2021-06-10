@@ -7,12 +7,13 @@ class GameScene extends Phaser.Scene {
 	IGLOO_DELAY = 30000;
 	TORCH_DELAY = 30000;
 	FISHIE_DELAY = 9000;
+	TIME_SCALE = 1;
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
 	isAuto = false;
-	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Tweens.Tween } };
-	penguinLoopTimers: Phaser.Tweens.Tween[];
+	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
+	penguinLoopTimers: Phaser.Time.TimerEvent[];
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
 		Penguin: {},
 		Igloo: {},
@@ -155,20 +156,17 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					const penguinTimer = this.tweens.add({
-						targets: sprite,
-						duration: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
-						x: index * 120,
-						onStart() {
-							sprite.anims.play("penguin_bounce");
-							sprite.disableInteractive();
-						},
-						onComplete() {
+					sprite.anims.play("penguin_bounce");
+					sprite.disableInteractive();
+					const penguinTimer = this.time.addEvent({
+						timeScale: this.TIME_SCALE,
+						delay: this.PENGUIN_DELAY,
+						callback() {
 							sprite.anims.pause();
 							sprite.setInteractive({ useHandCursor: true });
 							this.totalSnowballs += 1;
 							this.totalAddedSnowballs += 1;
-							penguinTimer.remove();
+							penguinTimer.remove(false);
 						},
 						callbackScope: this,
 					});
@@ -206,33 +204,27 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					if (this.PENGUIN_DELAY === 0) {
-						console.log("Torch already clicked");
-					} else {
-						PlayFabClient.ConsumeItem(
-							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
-							(e, r) => console.log("Consumed torch")
-						);
-						sprite.anims.play("fire_flame");
-						sprite.disableInteractive();
-						this.PENGUIN_DELAY -= 1000;
-						const torchTimer = this.time.addEvent({
-							delay: this.TORCH_DELAY,
-							callback() {
-								sprite.destroy(true);
-								this.PENGUIN_DELAY += 1000;
-								torchTimer.remove(false);
-								// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
-							},
-							callbackScope: this,
-						});
-					}
+					PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
+						console.log("Consumed torch")
+					);
+					sprite.anims.play("fire_flame");
+					sprite.disableInteractive();
+					this.speedUpPenguins();
+					const torchTimer = this.time.addEvent({
+						delay: this.TORCH_DELAY,
+						callback() {
+							sprite.destroy(true);
+							this.slowDownPenguins();
+							torchTimer.remove(false);
+							// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
+						},
+						callbackScope: this,
+					});
 				}
 			});
 		return sprite;
 	}
 
-	//TODO: how does fishie and torch interact with eachother
 	makeFishie(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const sprite = this.add
 			.sprite(index * 120, 460, "fish")
@@ -272,49 +264,54 @@ class GameScene extends Phaser.Scene {
 			const sprite = this.penguinRegularTimers[key]["Sprite"];
 			const timer = this.penguinRegularTimers[key]["Timer"];
 			const timerConfig = {
-				targets: sprite,
-				duration: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
-				x: sprite.x,
-				onStart() {
-					sprite.anims.play("penguin_bounce");
-					sprite.disableInteractive();
-				},
-				onRepeat() {
+				timeScale: this.TIME_SCALE,
+				delay: this.PENGUIN_DELAY,
+				callback() {
 					this.totalSnowballs += 1;
 					this.totalAddedSnowballs += 1;
 				},
-				repeat: Infinity,
+				loop: true,
 				callbackScope: this,
 			};
 			if (timer !== null && sprite.anims.isPlaying) {
-				console.log(timer);
-				timer.setCallback(
-					"onComplete",
-					() => {
-						this.totalSnowballs += 1;
-						this.totalAddedSnowballs += 1;
-						timer.remove();
-						const penguinLoopTimer = this.tweens.add(timerConfig);
-						this.penguinLoopTimers.push(penguinLoopTimer);
-					},
-					[timer, [sprite]],
-					this
-				);
+				timer.callback = () => {
+					this.totalSnowballs += 1;
+					this.totalAddedSnowballs += 1;
+					timer.remove(false);
+					const penguinLoopTimer = this.time.addEvent(timerConfig);
+					this.penguinLoopTimers.push(penguinLoopTimer);
+				};
 			} else {
-				const penguinLoopTimer = this.tweens.add(timerConfig);
+				sprite.anims.play("penguin_bounce");
+				sprite.disableInteractive();
+				const penguinLoopTimer = this.time.addEvent(timerConfig);
 				this.penguinLoopTimers.push(penguinLoopTimer);
 			}
 		});
 	}
 
 	stopPenguins() {
-		this.penguinLoopTimers.forEach(timer => timer.remove());
+		this.penguinLoopTimers.forEach(timer => timer.remove(false));
 		this.penguinLoopTimers = [];
 		Object.keys(this.penguinRegularTimers).forEach(key => {
 			const sprite = this.penguinRegularTimers[key]["Sprite"];
 			sprite.anims.pause();
 			sprite.setInteractive({ useHandCursor: true });
 		});
+	}
+
+	speedUpPenguins() {
+		if (this.TIME_SCALE < 12) {
+			this.TIME_SCALE += 2;
+		}
+		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
+	}
+
+	slowDownPenguins() {
+		if (this.TIME_SCALE > 1) {
+			this.TIME_SCALE -= 2;
+		}
+		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
 	}
 
 	makePopup() {
