@@ -6,9 +6,12 @@ class GameScene extends Phaser.Scene {
 	PENGUIN_DELAY = 3000;
 	IGLOO_DELAY = 30000;
 	TORCH_DELAY = 30000;
+	FISHIE_DELAY = 30000;
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
+	penguinObservers: Phaser.GameObjects.Sprite[];
+	penguinLoopTimers: Phaser.Time.TimerEvent[];
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
 		Penguin: {},
 		Igloo: {},
@@ -31,6 +34,8 @@ class GameScene extends Phaser.Scene {
 
 	create() {
 		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
+		this.penguinObservers = [];
+		this.penguinLoopTimers = [];
 		this.anims.create({
 			key: "penguin_bounce",
 			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
@@ -121,7 +126,7 @@ class GameScene extends Phaser.Scene {
 		} else if (inventory.DisplayName === "Torch") {
 			sprite = this.makeTorch(index, inventory);
 		} else if (inventory.DisplayName === "Fishie") {
-			sprite = this.makeFishie(index);
+			sprite = this.makeFishie(index, inventory);
 		}
 		sprite
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
@@ -149,18 +154,20 @@ class GameScene extends Phaser.Scene {
 				if (pointer.leftButtonReleased()) {
 					sprite.anims.play("penguin_bounce");
 					sprite.disableInteractive();
-					this.time.addEvent({
+					const penguinTimer = this.time.addEvent({
 						delay: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
 						callback() {
 							sprite.anims.pause();
 							sprite.setInteractive({ useHandCursor: true });
 							this.totalSnowballs += 1;
 							this.totalAddedSnowballs += 1;
+							penguinTimer.remove(false);
 						},
 						callbackScope: this,
 					});
 				}
 			});
+		this.penguinObservers.push(sprite);
 		return sprite;
 	}
 
@@ -210,32 +217,56 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
-	makeFishie(index: number) {
+	makeFishie(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const sprite = this.add
 			.sprite(index * 120, 460, "fish")
 			.setOrigin(0, 0)
-			.setScale(0.3);
-		// .setInteractive({ useHandCursor: true })
-		// .on("pointerup", (pointer: Phaser.Input.Pointer) => {
-		// 	if (pointer.leftButtonReleased()) {
-		// 		PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
-		// 			console.log(r)
-		// 		);
-		// 		sprite.anims.play("fire_flame");
-		// 		sprite.disableInteractive();
-		// 		this.FISHIE_DELAY -= 1000;
-		// 		this.time.addEvent({
-		// 			delay: this.TORCH_DELAY,
-		// 			callback() {
-		// 				sprite.destroy(true);
-		// 				delete this.items[inventory.DisplayName][inventory.ItemInstanceId];
-		// 				this.PENGUIN_DELAY += 1000;
-		// 			},
-		// 			callbackScope: this,
-		// 		});
-		// 	}
-		// });
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (pointer.leftButtonReleased()) {
+					PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
+						console.log(r)
+					);
+					sprite.disableInteractive();
+					this.startPenguins();
+					this.time.addEvent({
+						delay: this.FISHIE_DELAY,
+						callback() {
+							sprite.destroy(true);
+							this.stopPenguins();
+						},
+						callbackScope: this,
+					});
+				}
+			});
 		return sprite;
+	}
+
+	startPenguins() {
+		this.penguinObservers.forEach(sprite => {
+			sprite.anims.play("penguin_bounce");
+			sprite.disableInteractive();
+			const penguinTimer = this.time.addEvent({
+				delay: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
+				callback() {
+					console.log("*******************");
+					this.totalSnowballs += 1;
+					this.totalAddedSnowballs += 1;
+				},
+				loop: true,
+				callbackScope: this,
+			});
+			this.penguinLoopTimers.push(penguinTimer);
+		});
+	}
+
+	stopPenguins() {
+		this.penguinLoopTimers.forEach(timer => timer.remove(false));
+		this.penguinObservers.forEach(sprite => {
+			sprite.anims.pause();
+			sprite.setInteractive({ useHandCursor: true });
+		});
 	}
 
 	makePopup() {
