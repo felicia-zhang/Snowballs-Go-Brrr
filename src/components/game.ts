@@ -12,6 +12,7 @@ class GameScene extends Phaser.Scene {
 	syncTimer: Phaser.Time.TimerEvent;
 	penguinObservers: { [key: string]: { sprite: Phaser.GameObjects.Sprite; timer: Phaser.Time.TimerEvent } };
 	penguinLoopTimers: Phaser.Time.TimerEvent[];
+	fishieTimer: Phaser.Time.TimerEvent;
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
 		Penguin: {},
 		Igloo: {},
@@ -184,7 +185,7 @@ class GameScene extends Phaser.Scene {
 			delay: this.IGLOO_DELAY,
 			loop: true,
 			callback: () => {
-				console.log(`${inventory.ItemInstanceId} added 1 snowball`);
+				console.log(`Igloo ${inventory.ItemInstanceId} added 1 snowball`);
 				this.totalSnowballs++;
 				this.totalAddedSnowballs++;
 			},
@@ -206,11 +207,12 @@ class GameScene extends Phaser.Scene {
 					sprite.anims.play("fire_flame");
 					sprite.disableInteractive();
 					this.PENGUIN_DELAY -= 1000;
-					this.time.addEvent({
+					const torchTimer = this.time.addEvent({
 						delay: this.TORCH_DELAY,
 						callback() {
 							sprite.destroy(true);
 							this.PENGUIN_DELAY += 1000;
+							torchTimer.remove(false);
 							// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
 						},
 						callbackScope: this,
@@ -235,11 +237,12 @@ class GameScene extends Phaser.Scene {
 					);
 					sprite.disableInteractive();
 					this.startPenguins();
-					this.time.addEvent({
+					const fishieTimer = this.time.addEvent({
 						delay: this.FISHIE_DELAY,
 						callback() {
 							sprite.destroy(true);
 							this.stopPenguins();
+							fishieTimer.remove(false);
 						},
 						callbackScope: this,
 					});
