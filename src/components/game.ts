@@ -202,22 +202,27 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
-						console.log("Consumed torch")
-					);
-					sprite.anims.play("fire_flame");
-					sprite.disableInteractive();
-					this.PENGUIN_DELAY -= 1000;
-					const torchTimer = this.time.addEvent({
-						delay: this.TORCH_DELAY,
-						callback() {
-							sprite.destroy(true);
-							this.PENGUIN_DELAY += 1000;
-							torchTimer.remove(false);
-							// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
-						},
-						callbackScope: this,
-					});
+					if (this.PENGUIN_DELAY === 0) {
+						console.log("Torch already clicked");
+					} else {
+						PlayFabClient.ConsumeItem(
+							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
+							(e, r) => console.log("Consumed torch")
+						);
+						sprite.anims.play("fire_flame");
+						sprite.disableInteractive();
+						this.PENGUIN_DELAY -= 1000;
+						const torchTimer = this.time.addEvent({
+							delay: this.TORCH_DELAY,
+							callback() {
+								sprite.destroy(true);
+								this.PENGUIN_DELAY += 1000;
+								torchTimer.remove(false);
+								// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
+							},
+							callbackScope: this,
+						});
+					}
 				}
 			});
 		return sprite;
