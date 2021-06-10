@@ -11,8 +11,8 @@ class GameScene extends Phaser.Scene {
 	totalAddedSnowballs: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
 	isAuto = false;
-	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
-	penguinLoopTimers: Phaser.Time.TimerEvent[];
+	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Tweens.Tween } };
+	penguinLoopTimers: Phaser.Tweens.Tween[];
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
 		Penguin: {},
 		Igloo: {},
@@ -155,16 +155,20 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					sprite.anims.play("penguin_bounce");
-					sprite.disableInteractive();
-					const penguinTimer = this.time.addEvent({
-						delay: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
-						callback() {
+					const penguinTimer = this.tweens.add({
+						targets: sprite,
+						duration: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
+						x: index * 120,
+						onStart() {
+							sprite.anims.play("penguin_bounce");
+							sprite.disableInteractive();
+						},
+						onComplete() {
 							sprite.anims.pause();
 							sprite.setInteractive({ useHandCursor: true });
 							this.totalSnowballs += 1;
 							this.totalAddedSnowballs += 1;
-							penguinTimer.remove(false);
+							penguinTimer.remove();
 						},
 						callbackScope: this,
 					});
@@ -268,33 +272,43 @@ class GameScene extends Phaser.Scene {
 			const sprite = this.penguinRegularTimers[key]["Sprite"];
 			const timer = this.penguinRegularTimers[key]["Timer"];
 			const timerConfig = {
-				delay: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
-				callback() {
+				targets: sprite,
+				duration: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
+				x: sprite.x,
+				onStart() {
+					sprite.anims.play("penguin_bounce");
+					sprite.disableInteractive();
+				},
+				onRepeat() {
 					this.totalSnowballs += 1;
 					this.totalAddedSnowballs += 1;
 				},
-				loop: true,
+				repeat: Infinity,
 				callbackScope: this,
 			};
 			if (timer !== null && sprite.anims.isPlaying) {
-				timer.callback = () => {
-					this.totalSnowballs += 1;
-					this.totalAddedSnowballs += 1;
-					timer.remove(false);
-					const penguinLoopTimer = this.time.addEvent(timerConfig);
-					this.penguinLoopTimers.push(penguinLoopTimer);
-				};
+				console.log(timer);
+				timer.setCallback(
+					"onComplete",
+					() => {
+						this.totalSnowballs += 1;
+						this.totalAddedSnowballs += 1;
+						timer.remove();
+						const penguinLoopTimer = this.tweens.add(timerConfig);
+						this.penguinLoopTimers.push(penguinLoopTimer);
+					},
+					[timer, [sprite]],
+					this
+				);
 			} else {
-				sprite.anims.play("penguin_bounce");
-				sprite.disableInteractive();
-				const penguinLoopTimer = this.time.addEvent(timerConfig);
+				const penguinLoopTimer = this.tweens.add(timerConfig);
 				this.penguinLoopTimers.push(penguinLoopTimer);
 			}
 		});
 	}
 
 	stopPenguins() {
-		this.penguinLoopTimers.forEach(timer => timer.remove(false));
+		this.penguinLoopTimers.forEach(timer => timer.remove());
 		this.penguinLoopTimers = [];
 		Object.keys(this.penguinRegularTimers).forEach(key => {
 			const sprite = this.penguinRegularTimers[key]["Sprite"];
