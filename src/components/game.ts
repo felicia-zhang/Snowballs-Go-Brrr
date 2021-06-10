@@ -295,6 +295,7 @@ class GameScene extends Phaser.Scene {
 
 	stopPenguins() {
 		this.penguinLoopTimers.forEach(timer => timer.remove(false));
+		this.penguinLoopTimers = [];
 		Object.keys(this.penguinRegularTimers).forEach(key => {
 			const sprite = this.penguinRegularTimers[key]["Sprite"];
 			sprite.anims.pause();
