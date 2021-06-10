@@ -10,9 +10,9 @@ class GameScene extends Phaser.Scene {
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
-	penguinObservers: { [key: string]: { sprite: Phaser.GameObjects.Sprite; timer: Phaser.Time.TimerEvent } };
+	fishieTimer: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent };
+	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
 	penguinLoopTimers: Phaser.Time.TimerEvent[];
-	fishieTimer: Phaser.Time.TimerEvent;
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
 		Penguin: {},
 		Igloo: {},
@@ -35,7 +35,8 @@ class GameScene extends Phaser.Scene {
 
 	create() {
 		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
-		this.penguinObservers = {};
+		this.fishieTimer = { Sprite: null, Timer: null };
+		this.penguinRegularTimers = {};
 		this.penguinLoopTimers = [];
 		this.anims.create({
 			key: "penguin_bounce",
@@ -146,7 +147,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	makePenguin(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		const object = { sprite: null, timer: null };
+		const object = { Sprite: null, Timer: null };
 		const sprite = this.add
 			.sprite(index * 120, 60, "penguin3")
 			.setOrigin(0, 0)
@@ -167,11 +168,11 @@ class GameScene extends Phaser.Scene {
 						},
 						callbackScope: this,
 					});
-					object["timer"] = penguinTimer;
+					object["Timer"] = penguinTimer;
 				}
 			});
-		object["sprite"] = sprite;
-		this.penguinObservers[inventory.ItemInstanceId] = object;
+		object["Sprite"] = sprite;
+		this.penguinRegularTimers[inventory.ItemInstanceId] = object;
 		return sprite;
 	}
 
@@ -252,9 +253,9 @@ class GameScene extends Phaser.Scene {
 	}
 
 	startPenguins() {
-		Object.keys(this.penguinObservers).forEach(key => {
-			const sprite = this.penguinObservers[key]["sprite"];
-			const timer = this.penguinObservers[key]["timer"];
+		Object.keys(this.penguinRegularTimers).forEach(key => {
+			const sprite = this.penguinRegularTimers[key]["Sprite"];
+			const timer = this.penguinRegularTimers[key]["Timer"];
 			const timerConfig = {
 				delay: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
 				callback() {
@@ -283,8 +284,8 @@ class GameScene extends Phaser.Scene {
 
 	stopPenguins() {
 		this.penguinLoopTimers.forEach(timer => timer.remove(false));
-		Object.keys(this.penguinObservers).forEach(key => {
-			const sprite = this.penguinObservers[key]["sprite"];
+		Object.keys(this.penguinRegularTimers).forEach(key => {
+			const sprite = this.penguinRegularTimers[key]["Sprite"];
 			sprite.anims.pause();
 			sprite.setInteractive({ useHandCursor: true });
 		});
