@@ -201,7 +201,7 @@ class GameScene extends Phaser.Scene {
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
 					PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
-						console.log(r)
+						console.log("Consumed torch")
 					);
 					sprite.anims.play("fire_flame");
 					sprite.disableInteractive();
@@ -220,6 +220,8 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
+	//TODO: what happens if players use multiple fishies
+	//TODO: how does fishie and torch interact with eachother
 	makeFishie(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const sprite = this.add
 			.sprite(index * 120, 460, "fish")
@@ -229,7 +231,7 @@ class GameScene extends Phaser.Scene {
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
 					PlayFabClient.ConsumeItem({ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId }, (e, r) =>
-						console.log(r)
+						console.log("Consumed fishie")
 					);
 					sprite.disableInteractive();
 					this.startPenguins();
