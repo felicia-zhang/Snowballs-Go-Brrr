@@ -250,12 +250,7 @@ class GameScene extends Phaser.Scene {
 		Object.keys(this.penguinObservers).forEach(key => {
 			const sprite = this.penguinObservers[key]["sprite"];
 			const timer = this.penguinObservers[key]["timer"];
-			if (timer !== null) {
-				timer.remove(false);
-			}
-			sprite.anims.play("penguin_bounce");
-			sprite.disableInteractive();
-			const penguinLoopTimer = this.time.addEvent({
+			const timerConfig = {
 				delay: this.PENGUIN_DELAY <= 0 ? 250 : this.PENGUIN_DELAY,
 				callback() {
 					this.totalSnowballs += 1;
@@ -263,8 +258,21 @@ class GameScene extends Phaser.Scene {
 				},
 				loop: true,
 				callbackScope: this,
-			});
-			this.penguinLoopTimers.push(penguinLoopTimer);
+			};
+			if (timer !== null && sprite.anims.isPlaying) {
+				timer.callback = () => {
+					this.totalSnowballs += 1;
+					this.totalAddedSnowballs += 1;
+					timer.remove(false);
+					const penguinLoopTimer = this.time.addEvent(timerConfig);
+					this.penguinLoopTimers.push(penguinLoopTimer);
+				};
+			} else {
+				sprite.anims.play("penguin_bounce");
+				sprite.disableInteractive();
+				const penguinLoopTimer = this.time.addEvent(timerConfig);
+				this.penguinLoopTimers.push(penguinLoopTimer);
+			}
 		});
 	}
 
