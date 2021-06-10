@@ -1,15 +1,25 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 
-const SYNC_DELAY = 60000;
-const PENGUIN_DELAY = 3000;
-const FISHIE_DELAY = 30000;
-
 class GameScene extends Phaser.Scene {
+	SYNC_DELAY = 60000;
+	PENGUIN_DELAY = 3000;
+	IGLOO_DELAY = 30000;
+	TORCH_DELAY = 30000;
+	FISHIE_DELAY = 9000;
+	TIME_SCALE = 1;
 	totalSnowballs: number = 0;
-	prevTotalSnowballs: number = 0;
-	timerEvent: Phaser.Time.TimerEvent;
-	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } };
+	totalAddedSnowballs: number = 0;
+	syncTimer: Phaser.Time.TimerEvent;
+	isAuto = false;
+	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
+	penguinLoopTimers: Phaser.Time.TimerEvent[];
+	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
+		Penguin: {},
+		Igloo: {},
+		Torch: {},
+		Fishie: {},
+	};
 	itemDescriptions: { [key: string]: string } = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
 	itemLevels: { [key: string]: { [key: string]: { Cost: string; Effect: string } } } = {
 		Penguin: {},
@@ -18,103 +28,45 @@ class GameScene extends Phaser.Scene {
 		Fishie: {},
 	};
 	snowballText: Phaser.GameObjects.Text;
-	clickMultiplier: number = 1;
 	popup: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
 	}
 
-	init() {
-		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
-	}
-
 	create() {
+		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
+		this.isAuto = false;
+		this.penguinRegularTimers = {};
+		this.penguinLoopTimers = [];
 		this.anims.create({
-			key: "bounce",
+			key: "penguin_bounce",
 			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
 			frameRate: 8,
 			repeat: -1,
 		});
+		this.anims.create({
+			key: "fire_flame",
+			frames: [{ key: "fire2" }, { key: "fire1" }, { key: "fire3" }],
+			frameRate: 8,
+			repeat: -1,
+		});
 
-		const scene = this;
+		this.makePopup();
+
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemDescriptions[item.DisplayName] = item.Description;
 				this.itemLevels[item.DisplayName] = JSON.parse(item.CustomData)["Levels"];
 			});
 		});
-		// TODO: cloud script and getUserInventory have duplicated API call
+
+		const scene = this;
 		PlayFabClient.GetUserInventory({}, (error, result) => {
-			const inventory: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
+			const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 			const sb = result.data.VirtualCurrency.SB;
 			scene.totalSnowballs = sb;
-			scene.prevTotalSnowballs = sb;
-			inventory.forEach((inventory, i) => {
-				const index = Object.keys(this.items[inventory.DisplayName]).length;
-				this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
-				let image;
-				if (inventory.DisplayName === "Penguin") {
-					image = scene.add
-						.sprite(index * 120, 60, "penguin3")
-						.setOrigin(0, 0)
-						.setScale(0.3)
-						.setInteractive({ useHandCursor: true })
-						.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-							if (pointer.leftButtonReleased()) {
-								image.anims.play("bounce");
-								image.disableInteractive();
-								scene.time.addEvent({
-									delay: PENGUIN_DELAY,
-									callback() {
-										image.anims.pause();
-										image.setInteractive({ useHandCursor: true });
-										scene.totalSnowballs += 1;
-									},
-									callbackScope: this,
-								});
-							}
-						});
-				} else if (inventory.DisplayName === "Igloo") {
-					image = scene.add
-						.image(index * 220, 210, "igloo")
-						.setOrigin(0, 0)
-						.setScale(0.3)
-						.setInteractive();
-				} else if (inventory.DisplayName === "Torch") {
-					image = scene.add
-						.image(index * 70, 360, "fire")
-						.setOrigin(0, 0)
-						.setScale(0.3)
-						.setInteractive();
-				} else if (inventory.DisplayName === "Fishie") {
-					image = scene.add
-						.image(index * 120, 460, "fish")
-						.setOrigin(0, 0)
-						.setScale(0.3)
-						.setInteractive();
-					this.time.addEvent({
-						delay: FISHIE_DELAY,
-						loop: true,
-						callback: () => {
-							console.log(`${inventory.ItemInstanceId} added 1 snowball`);
-							this.totalSnowballs++;
-						},
-					});
-				}
-				image
-					.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
-						this.showDetails(pointer, localX, localY, event, inventory)
-					)
-					.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-						this.popup.destroy(true);
-					})
-					.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-						if (pointer.rightButtonReleased()) {
-							this.upgradeItemLevel(inventory);
-						}
-					});
-			});
+			inventories.forEach(inventory => this.makeItem(inventory));
 
 			PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
 				if (result.data.Data["auto"] !== undefined) {
@@ -122,16 +74,17 @@ class GameScene extends Phaser.Scene {
 					const elapsed = new Date().valueOf() - Number(lastUpdated);
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
-					const numberOfFishies = Object.keys(this.items["Fishie"]).length;
-					const sb = Math.floor(elapsedSeconds / (FISHIE_DELAY / 1000)) * numberOfFishies;
+					const numberOfIgloos = Object.keys(this.items["Igloo"]).length;
+					const sb = Math.floor(elapsedSeconds / (this.IGLOO_DELAY / 1000)) * numberOfIgloos;
 					this.totalSnowballs += sb;
-					console.log("Amount of snowballs added by Fishies while player was gone", sb);
+					this.totalAddedSnowballs += sb;
+					console.log("Amount of snowballs added by Igloo factories while player was gone", sb);
 				}
 			});
 		});
 
-		this.timerEvent = this.time.addEvent({
-			delay: SYNC_DELAY,
+		this.syncTimer = this.time.addEvent({
+			delay: this.SYNC_DELAY,
 			loop: true,
 			callback: () => this.sync(),
 		});
@@ -144,14 +97,17 @@ class GameScene extends Phaser.Scene {
 			.text(700, 400, "STORE", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerdown", () => {
-				this.sync(() => this.scene.start("Store"));
+				if (!this.scene.isActive("Store")) {
+					this.scene.launch("Store");
+				}
+				this.scene.bringToTop("Store");
 			});
 
 		this.add
 			.text(700, 450, "MENU", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerdown", () => {
-				this.sync(() => this.scene.start("Menu"));
+				this.scene.bringToTop("Menu");
 			});
 	}
 
@@ -162,30 +118,236 @@ class GameScene extends Phaser.Scene {
 		}
 	}
 
-	showDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
-		const texts: Phaser.GameObjects.Text[] = [];
-		texts.push(this.add.text(0, 0, `Name: ${item.DisplayName}`, { fontFamily: fontFamily }));
-		texts.push(
-			this.add.text(0, 20, `Description: ${this.itemDescriptions[item.DisplayName]}`, {
-				fontFamily: fontFamily,
+	makeItem(inventory: PlayFabClientModels.ItemInstance) {
+		const index = Object.keys(this.items[inventory.DisplayName]).length;
+		this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
+		let sprite: Phaser.GameObjects.Sprite;
+		if (inventory.DisplayName === "Penguin") {
+			sprite = this.makePenguin(index, inventory);
+		} else if (inventory.DisplayName === "Igloo") {
+			sprite = this.makeIgloo(index, inventory);
+		} else if (inventory.DisplayName === "Torch") {
+			sprite = this.makeTorch(index, inventory);
+		} else if (inventory.DisplayName === "Fishie") {
+			sprite = this.makeFishie(index, inventory);
+		}
+		sprite
+			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
+				this.showItemDetails(pointer, localX, localY, event, inventory)
+			)
+			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
+				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
+				levelsContainer.removeAll(true);
+				this.popup.setVisible(false);
 			})
-		);
-		texts.push(
-			this.add.text(0, 40, `Current level: ${item.CustomData["Level"]}`, {
-				fontFamily: fontFamily,
-			})
-		);
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (pointer.rightButtonReleased()) {
+					this.sync(() => this.upgradeItemLevel(inventory));
+				}
+			});
+	}
+
+	makePenguin(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		const object = { Sprite: null, Timer: null };
+		const sprite = this.add
+			.sprite(index * 120, 60, "penguin3")
+			.setOrigin(0, 0)
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (pointer.leftButtonReleased()) {
+					sprite.anims.play("penguin_bounce");
+					sprite.disableInteractive();
+					const penguinTimer = this.time.addEvent({
+						timeScale: this.TIME_SCALE,
+						delay: this.PENGUIN_DELAY,
+						callback() {
+							sprite.anims.pause();
+							sprite.setInteractive({ useHandCursor: true });
+							this.totalSnowballs += 1;
+							this.totalAddedSnowballs += 1;
+							penguinTimer.remove(false);
+						},
+						callbackScope: this,
+					});
+					object["Timer"] = penguinTimer;
+				}
+			});
+		object["Sprite"] = sprite;
+		this.penguinRegularTimers[inventory.ItemInstanceId] = object;
+		return sprite;
+	}
+
+	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		const sprite = this.add
+			.sprite(index * 220, 210, "igloo")
+			.setOrigin(0, 0)
+			.setScale(0.3)
+			.setInteractive();
+		this.time.addEvent({
+			delay: this.IGLOO_DELAY,
+			loop: true,
+			callback: () => {
+				console.log(`Igloo ${inventory.ItemInstanceId} added 1 snowball`);
+				this.totalSnowballs++;
+				this.totalAddedSnowballs++;
+			},
+		});
+		return sprite;
+	}
+
+	makeTorch(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		const sprite = this.add
+			.sprite(index * 70, 360, "fire2")
+			.setOrigin(0, 0)
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (pointer.leftButtonReleased()) {
+					if (this.TIME_SCALE === 13) {
+						console.log("Torches already max out penguin speed");
+					} else {
+						PlayFabClient.ConsumeItem(
+							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
+							(e, r) => console.log("Consumed torch")
+						);
+						sprite.anims.play("fire_flame");
+						sprite.disableInteractive();
+						this.speedUpPenguins();
+						const torchTimer = this.time.addEvent({
+							delay: this.TORCH_DELAY,
+							callback() {
+								sprite.destroy(true);
+								this.slowDownPenguins();
+								torchTimer.remove(false);
+								// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
+							},
+							callbackScope: this,
+						});
+					}
+				}
+			});
+		return sprite;
+	}
+
+	makeFishie(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		const sprite = this.add
+			.sprite(index * 120, 460, "fish")
+			.setOrigin(0, 0)
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (pointer.leftButtonReleased()) {
+					if (this.isAuto) {
+						console.log("Fishie already clicked");
+					} else {
+						PlayFabClient.ConsumeItem(
+							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
+							(e, r) => console.log("Consumed fishie")
+						);
+						sprite.disableInteractive();
+						this.isAuto = true;
+						this.startPenguins();
+						const fishieTimer = this.time.addEvent({
+							delay: this.FISHIE_DELAY,
+							callback() {
+								sprite.destroy(true);
+								this.isAuto = false;
+								this.stopPenguins();
+								fishieTimer.remove(false);
+							},
+							callbackScope: this,
+						});
+					}
+				}
+			});
+		return sprite;
+	}
+
+	startPenguins() {
+		Object.keys(this.penguinRegularTimers).forEach(key => {
+			const sprite = this.penguinRegularTimers[key]["Sprite"];
+			const timer = this.penguinRegularTimers[key]["Timer"];
+			const timerConfig = {
+				timeScale: this.TIME_SCALE,
+				delay: this.PENGUIN_DELAY,
+				callback() {
+					this.totalSnowballs += 1;
+					this.totalAddedSnowballs += 1;
+				},
+				loop: true,
+				callbackScope: this,
+			};
+			if (timer !== null && sprite.anims.isPlaying) {
+				timer.callback = () => {
+					this.totalSnowballs += 1;
+					this.totalAddedSnowballs += 1;
+					timer.remove(false);
+					const penguinLoopTimer = this.time.addEvent(timerConfig);
+					this.penguinLoopTimers.push(penguinLoopTimer);
+				};
+			} else {
+				sprite.anims.play("penguin_bounce");
+				sprite.disableInteractive();
+				const penguinLoopTimer = this.time.addEvent(timerConfig);
+				this.penguinLoopTimers.push(penguinLoopTimer);
+			}
+		});
+	}
+
+	stopPenguins() {
+		this.penguinLoopTimers.forEach(timer => timer.remove(false));
+		this.penguinLoopTimers = [];
+		Object.keys(this.penguinRegularTimers).forEach(key => {
+			const sprite = this.penguinRegularTimers[key]["Sprite"];
+			sprite.anims.pause();
+			sprite.setInteractive({ useHandCursor: true });
+		});
+	}
+
+	speedUpPenguins() {
+		this.TIME_SCALE += 2;
+		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
+	}
+
+	slowDownPenguins() {
+		this.TIME_SCALE -= 2;
+		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
+	}
+
+	makePopup() {
+		const nameText = this.add.text(0, 0, "", { fontFamily: fontFamily });
+		const descriptionText = this.add.text(0, 20, "", { fontFamily: fontFamily });
+		const currentLevelText = this.add.text(0, 40, "", { fontFamily: fontFamily });
+		const levelsContainer = this.add.container(0, 60, []);
+		const container = this.add.container(0, 0, [nameText, descriptionText, currentLevelText, levelsContainer]);
+		this.popup = container;
+		this.popup.setVisible(false);
+		this.popup.setDepth(1);
+	}
+
+	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
+		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
+		nameText.setText(`Name: ${item.DisplayName}`);
+		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
+		descriptionText.setText(`Description: ${this.itemDescriptions[item.DisplayName]}`);
+		const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
+		currentLevelText.setText(`Current level: ${item.CustomData["Level"]}`);
+
+		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
 		const levels = this.itemLevels[item.DisplayName] as { [key: string]: { Cost: string; Effect: string } };
 		Object.keys(levels).forEach((key, i) => {
-			const levelText = this.add.text(0, 60 + i * 20, key, { fontFamily: fontFamily });
-			const costText = this.add.text(50, 60 + i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
-			const effectText = this.add.text(200, 60 + i * 20, `Effect: ${levels[key]["Effect"]}`, {
+			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
+			const costText = this.add.text(50, i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
+			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key]["Effect"]}`, {
 				fontFamily: fontFamily,
 			});
-			texts.push(levelText, costText, effectText);
+			levelsContainer.add([levelText, costText, effectText]);
 		});
-		const container = this.add.container(pointer.x, pointer.y, texts);
-		this.popup = container;
+
+		this.popup.setX(pointer.x);
+		this.popup.setY(pointer.y);
+		this.popup.setVisible(true);
 	}
 
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
@@ -222,32 +384,30 @@ class GameScene extends Phaser.Scene {
 		});
 	}
 
-	sync(transition?: () => any) {
+	sync(func?: () => any) {
 		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, (e, r) => {
 			console.log("Last synced result", r);
 		});
 
-		const currentTotalSnowballs = this.totalSnowballs;
-		const change = currentTotalSnowballs - this.prevTotalSnowballs;
-		if (change === 0) {
+		if (this.totalAddedSnowballs === 0) {
 			console.log("No change to snowballs since last sync");
-			if (transition !== undefined) {
-				transition();
+			if (func !== undefined) {
+				func();
 			}
 		} else {
-			this.prevTotalSnowballs = currentTotalSnowballs;
 			PlayFabClient.ExecuteCloudScript(
 				{
 					FunctionName: "addUserVirtualCurrency",
-					FunctionParameter: { amount: change, virtualCurrency: "SB" },
+					FunctionParameter: { amount: this.totalAddedSnowballs, virtualCurrency: "SB" },
 				},
 				(error, result) => {
+					console.log("Amount of snowballs added:", this.totalAddedSnowballs);
+					this.totalAddedSnowballs = 0;
 					PlayFabClient.ExecuteCloudScript(
-						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: currentTotalSnowballs } },
+						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: this.totalSnowballs } },
 						() => {
-							console.log("Amount of snowballs changed:", change);
-							if (transition !== undefined) {
-								transition();
+							if (func !== undefined) {
+								func();
 							}
 						}
 					);
