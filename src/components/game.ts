@@ -1,6 +1,8 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 
+type itemType = "Penguin" | "Igloo" | "Torch" | "Fishie";
+
 class GameScene extends Phaser.Scene {
 	SYNC_DELAY = 60000;
 	PENGUIN_DELAY = 3000;
@@ -12,22 +14,15 @@ class GameScene extends Phaser.Scene {
 	totalAddedSnowballs: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
 	isAuto = false;
-	torchSprites: { [key: string]: Phaser.GameObjects.Sprite };
-	fishieSprites: { [key: string]: Phaser.GameObjects.Sprite };
 	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
 	penguinLoopTimers: Phaser.Time.TimerEvent[];
-	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
-		Penguin: {},
-		Igloo: {},
-		Torch: {},
-		Fishie: {},
-	};
-	itemDescriptions: { [key: string]: string } = { Penguin: "", Igloo: "", Torch: "", Fishie: "" };
-	itemLevels: { [key: string]: { [key: string]: { Cost: string; Effect: string } } } = {
-		Penguin: {},
-		Igloo: {},
-		Torch: {},
-		Fishie: {},
+	consumableItemsSprites: { [key: string]: { [key: string]: Phaser.GameObjects.Sprite } };
+	itemsMap: {
+		[key: string]: {
+			Description: string;
+			Levels: { [key: string]: { Cost: string; Effect: string } };
+			Instances: { [key: string]: PlayFabClientModels.ItemInstance };
+		};
 	};
 	snowballText: Phaser.GameObjects.Text;
 	popup: Phaser.GameObjects.Container;
@@ -37,9 +32,13 @@ class GameScene extends Phaser.Scene {
 	}
 
 	create() {
-		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
-		this.torchSprites = {};
-		this.fishieSprites = {};
+		this.consumableItemsSprites = { Torch: {}, Fishie: {} };
+		this.itemsMap = {
+			Penguin: { Description: "", Levels: {}, Instances: {} },
+			Igloo: { Description: "", Levels: {}, Instances: {} },
+			Torch: { Description: "", Levels: {}, Instances: {} },
+			Fishie: { Description: "", Levels: {}, Instances: {} },
+		};
 		this.isAuto = false;
 		this.penguinRegularTimers = {};
 		this.penguinLoopTimers = [];
@@ -60,8 +59,9 @@ class GameScene extends Phaser.Scene {
 
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				this.itemDescriptions[item.DisplayName] = item.Description;
-				this.itemLevels[item.DisplayName] = JSON.parse(item.CustomData)["Levels"];
+				const itemType = this.itemsMap[item.DisplayName];
+				itemType.Description = item.Description;
+				itemType.Levels = JSON.parse(item.CustomData)["Levels"];
 			});
 		});
 
@@ -78,7 +78,7 @@ class GameScene extends Phaser.Scene {
 					const elapsed = new Date().valueOf() - Number(lastUpdated);
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
-					const numberOfIgloos = Object.keys(this.items["Igloo"]).length;
+					const numberOfIgloos = Object.keys(this.itemsMap["Igloo"].Instances).length;
 					const sb = Math.floor(elapsedSeconds / (this.IGLOO_DELAY / 1000)) * numberOfIgloos;
 					this.totalSnowballs += sb;
 					this.totalAddedSnowballs += sb;
@@ -123,8 +123,9 @@ class GameScene extends Phaser.Scene {
 	}
 
 	makeItem(inventory: PlayFabClientModels.ItemInstance) {
-		const index = Object.keys(this.items[inventory.DisplayName]).length;
-		this.items[inventory.DisplayName][inventory.ItemInstanceId] = inventory;
+		const itemType = this.itemsMap[inventory.DisplayName];
+		const index = Object.keys(itemType.Instances).length;
+		itemType.Instances[inventory.ItemInstanceId] = inventory;
 		let sprite: Phaser.GameObjects.Sprite;
 		if (inventory.DisplayName === "Penguin") {
 			sprite = this.makePenguin(index, inventory);
@@ -132,8 +133,10 @@ class GameScene extends Phaser.Scene {
 			sprite = this.makeIgloo(index, inventory);
 		} else if (inventory.DisplayName === "Torch") {
 			sprite = this.makeTorch(index, inventory);
+			this.consumableItemsSprites[inventory.DisplayName][inventory.ItemInstanceId] = sprite;
 		} else if (inventory.DisplayName === "Fishie") {
 			sprite = this.makeFishie(index, inventory);
+			this.consumableItemsSprites[inventory.DisplayName][inventory.ItemInstanceId] = sprite;
 		}
 		sprite
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
@@ -152,7 +155,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	makePenguin(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		const object = { Sprite: null, Timer: null };
+		const data = { Sprite: null, Timer: null };
 		const sprite = this.add
 			.sprite(index * 120, 60, "penguin3")
 			.setOrigin(0, 0)
@@ -174,11 +177,11 @@ class GameScene extends Phaser.Scene {
 						},
 						callbackScope: this,
 					});
-					object["Timer"] = penguinTimer;
+					data.Timer = penguinTimer;
 				}
 			});
-		object["Sprite"] = sprite;
-		this.penguinRegularTimers[inventory.ItemInstanceId] = object;
+		data.Sprite = sprite;
+		this.penguinRegularTimers[inventory.ItemInstanceId] = data;
 		return sprite;
 	}
 
@@ -221,7 +224,7 @@ class GameScene extends Phaser.Scene {
 						const torchTimer = this.time.addEvent({
 							delay: this.TORCH_DELAY,
 							callback() {
-								this.removeTorchSprite(sprite, inventory, 70);
+								this.removeConsumableItemSprite(sprite, inventory, 70);
 								this.slowDownPenguins();
 								torchTimer.remove(false);
 							},
@@ -230,7 +233,6 @@ class GameScene extends Phaser.Scene {
 					}
 				}
 			});
-		this.torchSprites[inventory.ItemInstanceId] = sprite;
 		return sprite;
 	}
 
@@ -255,7 +257,7 @@ class GameScene extends Phaser.Scene {
 						const fishieTimer = this.time.addEvent({
 							delay: this.FISHIE_DELAY,
 							callback() {
-								this.removeFishieSprite(sprite, inventory, 120);
+								this.removeConsumableItemSprite(sprite, inventory, 120);
 								this.isAuto = false;
 								this.stopPenguins();
 								fishieTimer.remove(false);
@@ -265,14 +267,13 @@ class GameScene extends Phaser.Scene {
 					}
 				}
 			});
-		this.fishieSprites[inventory.ItemInstanceId] = sprite;
 		return sprite;
 	}
 
 	startPenguins() {
 		Object.keys(this.penguinRegularTimers).forEach(key => {
-			const sprite = this.penguinRegularTimers[key]["Sprite"];
-			const timer = this.penguinRegularTimers[key]["Timer"];
+			const sprite = this.penguinRegularTimers[key].Sprite;
+			const timer = this.penguinRegularTimers[key].Timer;
 			const timerConfig = {
 				timeScale: this.TIME_SCALE,
 				delay: this.PENGUIN_DELAY,
@@ -304,7 +305,7 @@ class GameScene extends Phaser.Scene {
 		this.penguinLoopTimers.forEach(timer => timer.remove(false));
 		this.penguinLoopTimers = [];
 		Object.keys(this.penguinRegularTimers).forEach(key => {
-			const sprite = this.penguinRegularTimers[key]["Sprite"];
+			const sprite = this.penguinRegularTimers[key].Sprite;
 			sprite.anims.pause();
 			sprite.setInteractive({ useHandCursor: true });
 		});
@@ -331,48 +332,37 @@ class GameScene extends Phaser.Scene {
 		this.popup.setDepth(1);
 	}
 
-	removeTorchSprite(
+	removeConsumableItemSprite(
 		removedSprite: Phaser.GameObjects.Sprite,
 		inventory: PlayFabClientModels.ItemInstance,
 		delta: number
 	) {
 		removedSprite.destroy(true);
-		delete this.items[inventory.DisplayName][inventory.ItemInstanceId];
-		delete this.torchSprites[inventory.ItemInstanceId];
-		Object.keys(this.torchSprites).forEach((id, i) => {
-			const sprite = this.torchSprites[id];
-			sprite.x = i * delta;
-		});
-	}
-
-	removeFishieSprite(
-		removedSprite: Phaser.GameObjects.Sprite,
-		inventory: PlayFabClientModels.ItemInstance,
-		delta: number
-	) {
-		removedSprite.destroy(true);
-		delete this.items[inventory.DisplayName][inventory.ItemInstanceId];
-		delete this.fishieSprites[inventory.ItemInstanceId];
-		Object.keys(this.fishieSprites).forEach((id, i) => {
-			const sprite = this.fishieSprites[id];
+		const consumableItemsType = this.consumableItemsSprites[inventory.DisplayName];
+		delete this.itemsMap[inventory.DisplayName].Instances[inventory.ItemInstanceId];
+		delete consumableItemsType[inventory.ItemInstanceId];
+		Object.keys(consumableItemsType).forEach((instanceId, i) => {
+			const sprite = consumableItemsType[instanceId];
 			sprite.x = i * delta;
 		});
 	}
 
 	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
+		const itemType = this.itemsMap[item.DisplayName];
+
 		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
 		nameText.setText(`Name: ${item.DisplayName}`);
 		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
-		descriptionText.setText(`Description: ${this.itemDescriptions[item.DisplayName]}`);
+		descriptionText.setText(`Description: ${itemType.Description}`);
 		const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
 		currentLevelText.setText(`Current level: ${item.CustomData["Level"]}`);
 
 		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-		const levels = this.itemLevels[item.DisplayName] as { [key: string]: { Cost: string; Effect: string } };
+		const levels = itemType.Levels as { [key: string]: { Cost: string; Effect: string } };
 		Object.keys(levels).forEach((key, i) => {
 			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
-			const costText = this.add.text(50, i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
-			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key]["Effect"]}`, {
+			const costText = this.add.text(50, i * 20, `Cost: ${levels[key].Cost}`, { fontFamily: fontFamily });
+			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key].Effect}`, {
 				fontFamily: fontFamily,
 			});
 			levelsContainer.add([levelText, costText, effectText]);
@@ -384,14 +374,16 @@ class GameScene extends Phaser.Scene {
 	}
 
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
+		const itemType = this.itemsMap[item.DisplayName];
+
 		const newLevel = Number(item.CustomData["Level"]) + 1;
 		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const sb = result.data.VirtualCurrency.SB;
-			if (!(newLevel.toString() in this.itemLevels[item.DisplayName])) {
+			if (!(newLevel.toString() in itemType.Levels)) {
 				console.log(`${newLevel} is not a valid level`);
 				return;
 			}
-			const cost = this.itemLevels[item.DisplayName][newLevel]["Cost"];
+			const cost = itemType.Levels[newLevel].Cost;
 			if (Number(cost) > sb) {
 				console.log("Insufficient funds");
 				return;
@@ -408,7 +400,7 @@ class GameScene extends Phaser.Scene {
 				(error, result) => {
 					console.log("Update item level result:", result);
 					this.totalSnowballs -= Number(cost);
-					const i: PlayFabClientModels.ItemInstance = this.items[item.DisplayName][item.ItemInstanceId];
+					const i: PlayFabClientModels.ItemInstance = itemType.Instances[item.ItemInstanceId];
 					i.CustomData["Level"] = newLevel.toString();
 					const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
 					currentLevelText.setText(`Current level: ${newLevel}`);
