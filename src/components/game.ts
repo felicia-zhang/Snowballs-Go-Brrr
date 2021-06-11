@@ -5,13 +5,15 @@ class GameScene extends Phaser.Scene {
 	SYNC_DELAY = 60000;
 	PENGUIN_DELAY = 3000;
 	IGLOO_DELAY = 30000;
-	TORCH_DELAY = 30000;
+	TORCH_DELAY = 9000;
 	FISHIE_DELAY = 9000;
 	TIME_SCALE = 1;
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
 	isAuto = false;
+	torchSprites: { [key: string]: Phaser.GameObjects.Sprite };
+	fishieSprites: { [key: string]: Phaser.GameObjects.Sprite };
 	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
 	penguinLoopTimers: Phaser.Time.TimerEvent[];
 	items: { [key: string]: { [key: string]: PlayFabClientModels.ItemInstance } } = {
@@ -36,6 +38,8 @@ class GameScene extends Phaser.Scene {
 
 	create() {
 		this.items = { Penguin: {}, Igloo: {}, Torch: {}, Fishie: {} };
+		this.torchSprites = {};
+		this.fishieSprites = {};
 		this.isAuto = false;
 		this.penguinRegularTimers = {};
 		this.penguinLoopTimers = [];
@@ -217,16 +221,16 @@ class GameScene extends Phaser.Scene {
 						const torchTimer = this.time.addEvent({
 							delay: this.TORCH_DELAY,
 							callback() {
-								sprite.destroy(true);
+								this.removeTorchSprite(sprite, inventory, 70);
 								this.slowDownPenguins();
 								torchTimer.remove(false);
-								// TODO: should we rearranged the sprite to left align? Should we delete this inventory from this.item["Torch"][instanceId]
 							},
 							callbackScope: this,
 						});
 					}
 				}
 			});
+		this.torchSprites[inventory.ItemInstanceId] = sprite;
 		return sprite;
 	}
 
@@ -251,7 +255,7 @@ class GameScene extends Phaser.Scene {
 						const fishieTimer = this.time.addEvent({
 							delay: this.FISHIE_DELAY,
 							callback() {
-								sprite.destroy(true);
+								this.removeFishieSprite(sprite, inventory, 120);
 								this.isAuto = false;
 								this.stopPenguins();
 								fishieTimer.remove(false);
@@ -261,6 +265,7 @@ class GameScene extends Phaser.Scene {
 					}
 				}
 			});
+		this.fishieSprites[inventory.ItemInstanceId] = sprite;
 		return sprite;
 	}
 
@@ -324,6 +329,34 @@ class GameScene extends Phaser.Scene {
 		this.popup = container;
 		this.popup.setVisible(false);
 		this.popup.setDepth(1);
+	}
+
+	removeTorchSprite(
+		removedSprite: Phaser.GameObjects.Sprite,
+		inventory: PlayFabClientModels.ItemInstance,
+		delta: number
+	) {
+		removedSprite.destroy(true);
+		delete this.items[inventory.DisplayName][inventory.ItemInstanceId];
+		delete this.torchSprites[inventory.ItemInstanceId];
+		Object.keys(this.torchSprites).forEach((id, i) => {
+			const sprite = this.torchSprites[id];
+			sprite.x = i * delta;
+		});
+	}
+
+	removeFishieSprite(
+		removedSprite: Phaser.GameObjects.Sprite,
+		inventory: PlayFabClientModels.ItemInstance,
+		delta: number
+	) {
+		removedSprite.destroy(true);
+		delete this.items[inventory.DisplayName][inventory.ItemInstanceId];
+		delete this.fishieSprites[inventory.ItemInstanceId];
+		Object.keys(this.fishieSprites).forEach((id, i) => {
+			const sprite = this.fishieSprites[id];
+			sprite.x = i * delta;
+		});
 	}
 
 	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
