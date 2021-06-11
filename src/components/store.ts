@@ -32,7 +32,7 @@ class StoreScene extends Phaser.Scene {
 		this.add
 			.text(700, 450, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
-			.on("pointerdown", () => {
+			.on("pointerup", () => {
 				this.scene.bringToTop("Game");
 			});
 	}
@@ -74,21 +74,6 @@ class StoreScene extends Phaser.Scene {
 				.image(20 + 100 * index, 100, "fish")
 				.setOrigin(0, 0)
 				.setScale(0.1);
-		} else if (item.DisplayName === "Ice Palace") {
-			image = this.add
-				.image(20 + 100 * index, 200, "palace")
-				.setOrigin(0, 0)
-				.setScale(0.1);
-		} else if (item.DisplayName === "Eternal Flame") {
-			image = this.add
-				.image(20 + 100 * index, 200, "eternalflame")
-				.setOrigin(0, 0)
-				.setScale(0.1);
-		} else if (item.DisplayName === "Arctic Vault") {
-			image = this.add
-				.image(20 + 100 * index, 200, "vault")
-				.setOrigin(0, 0)
-				.setScale(0.1);
 		}
 		image
 			.setInteractive({ useHandCursor: true })
@@ -126,6 +111,16 @@ class StoreScene extends Phaser.Scene {
 						console.log("Update item level to 1 result:", newItem);
 						this.gameScene.makeItem(newItem);
 					}
+				);
+
+				PlayFabClient.ExecuteCloudScript(
+					{
+						FunctionName: "updateStatistics",
+						FunctionParameter: {
+							[`${item.DisplayName}_purchased`]: 1,
+						},
+					},
+					() => {}
 				);
 			}
 		});
