@@ -74,21 +74,6 @@ class StoreScene extends Phaser.Scene {
 				.image(20 + 100 * index, 100, "fish")
 				.setOrigin(0, 0)
 				.setScale(0.1);
-		} else if (item.DisplayName === "Ice Palace") {
-			image = this.add
-				.image(20 + 100 * index, 200, "palace")
-				.setOrigin(0, 0)
-				.setScale(0.1);
-		} else if (item.DisplayName === "Eternal Flame") {
-			image = this.add
-				.image(20 + 100 * index, 200, "eternalflame")
-				.setOrigin(0, 0)
-				.setScale(0.1);
-		} else if (item.DisplayName === "Arctic Vault") {
-			image = this.add
-				.image(20 + 100 * index, 200, "vault")
-				.setOrigin(0, 0)
-				.setScale(0.1);
 		}
 		image
 			.setInteractive({ useHandCursor: true })
