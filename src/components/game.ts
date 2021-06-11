@@ -1,7 +1,17 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 
-type itemType = "Penguin" | "Igloo" | "Torch" | "Fishie";
+enum itemType {
+	Penguin = "Penguin",
+	Igloo = "Igloo",
+	Torch = "Torch",
+	Fishie = "Fishie",
+}
+
+enum consumableItemType {
+	Torch = "Torch",
+	Fishie = "Fishie",
+}
 
 class GameScene extends Phaser.Scene {
 	SYNC_DELAY = 60000;
@@ -16,9 +26,9 @@ class GameScene extends Phaser.Scene {
 	isAuto = false;
 	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
 	penguinLoopTimers: Phaser.Time.TimerEvent[];
-	consumableItemsSprites: { [key: string]: { [key: string]: Phaser.GameObjects.Sprite } };
+	consumableItemsSprites: { [key in consumableItemType]: { [key: string]: Phaser.GameObjects.Sprite } };
 	itemsMap: {
-		[key: string]: {
+		[key in itemType]: {
 			Description: string;
 			Levels: { [key: string]: { Cost: string; Effect: string } };
 			Instances: { [key: string]: PlayFabClientModels.ItemInstance };
@@ -78,7 +88,7 @@ class GameScene extends Phaser.Scene {
 					const elapsed = new Date().valueOf() - Number(lastUpdated);
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
-					const numberOfIgloos = Object.keys(this.itemsMap["Igloo"].Instances).length;
+					const numberOfIgloos = Object.keys(this.itemsMap.Igloo.Instances).length;
 					const sb = Math.floor(elapsedSeconds / (this.IGLOO_DELAY / 1000)) * numberOfIgloos;
 					this.totalSnowballs += sb;
 					this.totalAddedSnowballs += sb;
