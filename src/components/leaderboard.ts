@@ -8,30 +8,25 @@ enum statisticName {
 }
 
 class LeaderboardScene extends Phaser.Scene {
+	leaderboardName: Phaser.GameObjects.Text;
+	list: Phaser.GameObjects.Container;
 	constructor() {
 		super("Leaderboard");
 	}
 
 	create() {
-		const leaderboard = this;
-
 		this.add.image(400, 300, "sky");
 		this.add.text(300, 9, "Leaderboard", { fontFamily: fontFamily });
-		PlayFabClient.GetLeaderboard({ StatisticName: "3", StartPosition: 0 }, (error, result) => {
-			leaderboard.add.text(200, 80, "PLACE", { fontFamily: fontFamily });
-			leaderboard.add.text(300, 80, "NAME", { fontFamily: fontFamily });
-			leaderboard.add.text(500, 80, "STATISTIC", { fontFamily: fontFamily });
-			const players = result.data.Leaderboard;
-			players.forEach((player, i) => {
-				leaderboard.add.text(200, 110 + i * 20, (i + 1).toString(), { fontFamily: fontFamily });
-				leaderboard.add.text(300, 110 + i * 20, player.DisplayName, { fontFamily: fontFamily });
-				leaderboard.add.text(500, 110 + i * 20, player.StatValue.toString(), { fontFamily: fontFamily });
-			});
-		});
+		this.leaderboardName = this.add.text(300, 50, "", { fontFamily: fontFamily });
+		this.add.text(200, 80, "PLACE", { fontFamily: fontFamily });
+		this.add.text(300, 80, "NAME", { fontFamily: fontFamily });
+		this.add.text(500, 80, "STATISTIC", { fontFamily: fontFamily });
+		this.list = this.add.container(200, 110, []);
+		this.showLeaderboard("current_snowballs");
 
 		for (let stat in statisticName) {
 			const i = Number(statisticName[stat]) - 1;
-			const statButton = this.add
+			this.add
 				.text(80 + i * 200, 400, stat, { fontFamily: fontFamily })
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => this.showLeaderboard(stat));
@@ -46,7 +41,18 @@ class LeaderboardScene extends Phaser.Scene {
 	}
 
 	showLeaderboard(stat: string) {
-		console.log(statisticName[stat]);
+		this.leaderboardName.setText(stat);
+		this.list.removeAll(true);
+		PlayFabClient.GetLeaderboard({ StatisticName: statisticName[stat], StartPosition: 0 }, (error, result) => {
+			const players = result.data.Leaderboard;
+			const texts: Phaser.GameObjects.Text[] = [];
+			players.forEach((player, i) => {
+				texts.push(this.add.text(0, i * 20, (i + 1).toString(), { fontFamily: fontFamily }));
+				texts.push(this.add.text(100, i * 20, player.DisplayName, { fontFamily: fontFamily }));
+				texts.push(this.add.text(300, i * 20, player.StatValue.toString(), { fontFamily: fontFamily }));
+			});
+			this.list.add(texts);
+		});
 	}
 
 	update() {
