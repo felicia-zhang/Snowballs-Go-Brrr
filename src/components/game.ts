@@ -22,6 +22,7 @@ class GameScene extends Phaser.Scene {
 	TIME_SCALE = 1;
 	totalSnowballs: number = 0;
 	totalAddedSnowballs: number = 0;
+	totalManualPenguinClicks: number = 0;
 	syncTimer: Phaser.Time.TimerEvent;
 	isAuto = false;
 	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
@@ -173,6 +174,7 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
+					this.totalManualPenguinClicks += 1;
 					sprite.anims.play("penguin_bounce");
 					sprite.disableInteractive();
 					const penguinTimer = this.time.addEvent({
@@ -424,6 +426,8 @@ class GameScene extends Phaser.Scene {
 			console.log("Last synced result", r);
 		});
 
+		const totalAdded = this.totalAddedSnowballs;
+		const totalClicks = this.totalManualPenguinClicks;
 		if (this.totalAddedSnowballs === 0) {
 			console.log("No change to snowballs since last sync");
 			if (func !== undefined) {
@@ -438,8 +442,16 @@ class GameScene extends Phaser.Scene {
 				(error, result) => {
 					console.log("Amount of snowballs added:", this.totalAddedSnowballs);
 					this.totalAddedSnowballs = 0;
+					this.totalManualPenguinClicks = 0;
 					PlayFabClient.ExecuteCloudScript(
-						{ FunctionName: "updateStatistics", FunctionParameter: { snowballs: this.totalSnowballs } },
+						{
+							FunctionName: "updateStatistics",
+							FunctionParameter: {
+								current_snowballs: this.totalSnowballs,
+								total_added_snowballs: totalAdded,
+								total_manual_penguin_clicks: totalClicks,
+							},
+						},
 						() => {
 							if (func !== undefined) {
 								func();
