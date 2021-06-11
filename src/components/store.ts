@@ -32,7 +32,7 @@ class StoreScene extends Phaser.Scene {
 		this.add
 			.text(700, 450, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
-			.on("pointerdown", () => {
+			.on("pointerup", () => {
 				this.scene.bringToTop("Game");
 			});
 	}
