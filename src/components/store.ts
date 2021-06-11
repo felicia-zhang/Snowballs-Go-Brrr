@@ -112,6 +112,16 @@ class StoreScene extends Phaser.Scene {
 						this.gameScene.makeItem(newItem);
 					}
 				);
+
+				PlayFabClient.ExecuteCloudScript(
+					{
+						FunctionName: "updateStatistics",
+						FunctionParameter: {
+							[`${item.DisplayName}_purchased`]: 1,
+						},
+					},
+					() => {}
+				);
 			}
 		});
 	}
