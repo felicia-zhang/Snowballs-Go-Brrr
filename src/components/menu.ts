@@ -24,6 +24,7 @@ class MenuScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Leaderboard");
+				// TODO: scenes previously launched/started can still be clicked on
 			});
 		this.add.text(300, 300, "SETTINGS", { fontFamily: fontFamily });
 		// TODO:
