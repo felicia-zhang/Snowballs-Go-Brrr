@@ -50,6 +50,7 @@
 			"last 1 safari version"
 		]
 	},
+	"license": "MIT",
 	"devDependencies": {},
 	"prettier": {
 		"arrowParens": "avoid",
