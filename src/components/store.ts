@@ -4,8 +4,8 @@ import { fontFamily } from "../utils/font";
 import GameScene from "./game";
 
 class StoreScene extends Phaser.Scene {
-	durableItems: PlayFabClientModels.CatalogItem[] = [];
-	consumableItems: PlayFabClientModels.CatalogItem[] = [];
+	durableItems: PlayFabClientModels.CatalogItem[];
+	consumableItems: PlayFabClientModels.CatalogItem[];
 	snowballText: Phaser.GameObjects.Text;
 	gameScene: GameScene;
 	popup: Phaser.GameObjects.Container;
@@ -14,12 +14,12 @@ class StoreScene extends Phaser.Scene {
 	}
 
 	create() {
+		this.add.image(400, 300, "sky");
 		this.durableItems = [];
 		this.consumableItems = [];
-		this.gameScene = this.scene.get("Game") as GameScene;
-		this.add.image(400, 300, "sky");
-		this.makePopup();
 		this.snowballText = this.add.text(16, 16, "", { fontFamily: fontFamily });
+		this.gameScene = this.scene.get("Game") as GameScene;
+		this.makePopup();
 		//TODO: change to store items
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach(item => this.makeIcon(item));
@@ -35,7 +35,8 @@ class StoreScene extends Phaser.Scene {
 			.text(700, 450, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				this.scene.start("Game");
+				this.scene.stop("Store");
+				this.scene.bringToTop("Game");
 			});
 	}
 

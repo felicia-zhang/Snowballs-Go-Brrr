@@ -20,11 +20,11 @@ class GameScene extends Phaser.Scene {
 	TORCH_DELAY = 9000;
 	FISHIE_DELAY = 9000;
 	TIME_SCALE = 1;
-	totalSnowballs: number = 0;
-	totalAddedSnowballs: number = 0;
-	totalManualPenguinClicks: number = 0;
+	totalSnowballs: number;
+	totalAddedSnowballs: number;
+	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	isAuto = false;
+	isAuto: boolean;
 	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
 	penguinLoopTimers: Phaser.Time.TimerEvent[];
 	consumableItemsSprites: { [key in consumableItemType]: { [key: string]: Phaser.GameObjects.Sprite } };
@@ -43,6 +43,11 @@ class GameScene extends Phaser.Scene {
 	}
 
 	create() {
+		this.totalAddedSnowballs = 0;
+		this.totalManualPenguinClicks = 0;
+		this.isAuto = false;
+		this.penguinRegularTimers = {};
+		this.penguinLoopTimers = [];
 		this.consumableItemsSprites = { Torch: {}, Fishie: {} };
 		this.itemsMap = {
 			Penguin: { Description: "", Levels: {}, Instances: {} },
@@ -50,9 +55,7 @@ class GameScene extends Phaser.Scene {
 			Torch: { Description: "", Levels: {}, Instances: {} },
 			Fishie: { Description: "", Levels: {}, Instances: {} },
 		};
-		this.isAuto = false;
-		this.penguinRegularTimers = {};
-		this.penguinLoopTimers = [];
+		this.makePopup();
 		this.anims.create({
 			key: "penguin_bounce",
 			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
@@ -65,8 +68,6 @@ class GameScene extends Phaser.Scene {
 			frameRate: 8,
 			repeat: -1,
 		});
-
-		this.makePopup();
 
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
@@ -206,8 +207,8 @@ class GameScene extends Phaser.Scene {
 			loop: true,
 			callback: () => {
 				console.log(`Igloo ${inventory.ItemInstanceId} added 1 snowball`);
-				this.totalSnowballs++;
-				this.totalAddedSnowballs++;
+				this.totalSnowballs += 1;
+				this.totalAddedSnowballs += 1;
 			},
 		});
 		return sprite;
