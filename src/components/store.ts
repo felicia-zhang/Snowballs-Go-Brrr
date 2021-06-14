@@ -14,6 +14,8 @@ class StoreScene extends Phaser.Scene {
 	}
 
 	create() {
+		this.durableItems = [];
+		this.consumableItems = [];
 		this.gameScene = this.scene.get("Game") as GameScene;
 		this.add.image(400, 300, "sky");
 		this.makePopup();
@@ -33,7 +35,7 @@ class StoreScene extends Phaser.Scene {
 			.text(700, 450, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				this.scene.bringToTop("Game");
+				this.scene.start("Game");
 			});
 	}
 

@@ -14,17 +14,13 @@ class MenuScene extends Phaser.Scene {
 			.text(300, 200, "GAME", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				if (!this.scene.isActive("Game")) {
-					this.scene.launch("Game");
-				}
-				this.scene.bringToTop("Game");
+				this.scene.start("Game");
 			});
 		this.add
 			.text(300, 250, "LEADERBOARD", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Leaderboard");
-				// TODO: scenes previously launched/started can still be clicked on
 			});
 		this.add.text(300, 300, "SETTINGS", { fontFamily: fontFamily });
 		// TODO:

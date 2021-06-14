@@ -112,9 +112,7 @@ class GameScene extends Phaser.Scene {
 			.text(700, 400, "STORE", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				if (!this.scene.isActive("Store")) {
-					this.scene.launch("Store");
-				}
+				this.scene.launch("Store");
 				this.scene.bringToTop("Store");
 			});
 
@@ -122,7 +120,7 @@ class GameScene extends Phaser.Scene {
 			.text(700, 450, "MENU", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				this.scene.bringToTop("Menu");
+				this.scene.start("Menu");
 			});
 	}
 
