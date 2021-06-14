@@ -122,7 +122,7 @@ class App extends React.PureComponent<any, IState> {
 							)}
 							<Divider />
 							<GoogleLogin
-								clientId="168518881059-39uvi2d24ev5rjscb6go5q4cljni1tgd.apps.googleusercontent.com"
+								clientId={process.env.REACT_APP_GOOGLE_ID}
 								render={renderProps => (
 									<Button onClick={renderProps.onClick} leftIcon={<FaGoogle />}>
 										Sign in with Google
@@ -135,7 +135,7 @@ class App extends React.PureComponent<any, IState> {
 								cookiePolicy={"single_host_origin"}
 							/>
 							<FacebookLogin
-								appId="533322048080315"
+								appId={process.env.REACT_APP_FACEBOOK_ID}
 								autoLoad={true}
 								render={renderProps => (
 									<Button onClick={renderProps.onClick} leftIcon={<FaFacebook />}>
