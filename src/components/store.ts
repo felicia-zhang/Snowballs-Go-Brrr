@@ -9,6 +9,8 @@ class StoreScene extends Phaser.Scene {
 	snowballText: Phaser.GameObjects.Text;
 	gameScene: GameScene;
 	popup: Phaser.GameObjects.Container;
+	toast: Phaser.GameObjects.Container;
+
 	constructor() {
 		super("Store");
 	}
@@ -20,12 +22,11 @@ class StoreScene extends Phaser.Scene {
 		this.snowballText = this.add.text(16, 16, "", { fontFamily: fontFamily });
 		this.gameScene = this.scene.get("Game") as GameScene;
 		this.makePopup();
+		this.makeToast();
 		//TODO: change to store items
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach(item => this.makeIcon(item));
 		});
-
-		this.add.text(300, 9, "STORE", { fontFamily: fontFamily });
 
 		this.add.text(20, 70, "Consumable Items", { fontFamily: fontFamily });
 
@@ -97,7 +98,7 @@ class StoreScene extends Phaser.Scene {
 		const price = item.VirtualCurrencyPrices.SB;
 		PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
 			if (e !== null) {
-				console.log(e);
+				this.showToast("Not enough snowballs");
 			} else {
 				this.gameScene.totalSnowballs -= price;
 				PlayFabClient.ExecuteCloudScript(
@@ -111,8 +112,8 @@ class StoreScene extends Phaser.Scene {
 					},
 					(a, b) => {
 						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
-						console.log("Update item level to 1 result:", newItem);
 						this.gameScene.makeItem(newItem);
+						this.showToast(`1 ${item.DisplayName.toLowerCase()} successfully purchased`);
 					}
 				);
 
@@ -162,6 +163,33 @@ class StoreScene extends Phaser.Scene {
 		this.popup.setX(pointer.x);
 		this.popup.setY(pointer.y);
 		this.popup.setVisible(true);
+	}
+
+	makeToast() {
+		const toastText = this.add.text(0, 0, "", { fontFamily: fontFamily });
+		const bg = this.add.rectangle(0, 0, 0, 0, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1);
+		const container = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(2);
+		this.toast = container;
+	}
+
+	showToast(message: string) {
+		const toastText = this.toast.getAt(1) as Phaser.GameObjects.Text;
+		toastText.setText(message).setAlign("center").setOrigin(0.5, 0.5);
+
+		const bg = this.toast.getAt(0) as Phaser.GameObjects.Rectangle;
+		bg.setSize(toastText.width + 16, toastText.height + 8).setOrigin(0.5, 0.5);
+
+		this.toast.setPosition(400, 8 + bg.displayHeight / 2);
+		this.add.tween({
+			targets: [this.toast],
+			ease: "Sine.easeIn",
+			duration: 300,
+			alpha: 1,
+			completeDelay: 1000,
+			onComplete: () => {
+				this.toast.setAlpha(0);
+			},
+		});
 	}
 }
 
