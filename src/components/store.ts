@@ -1,35 +1,30 @@
-import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
+import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 import GameScene from "./game";
 
 class StoreScene extends Phaser.Scene {
-	durableItems: PlayFabClientModels.CatalogItem[];
-	consumableItems: PlayFabClientModels.CatalogItem[];
+	items: PlayFabClientModels.CatalogItem[];
 	snowballText: Phaser.GameObjects.Text;
 	gameScene: GameScene;
 	popup: Phaser.GameObjects.Container;
+	toast: Phaser.GameObjects.Container;
+
 	constructor() {
 		super("Store");
 	}
 
 	create() {
 		this.add.image(400, 300, "sky");
-		this.durableItems = [];
-		this.consumableItems = [];
+		this.items = [];
 		this.snowballText = this.add.text(16, 16, "", { fontFamily: fontFamily });
 		this.gameScene = this.scene.get("Game") as GameScene;
 		this.makePopup();
+		this.makeToast();
 		//TODO: change to store items
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach(item => this.makeIcon(item));
 		});
-
-		this.add.text(300, 9, "STORE", { fontFamily: fontFamily });
-
-		this.add.text(20, 70, "Consumable Items", { fontFamily: fontFamily });
-
-		this.add.text(20, 170, "Durable Items", { fontFamily: fontFamily });
 
 		this.add
 			.text(700, 450, "GAME", { fontFamily: fontFamily })
@@ -48,38 +43,20 @@ class StoreScene extends Phaser.Scene {
 	}
 
 	makeIcon(item: PlayFabClientModels.CatalogItem) {
-		let index;
-		if (item.Consumable !== undefined && item.Consumable.UsageCount !== undefined) {
-			index = this.consumableItems.length;
-			this.consumableItems.push(item);
-		} else {
-			index = this.durableItems.length;
-			this.durableItems.push(item);
-		}
+		const index = this.items.length;
+		this.items.push(item);
 		let image: Phaser.GameObjects.Image;
 		if (item.DisplayName === "Penguin") {
-			image = this.add
-				.image(20 + 100 * index, 200, "penguin3")
-				.setOrigin(0, 0)
-				.setScale(0.1);
+			image = this.add.image(100 + 100 * index, 200, "penguin3").setScale(0.1);
 		} else if (item.DisplayName === "Igloo") {
-			image = this.add
-				.image(20 + 100 * index, 200, "igloo")
-				.setOrigin(0, 0)
-				.setScale(0.1);
+			image = this.add.image(100 + 100 * index, 200, "igloo").setScale(0.1);
 		} else if (item.DisplayName === "Torch") {
-			image = this.add
-				.image(20 + 100 * index, 100, "fire2")
-				.setOrigin(0, 0)
-				.setScale(0.1);
+			image = this.add.image(100 + 100 * index, 200, "fire2").setScale(0.1);
 		} else if (item.DisplayName === "Fishie") {
-			image = this.add
-				.image(20 + 100 * index, 100, "fish")
-				.setOrigin(0, 0)
-				.setScale(0.1);
+			image = this.add.image(100 + 100 * index, 200, "fish").setScale(0.1);
 		}
 		image
-			.setInteractive({ useHandCursor: true })
+			.setInteractive()
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
 				this.showItemDetails(pointer, localX, localY, event, item)
 			)
@@ -87,7 +64,18 @@ class StoreScene extends Phaser.Scene {
 				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
 				levelsContainer.removeAll(true);
 				this.popup.setVisible(false);
-			})
+			});
+
+		const priceText = this.add
+			.text(0, 0, `${item.VirtualCurrencyPrices.SB}`, { fontFamily: fontFamily })
+			.setOrigin(1, 0.5);
+		const sb = this.add.circle(priceText.width + 15, 0, 10, 0xffffff, 1).setOrigin(1, 0.5);
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, 70, 36, 15, 0x3f4c4f));
+		this.add
+			.container(100 + 100 * index, 250, [background, priceText, sb])
+			.setDepth(2)
+			.setSize(70, 36)
+			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.gameScene.sync(() => this.purchaseItem(item));
 			});
@@ -97,7 +85,7 @@ class StoreScene extends Phaser.Scene {
 		const price = item.VirtualCurrencyPrices.SB;
 		PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
 			if (e !== null) {
-				console.log(e);
+				this.showToast("Not enough snowballs");
 			} else {
 				this.gameScene.totalSnowballs -= price;
 				PlayFabClient.ExecuteCloudScript(
@@ -111,8 +99,8 @@ class StoreScene extends Phaser.Scene {
 					},
 					(a, b) => {
 						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
-						console.log("Update item level to 1 result:", newItem);
 						this.gameScene.makeItem(newItem);
+						this.showToast(`1 ${item.DisplayName.toLowerCase()} successfully purchased`);
 					}
 				);
 
@@ -162,6 +150,36 @@ class StoreScene extends Phaser.Scene {
 		this.popup.setX(pointer.x);
 		this.popup.setY(pointer.y);
 		this.popup.setVisible(true);
+	}
+
+	makeToast() {
+		const toastText = this.add.text(0, 0, "", { fontFamily: fontFamily });
+		const bg = this.add.existing(
+			new RoundRectangle(this, 0, 0, 0, 0, 15, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1)
+		);
+		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(1);
+	}
+
+	showToast(message: string) {
+		const toastText = this.toast.getAt(1) as Phaser.GameObjects.Text;
+		toastText.setText(message).setAlign("center").setOrigin(0.5, 0.5);
+
+		const bg = this.toast.getAt(0) as RoundRectangle;
+		bg.width = toastText.width + 16;
+		bg.height = toastText.height + 8;
+
+		this.toast.setPosition(400, 8 + bg.height / 2);
+		this.add.tween({
+			targets: [this.toast],
+			ease: "Sine.easeIn",
+			duration: 300,
+			alpha: 1,
+			completeDelay: 1000,
+			onComplete: () => {
+				this.toast.setAlpha(0);
+			},
+			callbackScope: this,
+		});
 	}
 }
 

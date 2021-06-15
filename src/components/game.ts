@@ -1,5 +1,6 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
+import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 
 enum itemType {
 	Penguin = "Penguin",
@@ -37,6 +38,7 @@ class GameScene extends Phaser.Scene {
 	};
 	snowballText: Phaser.GameObjects.Text;
 	popup: Phaser.GameObjects.Container;
+	toast: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
@@ -55,6 +57,7 @@ class GameScene extends Phaser.Scene {
 			Torch: { Description: "", Levels: {}, Instances: {} },
 			Fishie: { Description: "", Levels: {}, Instances: {} },
 		};
+		this.makeToast();
 		this.makePopup();
 		this.anims.create({
 			key: "penguin_bounce",
@@ -94,7 +97,7 @@ class GameScene extends Phaser.Scene {
 					const sb = Math.floor(elapsedSeconds / (this.IGLOO_DELAY / 1000)) * numberOfIgloos;
 					this.totalSnowballs += sb;
 					this.totalAddedSnowballs += sb;
-					console.log("Amount of snowballs added by Igloo factories while player was gone", sb);
+					this.showToast(`${sb} snowballs added by \nIgloo factories while \nplayer was gone`);
 				}
 			});
 		});
@@ -391,12 +394,12 @@ class GameScene extends Phaser.Scene {
 		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const sb = result.data.VirtualCurrency.SB;
 			if (!(newLevel.toString() in itemType.Levels)) {
-				console.log(`${newLevel} is not a valid level`);
+				this.showToast(`${newLevel} is not a valid level`);
 				return;
 			}
 			const cost = itemType.Levels[newLevel].Cost;
 			if (Number(cost) > sb) {
-				console.log("Insufficient funds");
+				this.showToast("Insufficient funds");
 				return;
 			}
 			PlayFabClient.ExecuteCloudScript(
@@ -420,9 +423,39 @@ class GameScene extends Phaser.Scene {
 		});
 	}
 
+	makeToast() {
+		const toastText = this.add.text(0, 0, "", { fontFamily: fontFamily });
+		const bg = this.add.existing(
+			new RoundRectangle(this, 0, 0, 0, 0, 15, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1)
+		);
+		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(1);
+	}
+
+	showToast(message: string) {
+		const toastText = this.toast.getAt(1) as Phaser.GameObjects.Text;
+		toastText.setText(message).setAlign("center").setOrigin(0.5, 0.5);
+
+		const bg = this.toast.getAt(0) as RoundRectangle;
+		bg.width = toastText.width + 16;
+		bg.height = toastText.height + 8;
+
+		this.toast.setPosition(400, 8 + bg.height / 2);
+		this.add.tween({
+			targets: [this.toast],
+			ease: "Sine.easeIn",
+			duration: 300,
+			alpha: 1,
+			completeDelay: 1000,
+			onComplete: () => {
+				this.toast.setAlpha(0);
+			},
+			callbackScope: this,
+		});
+	}
+
 	sync(func?: () => any) {
 		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, (e, r) => {
-			console.log("Last synced result", r);
+			this.showToast("Saved");
 		});
 
 		const totalAdded = this.totalAddedSnowballs;
