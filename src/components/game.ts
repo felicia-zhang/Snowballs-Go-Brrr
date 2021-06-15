@@ -9,26 +9,14 @@ enum itemType {
 	Fishie = "Fishie",
 }
 
-enum consumableItemType {
-	Torch = "Torch",
-	Fishie = "Fishie",
-}
-
 class GameScene extends Phaser.Scene {
 	SYNC_DELAY = 60000;
-	PENGUIN_DELAY = 3000;
-	IGLOO_DELAY = 30000;
-	TORCH_DELAY = 9000;
-	FISHIE_DELAY = 9000;
-	TIME_SCALE = 1;
+	AUTO_DELAY = 30000;
+	CLICK_MULTIPLIER = 1;
 	totalSnowballs: number;
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	isAuto: boolean;
-	penguinRegularTimers: { [key: string]: { Sprite: Phaser.GameObjects.Sprite; Timer: Phaser.Time.TimerEvent } };
-	penguinLoopTimers: Phaser.Time.TimerEvent[];
-	consumableItemsSprites: { [key in consumableItemType]: { [key: string]: Phaser.GameObjects.Sprite } };
 	itemsMap: {
 		[key in itemType]: {
 			Description: string;
@@ -47,10 +35,6 @@ class GameScene extends Phaser.Scene {
 	create() {
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
-		this.isAuto = false;
-		this.penguinRegularTimers = {};
-		this.penguinLoopTimers = [];
-		this.consumableItemsSprites = { Torch: {}, Fishie: {} };
 		this.itemsMap = {
 			Penguin: { Description: "", Levels: {}, Instances: {} },
 			Igloo: { Description: "", Levels: {}, Instances: {} },
@@ -94,7 +78,10 @@ class GameScene extends Phaser.Scene {
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
 					const numberOfIgloos = Object.keys(this.itemsMap.Igloo.Instances).length;
-					const sb = Math.floor(elapsedSeconds / (this.IGLOO_DELAY / 1000)) * numberOfIgloos;
+					const numberOfTorches = Object.keys(this.itemsMap.Torch.Instances).length;
+					const sb =
+						Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfIgloos +
+						Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfTorches;
 					this.totalSnowballs += sb;
 					this.totalAddedSnowballs += sb;
 					this.showToast(`${sb} snowballs added by \nIgloo factories while \nplayer was gone`);
@@ -146,10 +133,8 @@ class GameScene extends Phaser.Scene {
 			sprite = this.makeIgloo(index, inventory);
 		} else if (inventory.DisplayName === "Torch") {
 			sprite = this.makeTorch(index, inventory);
-			this.consumableItemsSprites[inventory.DisplayName][inventory.ItemInstanceId] = sprite;
 		} else if (inventory.DisplayName === "Fishie") {
 			sprite = this.makeFishie(index, inventory);
-			this.consumableItemsSprites[inventory.DisplayName][inventory.ItemInstanceId] = sprite;
 		}
 		sprite
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
@@ -168,7 +153,6 @@ class GameScene extends Phaser.Scene {
 	}
 
 	makePenguin(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		const data = { Sprite: null, Timer: null };
 		const sprite = this.add
 			.sprite(index * 120, 60, "penguin3")
 			.setOrigin(0, 0)
@@ -177,162 +161,57 @@ class GameScene extends Phaser.Scene {
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
 					this.totalManualPenguinClicks += 1;
-					sprite.anims.play("penguin_bounce");
-					sprite.disableInteractive();
-					const penguinTimer = this.time.addEvent({
-						timeScale: this.TIME_SCALE,
-						delay: this.PENGUIN_DELAY,
-						callback() {
-							sprite.anims.pause();
-							sprite.setInteractive({ useHandCursor: true });
-							this.totalSnowballs += 1;
-							this.totalAddedSnowballs += 1;
-							penguinTimer.remove(false);
-						},
-						callbackScope: this,
-					});
-					data.Timer = penguinTimer;
+					this.totalAddedSnowballs += 1;
+					this.totalSnowballs += 1;
+					if (!sprite.anims.isPlaying) {
+						sprite.anims.play("penguin_bounce");
+					}
 				}
 			});
-		data.Sprite = sprite;
-		this.penguinRegularTimers[inventory.ItemInstanceId] = data;
 		return sprite;
 	}
 
 	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		const sprite = this.add
+		this.time.addEvent({
+			delay: this.AUTO_DELAY,
+			loop: true,
+			callback: () => {
+				console.log(`Igloo ${inventory.ItemInstanceId} added 10 snowball`);
+				this.totalSnowballs += 10;
+				this.totalAddedSnowballs += 10;
+			},
+		});
+		return this.add
 			.sprite(index * 220, 210, "igloo")
 			.setOrigin(0, 0)
 			.setScale(0.3)
 			.setInteractive();
+	}
+
+	makeTorch(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		this.time.addEvent({
-			delay: this.IGLOO_DELAY,
+			delay: this.AUTO_DELAY,
 			loop: true,
 			callback: () => {
-				console.log(`Igloo ${inventory.ItemInstanceId} added 1 snowball`);
+				console.log(`Torch ${inventory.ItemInstanceId} added 1 snowball`);
 				this.totalSnowballs += 1;
 				this.totalAddedSnowballs += 1;
 			},
 		});
-		return sprite;
-	}
-
-	makeTorch(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		const sprite = this.add
+		return this.add
 			.sprite(index * 70, 360, "fire2")
 			.setOrigin(0, 0)
 			.setScale(0.3)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (pointer.leftButtonReleased()) {
-					if (this.TIME_SCALE === 13) {
-						console.log("Torches already max out penguin speed");
-					} else {
-						PlayFabClient.ConsumeItem(
-							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
-							(e, r) => console.log("Consumed torch")
-						);
-						sprite.anims.play("fire_flame");
-						sprite.disableInteractive();
-						this.speedUpPenguins();
-						const torchTimer = this.time.addEvent({
-							delay: this.TORCH_DELAY,
-							callback() {
-								this.removeConsumableItemSprite(sprite, inventory, 70);
-								this.slowDownPenguins();
-								torchTimer.remove(false);
-							},
-							callbackScope: this,
-						});
-					}
-				}
-			});
-		return sprite;
+			.setInteractive({ useHandCursor: true });
 	}
 
 	makeFishie(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		const sprite = this.add
+		this.CLICK_MULTIPLIER += 1;
+		return this.add
 			.sprite(index * 120, 460, "fish")
 			.setOrigin(0, 0)
 			.setScale(0.3)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (pointer.leftButtonReleased()) {
-					if (this.isAuto) {
-						console.log("Fishie already clicked");
-					} else {
-						PlayFabClient.ConsumeItem(
-							{ ConsumeCount: 1, ItemInstanceId: inventory.ItemInstanceId },
-							(e, r) => console.log("Consumed fishie")
-						);
-						sprite.disableInteractive();
-						this.isAuto = true;
-						this.startPenguins();
-						const fishieTimer = this.time.addEvent({
-							delay: this.FISHIE_DELAY,
-							callback() {
-								this.removeConsumableItemSprite(sprite, inventory, 120);
-								this.isAuto = false;
-								this.stopPenguins();
-								fishieTimer.remove(false);
-							},
-							callbackScope: this,
-						});
-					}
-				}
-			});
-		return sprite;
-	}
-
-	startPenguins() {
-		Object.keys(this.penguinRegularTimers).forEach(key => {
-			const sprite = this.penguinRegularTimers[key].Sprite;
-			const timer = this.penguinRegularTimers[key].Timer;
-			const timerConfig = {
-				timeScale: this.TIME_SCALE,
-				delay: this.PENGUIN_DELAY,
-				callback() {
-					this.totalSnowballs += 1;
-					this.totalAddedSnowballs += 1;
-				},
-				loop: true,
-				callbackScope: this,
-			};
-			if (timer !== null && sprite.anims.isPlaying) {
-				timer.callback = () => {
-					this.totalSnowballs += 1;
-					this.totalAddedSnowballs += 1;
-					timer.remove(false);
-					const penguinLoopTimer = this.time.addEvent(timerConfig);
-					this.penguinLoopTimers.push(penguinLoopTimer);
-				};
-			} else {
-				sprite.anims.play("penguin_bounce");
-				sprite.disableInteractive();
-				const penguinLoopTimer = this.time.addEvent(timerConfig);
-				this.penguinLoopTimers.push(penguinLoopTimer);
-			}
-		});
-	}
-
-	stopPenguins() {
-		this.penguinLoopTimers.forEach(timer => timer.remove(false));
-		this.penguinLoopTimers = [];
-		Object.keys(this.penguinRegularTimers).forEach(key => {
-			const sprite = this.penguinRegularTimers[key].Sprite;
-			sprite.anims.pause();
-			sprite.setInteractive({ useHandCursor: true });
-		});
-	}
-
-	speedUpPenguins() {
-		this.TIME_SCALE += 2;
-		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
-	}
-
-	slowDownPenguins() {
-		this.TIME_SCALE -= 2;
-		this.penguinLoopTimers.forEach(timer => (timer.timeScale = this.TIME_SCALE));
+			.setInteractive({ useHandCursor: true });
 	}
 
 	makePopup() {
@@ -344,21 +223,6 @@ class GameScene extends Phaser.Scene {
 		this.popup = container;
 		this.popup.setVisible(false);
 		this.popup.setDepth(1);
-	}
-
-	removeConsumableItemSprite(
-		removedSprite: Phaser.GameObjects.Sprite,
-		inventory: PlayFabClientModels.ItemInstance,
-		delta: number
-	) {
-		removedSprite.destroy(true);
-		const consumableItemsType = this.consumableItemsSprites[inventory.DisplayName];
-		delete this.itemsMap[inventory.DisplayName].Instances[inventory.ItemInstanceId];
-		delete consumableItemsType[inventory.ItemInstanceId];
-		Object.keys(consumableItemsType).forEach((instanceId, i) => {
-			const sprite = consumableItemsType[instanceId];
-			sprite.x = i * delta;
-		});
 	}
 
 	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
@@ -460,7 +324,7 @@ class GameScene extends Phaser.Scene {
 
 		const totalAdded = this.totalAddedSnowballs;
 		const totalClicks = this.totalManualPenguinClicks;
-		if (this.totalAddedSnowballs === 0) {
+		if (totalAdded === 0) {
 			console.log("No change to snowballs since last sync");
 			if (func !== undefined) {
 				func();
@@ -469,12 +333,12 @@ class GameScene extends Phaser.Scene {
 			PlayFabClient.ExecuteCloudScript(
 				{
 					FunctionName: "addUserVirtualCurrency",
-					FunctionParameter: { amount: this.totalAddedSnowballs, virtualCurrency: "SB" },
+					FunctionParameter: { amount: totalAdded, virtualCurrency: "SB" },
 				},
 				(error, result) => {
-					console.log("Amount of snowballs added:", this.totalAddedSnowballs);
-					this.totalAddedSnowballs = 0;
-					this.totalManualPenguinClicks = 0;
+					console.log("Amount of snowballs added:", totalAdded);
+					this.totalAddedSnowballs -= totalAdded;
+					this.totalManualPenguinClicks -= totalClicks;
 					PlayFabClient.ExecuteCloudScript(
 						{
 							FunctionName: "updateStatistics",
