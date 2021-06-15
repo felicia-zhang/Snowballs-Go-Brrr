@@ -425,8 +425,7 @@ class GameScene extends Phaser.Scene {
 	makeToast() {
 		const toastText = this.add.text(0, 0, "", { fontFamily: fontFamily });
 		const bg = this.add.rectangle(0, 0, 0, 0, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1);
-		const container = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(2);
-		this.toast = container;
+		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(1);
 	}
 
 	showToast(message: string) {
@@ -446,6 +445,7 @@ class GameScene extends Phaser.Scene {
 			onComplete: () => {
 				this.toast.setAlpha(0);
 			},
+			callbackScope: this,
 		});
 	}
 
