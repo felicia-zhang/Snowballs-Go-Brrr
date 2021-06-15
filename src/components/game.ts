@@ -2,6 +2,12 @@ import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 
+interface ItemDetail {
+	Description: string;
+	Levels: { [key: string]: { Cost: string; Effect: string } };
+	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
+}
+
 class GameScene extends Phaser.Scene {
 	SYNC_DELAY = 60000;
 	AUTO_DELAY = 30000;
@@ -10,13 +16,8 @@ class GameScene extends Phaser.Scene {
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	itemsMap: {
-		[key: number]: {
-			Description: string;
-			Levels: { [key: string]: { Cost: string; Effect: string } };
-			Instances: { [key: string]: PlayFabClientModels.ItemInstance };
-		};
-	};
+	catalogItems: PlayFabClientModels.CatalogItem[];
+	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	popup: Phaser.GameObjects.Container;
 	toast: Phaser.GameObjects.Container;
@@ -29,44 +30,46 @@ class GameScene extends Phaser.Scene {
 		this.add.image(400, 300, "sky");
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
+		this.catalogItems = [];
 		this.itemsMap = {};
 		this.makeToast();
 		this.makePopup();
 		this.makePenguin();
 
+		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
+				this.makeCatalogItem(item);
 				this.itemsMap[item.ItemId] = {
 					Description: item.Description,
 					Levels: JSON.parse(item.CustomData)["Levels"],
 					Instances: {},
 				};
 			});
-		});
 
-		const scene = this;
-		PlayFabClient.GetUserInventory({}, (error, result) => {
-			const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
-			const sb = result.data.VirtualCurrency.SB;
-			scene.totalSnowballs = sb;
-			inventories.forEach(inventory => this.makeItem(inventory));
+			PlayFabClient.GetUserInventory({}, (error, result) => {
+				const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
+				const sb = result.data.VirtualCurrency.SB;
+				scene.totalSnowballs = sb;
+				inventories.forEach(inventory => this.makeItem(inventory));
 
-			PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
-				if (result.data.Data["auto"] !== undefined) {
-					const lastUpdated = result.data.Data["auto"].Value;
-					const elapsed = new Date().valueOf() - Number(lastUpdated);
-					const elapsedSeconds = elapsed / 1000;
-					console.log("Elapsed seconds:", elapsedSeconds);
-					//TODO: needs to be fixed
-					// const numberOfIgloos = Object.keys(this.itemsMap.3.Instances).length;
-					// const numberOfTorches = Object.keys(this.itemsMap.1.Instances).length;
-					// const sb =
-					// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfIgloos +
-					// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfTorches;
-					// this.totalSnowballs += sb;
-					// this.totalAddedSnowballs += sb;
-					// this.showToast(`${sb} snowballs added by \nIgloo factories while \nplayer was gone`);
-				}
+				PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
+					if (result.data.Data["auto"] !== undefined) {
+						const lastUpdated = result.data.Data["auto"].Value;
+						const elapsed = new Date().valueOf() - Number(lastUpdated);
+						const elapsedSeconds = elapsed / 1000;
+						console.log("Elapsed seconds:", elapsedSeconds);
+						//TODO: needs to be fixed
+						// const numberOfIgloos = Object.keys(this.itemsMap.3.Instances).length;
+						// const numberOfTorches = Object.keys(this.itemsMap.1.Instances).length;
+						// const sb =
+						// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfIgloos +
+						// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfTorches;
+						// this.totalSnowballs += sb;
+						// this.totalAddedSnowballs += sb;
+						// this.showToast(`${sb} snowballs added by \nIgloo factories while \nplayer was gone`);
+					}
+				});
 			});
 		});
 
@@ -79,15 +82,7 @@ class GameScene extends Phaser.Scene {
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.add
-			.text(700, 400, "STORE", { fontFamily: fontFamily })
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.scene.launch("Store");
-				this.scene.bringToTop("Store");
-			});
-
-		this.add
-			.text(700, 450, "MENU", { fontFamily: fontFamily })
+			.text(100, 450, "MENU", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Menu");
@@ -126,12 +121,89 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
+	makeCatalogItem(item: PlayFabClientModels.CatalogItem) {
+		const index = this.catalogItems.length;
+		this.catalogItems.push(item);
+		let image: Phaser.GameObjects.Image;
+		if (item.DisplayName === "Igloo Factory") {
+			image = this.add.image(100 + 100 * index, 200, "igloo").setScale(0.1);
+		} else if (item.DisplayName === "Torch") {
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+		} else if (item.DisplayName === "Snowman") {
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+		} else if (item.DisplayName === "Snowrhombus") {
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+		} else if (item.DisplayName === "Arctic Vault") {
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+		}
+		image
+			.setInteractive()
+			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
+				this.showCatalogItemDetails(pointer, localX, localY, event, item)
+			)
+			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
+				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
+				levelsContainer.removeAll(true);
+				this.popup.setVisible(false);
+			});
+
+		const priceText = this.add
+			.text(0, 0, `${item.VirtualCurrencyPrices.SB}`, { fontFamily: fontFamily })
+			.setOrigin(1, 0.5);
+		const sb = this.add.circle(priceText.width + 15, 0, 10, 0xffffff, 1).setOrigin(1, 0.5);
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, 70, 36, 15, 0x3f4c4f));
+		this.add
+			.container(100 + 100 * index, 250, [background, priceText, sb])
+			.setDepth(2)
+			.setSize(70, 36)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				this.sync(() => this.purchaseItem(item));
+			});
+	}
+
+	purchaseItem(item: PlayFabClientModels.CatalogItem) {
+		const price = item.VirtualCurrencyPrices.SB;
+		PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
+			if (e !== null) {
+				this.showToast("Not enough snowballs");
+			} else {
+				this.totalSnowballs -= price;
+				PlayFabClient.ExecuteCloudScript(
+					{
+						FunctionName: "updateItemLevel",
+						FunctionParameter: {
+							cost: "0",
+							instanceId: r.data.Items[0].ItemInstanceId,
+							level: "1",
+						},
+					},
+					(a, b) => {
+						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
+						this.makeItem(newItem);
+						this.showToast(`1 ${item.DisplayName.toLowerCase()} successfully purchased`);
+					}
+				);
+
+				PlayFabClient.ExecuteCloudScript(
+					{
+						FunctionName: "updateStatistics",
+						FunctionParameter: {
+							[`${item.ItemId}_purchased`]: 1,
+							//TODO: cloudscript needs update
+						},
+					},
+					() => {}
+				);
+			}
+		});
+	}
+
 	makeItem(inventory: PlayFabClientModels.ItemInstance) {
-		const itemType = this.itemsMap[inventory.DisplayName];
+		const itemType = this.itemsMap[inventory.ItemId];
 		const index = Object.keys(itemType.Instances).length;
 		itemType.Instances[inventory.ItemInstanceId] = inventory;
 		let sprite: Phaser.GameObjects.Sprite;
-		console.log(inventory.DisplayName);
 		if (inventory.DisplayName === "Igloo Factory") {
 			sprite = this.makeIgloo(index, inventory);
 		} else if (inventory.DisplayName === "Torch") {
@@ -231,7 +303,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
-		const itemType = this.itemsMap[item.DisplayName];
+		const itemType = this.itemsMap[item.ItemId];
 
 		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
 		nameText.setText(`Name: ${item.DisplayName}`);
@@ -256,8 +328,38 @@ class GameScene extends Phaser.Scene {
 		this.popup.setVisible(true);
 	}
 
+	showCatalogItemDetails(
+		pointer: Phaser.Input.Pointer,
+		localX,
+		localY,
+		event,
+		item: PlayFabClientModels.CatalogItem
+	) {
+		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
+		nameText.setText(`Name: ${item.DisplayName}`);
+		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
+		descriptionText.setText(`Description: ${item.Description}`);
+		const priceText = this.popup.getAt(2) as Phaser.GameObjects.Text;
+		priceText.setText(`Price: ${item.VirtualCurrencyPrices.SB}`);
+
+		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
+		const levels = JSON.parse(item.CustomData)["Levels"];
+		Object.keys(levels).forEach((key, i) => {
+			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
+			const costText = this.add.text(50, i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
+			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key]["Effect"]}`, {
+				fontFamily: fontFamily,
+			});
+			levelsContainer.add([levelText, costText, effectText]);
+		});
+
+		this.popup.setX(pointer.x);
+		this.popup.setY(pointer.y);
+		this.popup.setVisible(true);
+	}
+
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
-		const itemType = this.itemsMap[item.DisplayName];
+		const itemType = this.itemsMap[item.ItemId];
 
 		const newLevel = Number(item.CustomData["Level"]) + 1;
 		PlayFabClient.GetUserInventory({}, (error, result) => {

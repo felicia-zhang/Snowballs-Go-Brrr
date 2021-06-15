@@ -3,7 +3,6 @@ import { PlayFabClient } from "playfab-sdk";
 import LeaderboardScene from "./leaderboard";
 import GameScene from "./game";
 import SigninScene from "./signin";
-import StoreScene from "./store";
 import sky from "../assets/sky.png";
 import fire from "../assets/fire.png";
 import igloo from "../assets/igloo.png";
@@ -31,7 +30,6 @@ class Controller extends Phaser.Scene {
 	create() {
 		this.game.input.mouse.disableContextMenu();
 		this.scene.add("Leaderboard", LeaderboardScene);
-		this.scene.add("Store", StoreScene);
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Menu", MenuScene);
 		this.scene.add("Game", GameScene);
