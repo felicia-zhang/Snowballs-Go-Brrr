@@ -46,14 +46,16 @@ class StoreScene extends Phaser.Scene {
 		const index = this.items.length;
 		this.items.push(item);
 		let image: Phaser.GameObjects.Image;
-		if (item.DisplayName === "Penguin") {
-			image = this.add.image(100 + 100 * index, 200, "penguin3").setScale(0.1);
-		} else if (item.DisplayName === "Igloo") {
+		if (item.DisplayName === "Igloo Factory") {
 			image = this.add.image(100 + 100 * index, 200, "igloo").setScale(0.1);
 		} else if (item.DisplayName === "Torch") {
 			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
-		} else if (item.DisplayName === "Fishie") {
-			image = this.add.image(100 + 100 * index, 200, "fish").setScale(0.1);
+		} else if (item.DisplayName === "Snowman") {
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+		} else if (item.DisplayName === "Snowrhombus") {
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+		} else if (item.DisplayName === "Arctic Vault") {
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
 		}
 		image
 			.setInteractive()

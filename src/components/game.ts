@@ -2,13 +2,6 @@ import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 
-enum itemType {
-	Penguin = "Penguin",
-	Igloo = "Igloo",
-	Torch = "Torch",
-	Fishie = "Fishie",
-}
-
 class GameScene extends Phaser.Scene {
 	SYNC_DELAY = 60000;
 	AUTO_DELAY = 30000;
@@ -18,7 +11,7 @@ class GameScene extends Phaser.Scene {
 	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
 	itemsMap: {
-		[key in itemType]: {
+		[key: number]: {
 			Description: string;
 			Levels: { [key: string]: { Cost: string; Effect: string } };
 			Instances: { [key: string]: PlayFabClientModels.ItemInstance };
@@ -33,34 +26,21 @@ class GameScene extends Phaser.Scene {
 	}
 
 	create() {
+		this.add.image(400, 300, "sky");
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
-		this.itemsMap = {
-			Penguin: { Description: "", Levels: {}, Instances: {} },
-			Igloo: { Description: "", Levels: {}, Instances: {} },
-			Torch: { Description: "", Levels: {}, Instances: {} },
-			Fishie: { Description: "", Levels: {}, Instances: {} },
-		};
+		this.itemsMap = {};
 		this.makeToast();
 		this.makePopup();
-		this.anims.create({
-			key: "penguin_bounce",
-			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.anims.create({
-			key: "fire_flame",
-			frames: [{ key: "fire2" }, { key: "fire1" }, { key: "fire3" }],
-			frameRate: 8,
-			repeat: -1,
-		});
+		this.makePenguin();
 
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				const itemType = this.itemsMap[item.DisplayName];
-				itemType.Description = item.Description;
-				itemType.Levels = JSON.parse(item.CustomData)["Levels"];
+				this.itemsMap[item.ItemId] = {
+					Description: item.Description,
+					Levels: JSON.parse(item.CustomData)["Levels"],
+					Instances: {},
+				};
 			});
 		});
 
@@ -77,14 +57,15 @@ class GameScene extends Phaser.Scene {
 					const elapsed = new Date().valueOf() - Number(lastUpdated);
 					const elapsedSeconds = elapsed / 1000;
 					console.log("Elapsed seconds:", elapsedSeconds);
-					const numberOfIgloos = Object.keys(this.itemsMap.Igloo.Instances).length;
-					const numberOfTorches = Object.keys(this.itemsMap.Torch.Instances).length;
-					const sb =
-						Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfIgloos +
-						Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfTorches;
-					this.totalSnowballs += sb;
-					this.totalAddedSnowballs += sb;
-					this.showToast(`${sb} snowballs added by \nIgloo factories while \nplayer was gone`);
+					//TODO: needs to be fixed
+					// const numberOfIgloos = Object.keys(this.itemsMap.3.Instances).length;
+					// const numberOfTorches = Object.keys(this.itemsMap.1.Instances).length;
+					// const sb =
+					// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfIgloos +
+					// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfTorches;
+					// this.totalSnowballs += sb;
+					// this.totalAddedSnowballs += sb;
+					// this.showToast(`${sb} snowballs added by \nIgloo factories while \nplayer was gone`);
 				}
 			});
 		});
@@ -94,8 +75,6 @@ class GameScene extends Phaser.Scene {
 			loop: true,
 			callback: () => this.sync(),
 		});
-
-		this.add.image(400, 300, "sky");
 
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
@@ -122,19 +101,47 @@ class GameScene extends Phaser.Scene {
 		}
 	}
 
+	makePenguin() {
+		this.anims.create({
+			key: "penguin_bounce",
+			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
+			frameRate: 8,
+			repeat: -1,
+		});
+		const sprite = this.add
+			.sprite(0, 60, "penguin3")
+			.setOrigin(0, 0)
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (pointer.leftButtonReleased()) {
+					this.totalManualPenguinClicks += 1;
+					this.totalAddedSnowballs += 1;
+					this.totalSnowballs += 1;
+					if (!sprite.anims.isPlaying) {
+						sprite.anims.play("penguin_bounce");
+					}
+				}
+			});
+		return sprite;
+	}
+
 	makeItem(inventory: PlayFabClientModels.ItemInstance) {
 		const itemType = this.itemsMap[inventory.DisplayName];
 		const index = Object.keys(itemType.Instances).length;
 		itemType.Instances[inventory.ItemInstanceId] = inventory;
 		let sprite: Phaser.GameObjects.Sprite;
-		if (inventory.DisplayName === "Penguin") {
-			sprite = this.makePenguin(index, inventory);
-		} else if (inventory.DisplayName === "Igloo") {
+		console.log(inventory.DisplayName);
+		if (inventory.DisplayName === "Igloo Factory") {
 			sprite = this.makeIgloo(index, inventory);
 		} else if (inventory.DisplayName === "Torch") {
 			sprite = this.makeTorch(index, inventory);
-		} else if (inventory.DisplayName === "Fishie") {
-			sprite = this.makeFishie(index, inventory);
+		} else if (inventory.DisplayName === "Snowman") {
+			sprite = this.makeSnowman(index, inventory);
+		} else if (inventory.DisplayName === "Snowrhombus") {
+			sprite = this.makeRhombus(index, inventory);
+		} else if (inventory.DisplayName === "Arctic Vault") {
+			sprite = this.makeVault(index, inventory);
 		}
 		sprite
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
@@ -150,25 +157,6 @@ class GameScene extends Phaser.Scene {
 					this.sync(() => this.upgradeItemLevel(inventory));
 				}
 			});
-	}
-
-	makePenguin(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		const sprite = this.add
-			.sprite(index * 120, 60, "penguin3")
-			.setOrigin(0, 0)
-			.setScale(0.3)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (pointer.leftButtonReleased()) {
-					this.totalManualPenguinClicks += 1;
-					this.totalAddedSnowballs += 1;
-					this.totalSnowballs += 1;
-					if (!sprite.anims.isPlaying) {
-						sprite.anims.play("penguin_bounce");
-					}
-				}
-			});
-		return sprite;
 	}
 
 	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
@@ -199,13 +187,30 @@ class GameScene extends Phaser.Scene {
 			},
 		});
 		return this.add
-			.sprite(index * 70, 360, "fire2")
+			.sprite(index * 70, 360, "fire")
 			.setOrigin(0, 0)
 			.setScale(0.3)
 			.setInteractive({ useHandCursor: true });
 	}
 
-	makeFishie(index: number, inventory: PlayFabClientModels.ItemInstance) {
+	makeSnowman(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		return this.add
+			.sprite(index * 120, 460, "fish")
+			.setOrigin(0, 0)
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true });
+	}
+
+	makeRhombus(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		this.CLICK_MULTIPLIER += 1;
+		return this.add
+			.sprite(index * 120, 460, "fish")
+			.setOrigin(0, 0)
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true });
+	}
+
+	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		this.CLICK_MULTIPLIER += 1;
 		return this.add
 			.sprite(index * 120, 460, "fish")
