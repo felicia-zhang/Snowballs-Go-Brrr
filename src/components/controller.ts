@@ -5,14 +5,13 @@ import GameScene from "./game";
 import SigninScene from "./signin";
 import StoreScene from "./store";
 import sky from "../assets/sky.png";
-import fire1 from "../assets/fire1.png";
-import fire2 from "../assets/fire2.png";
-import fire3 from "../assets/fire3.png";
+import fire from "../assets/fire.png";
 import fish from "../assets/fish.png";
 import igloo from "../assets/igloo.png";
 import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
 import penguin3 from "../assets/penguin3.png";
+import snowball from "../assets/snowball.png";
 import MenuScene from "./menu";
 
 class Controller extends Phaser.Scene {
@@ -22,14 +21,13 @@ class Controller extends Phaser.Scene {
 
 	preload() {
 		this.load.image("sky", sky);
-		this.load.image("fire1", fire1, { frameWidth: 210, frameHeight: 270 } as PlayFab.ImageFrameConfig);
-		this.load.image("fire2", fire2, { frameWidth: 210, frameHeight: 270 } as PlayFab.ImageFrameConfig);
-		this.load.image("fire3", fire3, { frameWidth: 210, frameHeight: 270 } as PlayFab.ImageFrameConfig);
+		this.load.image("fire", fire, { frameWidth: 210, frameHeight: 270 } as PlayFab.ImageFrameConfig);
 		this.load.image("fish", fish, { frameWidth: 360, frameHeight: 244 } as PlayFab.ImageFrameConfig);
 		this.load.image("igloo", igloo, { frameWidth: 770, frameHeight: 620 } as PlayFab.ImageFrameConfig);
 		this.load.image("penguin1", penguin1, { frameWidth: 355, frameHeight: 450 } as PlayFab.ImageFrameConfig);
 		this.load.image("penguin2", penguin2, { frameWidth: 355, frameHeight: 450 } as PlayFab.ImageFrameConfig);
 		this.load.image("penguin3", penguin3, { frameWidth: 355, frameHeight: 450 } as PlayFab.ImageFrameConfig);
+		this.load.image("snowball", snowball, { frameWidth: 100, frameHeight: 100 } as PlayFab.ImageFrameConfig);
 	}
 
 	create() {

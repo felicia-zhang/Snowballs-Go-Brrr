@@ -51,7 +51,7 @@ class StoreScene extends Phaser.Scene {
 		} else if (item.DisplayName === "Igloo") {
 			image = this.add.image(100 + 100 * index, 200, "igloo").setScale(0.1);
 		} else if (item.DisplayName === "Torch") {
-			image = this.add.image(100 + 100 * index, 200, "fire2").setScale(0.1);
+			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
 		} else if (item.DisplayName === "Fishie") {
 			image = this.add.image(100 + 100 * index, 200, "fish").setScale(0.1);
 		}
@@ -108,7 +108,8 @@ class StoreScene extends Phaser.Scene {
 					{
 						FunctionName: "updateStatistics",
 						FunctionParameter: {
-							[`${item.DisplayName}_purchased`]: 1,
+							[`${item.ItemId}_purchased`]: 1,
+							//TODO: cloudscript needs update
 						},
 					},
 					() => {}
