@@ -154,7 +154,9 @@ class StoreScene extends Phaser.Scene {
 
 	makeToast() {
 		const toastText = this.add.text(0, 0, "", { fontFamily: fontFamily });
-		const bg = this.add.rectangle(0, 0, 0, 0, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1);
+		const bg = this.add.existing(
+			new RoundRectangle(this, 0, 0, 0, 0, 15, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1)
+		);
 		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(1);
 	}
 
@@ -162,10 +164,11 @@ class StoreScene extends Phaser.Scene {
 		const toastText = this.toast.getAt(1) as Phaser.GameObjects.Text;
 		toastText.setText(message).setAlign("center").setOrigin(0.5, 0.5);
 
-		const bg = this.toast.getAt(0) as Phaser.GameObjects.Rectangle;
-		bg.setSize(toastText.width + 16, toastText.height + 8).setOrigin(0.5, 0.5);
+		const bg = this.toast.getAt(0) as RoundRectangle;
+		bg.width = toastText.width + 16;
+		bg.height = toastText.height + 8;
 
-		this.toast.setPosition(400, 8 + bg.displayHeight / 2);
+		this.toast.setPosition(400, 8 + bg.height / 2);
 		this.add.tween({
 			targets: [this.toast],
 			ease: "Sine.easeIn",
