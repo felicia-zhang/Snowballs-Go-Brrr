@@ -36,8 +36,8 @@ class GameScene extends Phaser.Scene {
 		this.makeToast();
 		this.makePopup();
 		this.add.text(600, 20, "STORE", { fontFamily: fontFamily });
-		const background = this.add.existing(new RoundRectangle(this, 0, 330, 180, 520, 15, 0x1a252e));
-		this.storeContainer = this.add.container(690, 0, [background]);
+		const background = this.add.existing(new RoundRectangle(this, 0, 320, 220, 510, 15, 0x1a252e));
+		this.storeContainer = this.add.container(670, 0, [background]);
 		this.inventoryContainer = this.add.container(200, 0, []);
 		this.makeSnowball();
 
@@ -128,17 +128,24 @@ class GameScene extends Phaser.Scene {
 	makeCatalogItem(item: PlayFabClientModels.CatalogItem) {
 		const index = this.catalogItems.length;
 		this.catalogItems.push(item);
+		const background = this.add
+			.existing(new RoundRectangle(this, 0, 120 + index * 100, 200, 80, 15, 0x385666))
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				this.sync(() => this.purchaseItem(item));
+			});
+
 		let image: Phaser.GameObjects.Image;
 		if (item.DisplayName === "Igloo Factory") {
-			image = this.add.image(10, 100 + index * 100, "igloo").setScale(0.3);
+			image = this.add.image(-60, 120 + index * 100, "igloo").setScale(0.3);
 		} else if (item.DisplayName === "Bonfire") {
-			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.3);
+			image = this.add.image(-60, 120 + index * 100, "fire").setScale(0.3);
 		} else if (item.DisplayName === "Snowman") {
-			image = this.add.image(10, 100 + index * 100, "snowman").setScale(0.3);
+			image = this.add.image(-60, 120 + index * 100, "snowman").setScale(0.3);
 		} else if (item.DisplayName === "Mittens") {
-			image = this.add.image(10, 100 + index * 100, "mittens").setScale(0.3);
+			image = this.add.image(-60, 120 + index * 100, "mittens").setScale(0.3);
 		} else if (item.DisplayName === "Arctic Vault") {
-			image = this.add.image(10, 100 + index * 100, "vault").setScale(0.3);
+			image = this.add.image(-60, 120 + index * 100, "vault").setScale(0.3);
 		}
 		image
 			.setInteractive()
@@ -151,20 +158,15 @@ class GameScene extends Phaser.Scene {
 				this.popup.setVisible(false);
 			});
 
-		const priceText = this.add
-			.text(0, 0, `${item.VirtualCurrencyPrices.SB} snowballs`, { fontFamily: fontFamily })
-			.setOrigin(0.5, 0.5);
-		const background = this.add.existing(new RoundRectangle(this, 0, 0, priceText.width + 16, 36, 15, 0x385666));
-		const priceTag = this.add
-			.container(10, 150 + index * 100, [background, priceText])
-			.setDepth(2)
-			.setSize(70, 36)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.sync(() => this.purchaseItem(item));
-			});
+		const nameText = this.add.text(-20, 100 + index * 100, item.DisplayName, {
+			fontFamily: fontFamily,
+		});
+		const priceText = this.add.text(-20, 130 + index * 100, `${item.VirtualCurrencyPrices.SB} snowballs`, {
+			fontFamily: fontFamily,
+		});
 
-		this.storeContainer.add([image, priceTag]);
+		const row = this.add.container(0, 0, [background, image, nameText, priceText]);
+		this.storeContainer.add(row);
 	}
 
 	purchaseItem(item: PlayFabClientModels.CatalogItem) {
@@ -349,25 +351,25 @@ class GameScene extends Phaser.Scene {
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
 		const prevY = amountText.y;
-		this.add.tween({
-			targets: [amountText],
-			props: {
-				y: {
-					value: prevY - 100,
-					duration: 500,
-					ease: "Sine.easeIn",
-				},
-				alpha: {
-					value: 0,
-					duration: 500,
-					ease: "Sine.easeIn",
-				},
-			},
-			onStart: () => {
-				amountText.setAlpha(1);
-			},
-			callbackScope: this,
-		});
+		// this.add.tween({
+		// 	targets: [amountText],
+		// 	props: {
+		// 		y: {
+		// 			value: prevY - 100,
+		// 			duration: 500,
+		// 			ease: "Sine.easeIn",
+		// 		},
+		// 		alpha: {
+		// 			value: 0,
+		// 			duration: 500,
+		// 			ease: "Sine.easeIn",
+		// 		},
+		// 	},
+		// 	onStart: () => {
+		// 		amountText.setAlpha(1);
+		// 	},
+		// 	callbackScope: this,
+		// });
 	}
 
 	makePopup() {
