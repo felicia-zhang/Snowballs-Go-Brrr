@@ -126,7 +126,7 @@ class GameScene extends Phaser.Scene {
 		this.catalogItems.push(item);
 		let image: Phaser.GameObjects.Image;
 		if (item.DisplayName === "Igloo Factory") {
-			image = this.add.image(10, 100 + index * 100, "igloo").setScale(0.1);
+			image = this.add.image(10, 100 + index * 100, "igloo").setScale(0.3);
 		} else if (item.DisplayName === "Bonfire") {
 			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.3);
 		} else if (item.DisplayName === "Snowman") {
@@ -134,7 +134,7 @@ class GameScene extends Phaser.Scene {
 		} else if (item.DisplayName === "Mittens") {
 			image = this.add.image(10, 100 + index * 100, "mittens").setScale(0.3);
 		} else if (item.DisplayName === "Arctic Vault") {
-			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.1);
+			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.3);
 		}
 		image
 			.setInteractive()
@@ -233,21 +233,13 @@ class GameScene extends Phaser.Scene {
 		this.inventoryContainer.add(sprite);
 	}
 
-	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		this.time.addEvent({
-			delay: this.AUTO_DELAY,
-			loop: true,
-			callback: () => {
-				console.log(`Igloo ${inventory.ItemInstanceId} added 10 snowball`);
-				this.totalSnowballs += 10;
-				this.totalAddedSnowballs += 10;
-			},
-		});
+	makeMittens(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		this.CLICK_MULTIPLIER += 1;
 		return this.add
-			.sprite(index * 220, 300, "igloo")
+			.sprite(index * 100, 50, "mittens")
 			.setOrigin(0, 0)
 			.setScale(0.5)
-			.setInteractive();
+			.setInteractive({ useHandCursor: true });
 	}
 
 	makeFire(index: number, inventory: PlayFabClientModels.ItemInstance) {
@@ -261,7 +253,7 @@ class GameScene extends Phaser.Scene {
 			},
 		});
 		return this.add
-			.sprite(index * 70, 100, "fire")
+			.sprite(index * 100, 150, "fire")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
@@ -269,27 +261,35 @@ class GameScene extends Phaser.Scene {
 
 	makeSnowman(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		return this.add
-			.sprite(index * 120, 200, "snowman")
+			.sprite(index * 100, 250, "snowman")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
 	}
 
-	makeMittens(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		this.CLICK_MULTIPLIER += 1;
+	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		this.time.addEvent({
+			delay: this.AUTO_DELAY,
+			loop: true,
+			callback: () => {
+				console.log(`Igloo ${inventory.ItemInstanceId} added 10 snowball`);
+				this.totalSnowballs += 10;
+				this.totalAddedSnowballs += 10;
+			},
+		});
 		return this.add
-			.sprite(index * 120, 50, "mittens")
+			.sprite(index * 100, 350, "igloo")
 			.setOrigin(0, 0)
 			.setScale(0.5)
-			.setInteractive({ useHandCursor: true });
+			.setInteractive();
 	}
 
 	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		this.CLICK_MULTIPLIER += 1;
 		return this.add
-			.sprite(index * 120, 500, "fish")
+			.sprite(index * 100, 450, "fish")
 			.setOrigin(0, 0)
-			.setScale(0.3)
+			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
 	}
 
