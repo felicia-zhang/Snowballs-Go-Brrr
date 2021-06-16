@@ -111,9 +111,21 @@ class GameScene extends Phaser.Scene {
 	}
 
 	makeSnowball() {
+		this.anims.create({
+			key: "squish",
+			frames: [
+				{ key: "snowball1" },
+				{ key: "snowball2" },
+				{ key: "snowball3" },
+				{ key: "snowball2" },
+				{ key: "snowball1" },
+			],
+			frameRate: 8,
+		});
+
 		const amountText = this.add.text(0, 0, "", { fontFamily: fontFamily }).setAlpha(0).setDepth(10);
 		const sprite = this.add
-			.sprite(0, 60, "snowball")
+			.sprite(0, 60, "snowball1")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
@@ -127,7 +139,7 @@ class GameScene extends Phaser.Scene {
 					this.totalSnowballs += currentClickMultiplier;
 					this.showClickAnimation(amountText);
 					if (!sprite.anims.isPlaying) {
-						sprite.anims.play("penguin_bounce");
+						sprite.anims.play("squish");
 					}
 				}
 			});
@@ -216,9 +228,8 @@ class GameScene extends Phaser.Scene {
 							[`${itemDetail.ItemId}_purchased`]: 1,
 						},
 					},
-					() => {
-						// TODO: switch out store items
-					}
+					() => {}
+					//TODO: store needs to be a popup or something so we can fetch storeItems everytime
 				);
 			}
 		});
