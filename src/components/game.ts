@@ -21,6 +21,8 @@ class GameScene extends Phaser.Scene {
 	snowballText: Phaser.GameObjects.Text;
 	popup: Phaser.GameObjects.Container;
 	toast: Phaser.GameObjects.Container;
+	storeContainer: Phaser.GameObjects.Container;
+	inventoryContainer: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
@@ -34,7 +36,11 @@ class GameScene extends Phaser.Scene {
 		this.itemsMap = {};
 		this.makeToast();
 		this.makePopup();
-		this.makePenguin();
+		this.add.text(600, 20, "STORE", { fontFamily: fontFamily });
+		const background = this.add.existing(new RoundRectangle(this, 0, 330, 180, 520, 15, 0x1a252e));
+		this.storeContainer = this.add.container(690, 0, [background]);
+		this.inventoryContainer = this.add.container(200, 0, []);
+		this.makeSnowball();
 
 		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
@@ -96,17 +102,11 @@ class GameScene extends Phaser.Scene {
 		}
 	}
 
-	makePenguin() {
-		this.anims.create({
-			key: "penguin_bounce",
-			frames: [{ key: "penguin3" }, { key: "penguin2" }, { key: "penguin1" }, { key: "penguin2" }],
-			frameRate: 8,
-			repeat: -1,
-		});
+	makeSnowball() {
 		const sprite = this.add
-			.sprite(0, 60, "penguin3")
+			.sprite(0, 60, "snowball")
 			.setOrigin(0, 0)
-			.setScale(0.3)
+			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
@@ -126,15 +126,15 @@ class GameScene extends Phaser.Scene {
 		this.catalogItems.push(item);
 		let image: Phaser.GameObjects.Image;
 		if (item.DisplayName === "Igloo Factory") {
-			image = this.add.image(100 + 100 * index, 200, "igloo").setScale(0.1);
+			image = this.add.image(10, 100 + index * 100, "igloo").setScale(0.1);
 		} else if (item.DisplayName === "Torch") {
-			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.3);
 		} else if (item.DisplayName === "Snowman") {
-			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
-		} else if (item.DisplayName === "Snowrhombus") {
-			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+			image = this.add.image(10, 100 + index * 100, "snowman").setScale(0.3);
+		} else if (item.DisplayName === "Mittens") {
+			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.1);
 		} else if (item.DisplayName === "Arctic Vault") {
-			image = this.add.image(100 + 100 * index, 200, "fire").setScale(0.1);
+			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.1);
 		}
 		image
 			.setInteractive()
@@ -148,18 +148,19 @@ class GameScene extends Phaser.Scene {
 			});
 
 		const priceText = this.add
-			.text(0, 0, `${item.VirtualCurrencyPrices.SB}`, { fontFamily: fontFamily })
-			.setOrigin(1, 0.5);
-		const sb = this.add.circle(priceText.width + 15, 0, 10, 0xffffff, 1).setOrigin(1, 0.5);
-		const background = this.add.existing(new RoundRectangle(this, 0, 0, 70, 36, 15, 0x3f4c4f));
-		this.add
-			.container(100 + 100 * index, 250, [background, priceText, sb])
+			.text(0, 0, `${item.VirtualCurrencyPrices.SB} snowballs`, { fontFamily: fontFamily })
+			.setOrigin(0.5, 0.5);
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, priceText.width + 16, 36, 15, 0x385666));
+		const priceTag = this.add
+			.container(10, 150 + index * 100, [background, priceText])
 			.setDepth(2)
 			.setSize(70, 36)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(item));
 			});
+
+		this.storeContainer.add([image, priceTag]);
 	}
 
 	purchaseItem(item: PlayFabClientModels.CatalogItem) {
@@ -210,8 +211,8 @@ class GameScene extends Phaser.Scene {
 			sprite = this.makeTorch(index, inventory);
 		} else if (inventory.DisplayName === "Snowman") {
 			sprite = this.makeSnowman(index, inventory);
-		} else if (inventory.DisplayName === "Snowrhombus") {
-			sprite = this.makeRhombus(index, inventory);
+		} else if (inventory.DisplayName === "Mittens") {
+			sprite = this.makeMittens(index, inventory);
 		} else if (inventory.DisplayName === "Arctic Vault") {
 			sprite = this.makeVault(index, inventory);
 		}
@@ -229,6 +230,7 @@ class GameScene extends Phaser.Scene {
 					this.sync(() => this.upgradeItemLevel(inventory));
 				}
 			});
+		this.inventoryContainer.add(sprite);
 	}
 
 	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
@@ -261,7 +263,7 @@ class GameScene extends Phaser.Scene {
 		return this.add
 			.sprite(index * 70, 360, "fire")
 			.setOrigin(0, 0)
-			.setScale(0.3)
+			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
 	}
 
@@ -273,7 +275,7 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true });
 	}
 
-	makeRhombus(index: number, inventory: PlayFabClientModels.ItemInstance) {
+	makeMittens(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		this.CLICK_MULTIPLIER += 1;
 		return this.add
 			.sprite(index * 120, 460, "fish")
