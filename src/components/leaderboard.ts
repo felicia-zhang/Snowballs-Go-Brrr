@@ -1,12 +1,6 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily } from "../utils/font";
 
-enum statisticName {
-	current_snowballs = "1",
-	total_added_snowballs = "2",
-	total_manual_penguin_clicks = "3",
-}
-
 class LeaderboardScene extends Phaser.Scene {
 	leaderboardName: Phaser.GameObjects.Text;
 	list: Phaser.GameObjects.Container;
@@ -22,15 +16,20 @@ class LeaderboardScene extends Phaser.Scene {
 		this.add.text(300, 80, "NAME", { fontFamily: fontFamily });
 		this.add.text(500, 80, "STATISTIC", { fontFamily: fontFamily });
 		this.list = this.add.container(200, 110, []);
-		this.showLeaderboard("current_snowballs");
+		this.showLeaderboard("5");
 
-		for (let stat in statisticName) {
-			const i = Number(statisticName[stat]) - 1;
-			this.add
-				.text(80 + i * 200, 400, stat, { fontFamily: fontFamily })
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => this.showLeaderboard(stat));
-		}
+		this.add
+			.text(80, 400, "current_snowballs", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => this.showLeaderboard("5"));
+		this.add
+			.text(80 + 200, 400, "total_added_snowballs", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => this.showLeaderboard("6"));
+		this.add
+			.text(80 + 400, 400, "total_manual_penguin_clicks", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => this.showLeaderboard("7"));
 
 		this.add
 			.text(700, 550, "MENU", { fontFamily: fontFamily })
@@ -43,7 +42,7 @@ class LeaderboardScene extends Phaser.Scene {
 	showLeaderboard(stat: string) {
 		this.leaderboardName.setText(stat);
 		this.list.removeAll(true);
-		PlayFabClient.GetLeaderboard({ StatisticName: statisticName[stat], StartPosition: 0 }, (error, result) => {
+		PlayFabClient.GetLeaderboard({ StatisticName: stat, StartPosition: 0 }, (error, result) => {
 			const players = result.data.Leaderboard;
 			const texts: Phaser.GameObjects.Text[] = [];
 			players.forEach((player, i) => {

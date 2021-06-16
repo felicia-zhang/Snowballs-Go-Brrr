@@ -197,7 +197,6 @@ class GameScene extends Phaser.Scene {
 						FunctionName: "updateStatistics",
 						FunctionParameter: {
 							[`${item.ItemId}_purchased`]: 1,
-							//TODO: cloudscript needs update
 						},
 					},
 					() => {}
@@ -506,9 +505,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	sync(func?: () => any) {
-		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, (e, r) => {
-			this.showToast("Saved");
-		});
+		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, () => {});
 
 		const totalAdded = this.totalAddedSnowballs;
 		const totalClicks = this.totalManualPenguinClicks;
@@ -517,6 +514,7 @@ class GameScene extends Phaser.Scene {
 			if (func !== undefined) {
 				func();
 			}
+			this.showToast("Saved");
 		} else {
 			PlayFabClient.ExecuteCloudScript(
 				{
@@ -540,6 +538,7 @@ class GameScene extends Phaser.Scene {
 							if (func !== undefined) {
 								func();
 							}
+							this.showToast("Saved");
 						}
 					);
 				}
