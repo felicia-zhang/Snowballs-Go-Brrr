@@ -10,7 +10,6 @@ interface ItemDetail {
 
 class GameScene extends Phaser.Scene {
 	SYNC_DELAY = 60000;
-	AUTO_DELAY = 30000;
 	CLICK_MULTIPLIER = 1;
 	totalSnowballs: number;
 	totalAddedSnowballs: number;
@@ -103,6 +102,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	makeSnowball() {
+		const amountText = this.add.text(0, 0, "", { fontFamily: fontFamily }).setAlpha(0).setDepth(10);
 		const sprite = this.add
 			.sprite(0, 60, "snowball")
 			.setOrigin(0, 0)
@@ -110,9 +110,13 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
+					const currentClickMultiplier = this.CLICK_MULTIPLIER;
+					amountText.setText(currentClickMultiplier.toString());
+					amountText.setPosition(pointer.x, pointer.y);
 					this.totalManualPenguinClicks += 1;
-					this.totalAddedSnowballs += 1;
-					this.totalSnowballs += 1;
+					this.totalAddedSnowballs += currentClickMultiplier;
+					this.totalSnowballs += currentClickMultiplier;
+					this.showClickAnimation(amountText);
 					if (!sprite.anims.isPlaying) {
 						sprite.anims.play("penguin_bounce");
 					}
@@ -230,67 +234,140 @@ class GameScene extends Phaser.Scene {
 					this.sync(() => this.upgradeItemLevel(inventory));
 				}
 			});
-		this.inventoryContainer.add(sprite);
 	}
 
 	makeMittens(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		this.CLICK_MULTIPLIER += 1;
-		return this.add
+		const sprite = this.add
 			.sprite(index * 100, 50, "mittens")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
+		this.inventoryContainer.add(sprite);
+		return sprite;
 	}
 
 	makeFire(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		const amountText = this.add
+			.text(index * 100, 150, "+1", { fontFamily: fontFamily })
+			.setAlpha(0)
+			.setDepth(10);
 		this.time.addEvent({
-			delay: this.AUTO_DELAY,
+			delay: 10000,
 			loop: true,
 			callback: () => {
-				console.log(`Bonfire ${inventory.ItemInstanceId} added 1 snowball`);
+				amountText.setPosition(index * 100, 150);
 				this.totalSnowballs += 1;
 				this.totalAddedSnowballs += 1;
+				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add
+		const sprite = this.add
 			.sprite(index * 100, 150, "fire")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
+		this.inventoryContainer.add(sprite);
+		this.inventoryContainer.add(amountText);
+		return sprite;
 	}
 
 	makeSnowman(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		return this.add
+		const amountText = this.add
+			.text(index * 100, 250, "+1", { fontFamily: fontFamily })
+			.setAlpha(0)
+			.setDepth(10);
+		this.time.addEvent({
+			delay: 1000,
+			loop: true,
+			callback: () => {
+				amountText.setPosition(index * 100, 250);
+				this.totalSnowballs += 1;
+				this.totalAddedSnowballs += 1;
+				this.showClickAnimation(amountText);
+			},
+		});
+		const sprite = this.add
 			.sprite(index * 100, 250, "snowman")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
+		this.inventoryContainer.add(sprite);
+		this.inventoryContainer.add(amountText);
+		return sprite;
 	}
 
 	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
+		const amountText = this.add
+			.text(index * 100, 350, "+10", { fontFamily: fontFamily })
+			.setAlpha(0)
+			.setDepth(10);
 		this.time.addEvent({
-			delay: this.AUTO_DELAY,
+			delay: 1000,
 			loop: true,
 			callback: () => {
-				console.log(`Igloo ${inventory.ItemInstanceId} added 10 snowball`);
+				amountText.setPosition(index * 100, 350);
 				this.totalSnowballs += 10;
 				this.totalAddedSnowballs += 10;
+				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add
+		const sprite = this.add
 			.sprite(index * 100, 350, "igloo")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive();
+		this.inventoryContainer.add(sprite);
+		this.inventoryContainer.add(amountText);
+		return sprite;
 	}
 
 	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		this.CLICK_MULTIPLIER += 1;
-		return this.add
+		const amountText = this.add
+			.text(index * 100, 450, "+10", { fontFamily: fontFamily })
+			.setAlpha(0)
+			.setDepth(10);
+		this.time.addEvent({
+			delay: 1000,
+			loop: true,
+			callback: () => {
+				amountText.setPosition(index * 100, 450);
+				this.totalSnowballs += 100;
+				this.totalAddedSnowballs += 100;
+				this.showClickAnimation(amountText);
+			},
+		});
+		const sprite = this.add
 			.sprite(index * 100, 450, "vault")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
+		this.inventoryContainer.add(sprite);
+		this.inventoryContainer.add(amountText);
+		return sprite;
+	}
+
+	showClickAnimation(amountText: Phaser.GameObjects.Text) {
+		const prevY = amountText.y;
+		this.add.tween({
+			targets: [amountText],
+			props: {
+				y: {
+					value: prevY - 100,
+					duration: 500,
+					ease: "Sine.easeIn",
+				},
+				alpha: {
+					value: 0,
+					duration: 500,
+					ease: "Sine.easeIn",
+				},
+			},
+			onStart: () => {
+				amountText.setAlpha(1);
+			},
+			callbackScope: this,
+		});
 	}
 
 	makePopup() {
