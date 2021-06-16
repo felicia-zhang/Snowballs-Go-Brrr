@@ -33,7 +33,7 @@ class LeaderboardScene extends Phaser.Scene {
 		}
 
 		this.add
-			.text(700, 450, "MENU", { fontFamily: fontFamily })
+			.text(700, 550, "MENU", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Menu");

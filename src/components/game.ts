@@ -88,7 +88,7 @@ class GameScene extends Phaser.Scene {
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
 		this.add
-			.text(100, 450, "MENU", { fontFamily: fontFamily })
+			.text(16, 550, "MENU", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Menu");
