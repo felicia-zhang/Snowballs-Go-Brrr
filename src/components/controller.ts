@@ -8,6 +8,7 @@ import igloo from "../assets/igloo.png";
 import snowball from "../assets/snowball.png";
 import snowman from "../assets/snowman.png";
 import mittens from "../assets/mittens.png";
+import vault from "../assets/vault.png";
 import MenuScene from "./menu";
 
 class Controller extends Phaser.Scene {
@@ -22,6 +23,7 @@ class Controller extends Phaser.Scene {
 		this.load.image("snowball", snowball);
 		this.load.image("snowman", snowman);
 		this.load.image("mittens", mittens);
+		this.load.image("vault", vault);
 	}
 
 	create() {

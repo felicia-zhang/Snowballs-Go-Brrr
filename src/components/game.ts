@@ -134,7 +134,7 @@ class GameScene extends Phaser.Scene {
 		} else if (item.DisplayName === "Mittens") {
 			image = this.add.image(10, 100 + index * 100, "mittens").setScale(0.3);
 		} else if (item.DisplayName === "Arctic Vault") {
-			image = this.add.image(10, 100 + index * 100, "fire").setScale(0.3);
+			image = this.add.image(10, 100 + index * 100, "vault").setScale(0.3);
 		}
 		image
 			.setInteractive()
@@ -287,7 +287,7 @@ class GameScene extends Phaser.Scene {
 	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		this.CLICK_MULTIPLIER += 1;
 		return this.add
-			.sprite(index * 100, 450, "fish")
+			.sprite(index * 100, 450, "vault")
 			.setOrigin(0, 0)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true });
