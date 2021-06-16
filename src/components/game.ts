@@ -38,7 +38,7 @@ class GameScene extends Phaser.Scene {
 		this.add.text(600, 20, "STORE", { fontFamily: fontFamily });
 		const background = this.add.existing(new RoundRectangle(this, 0, 320, 220, 510, 15, 0x1a252e));
 		this.storeContainer = this.add.container(670, 0, [background]);
-		this.inventoryContainer = this.add.container(200, 0, []);
+		this.inventoryContainer = this.add.container(140, 0, []);
 		this.makeSnowball();
 
 		const scene = this;
@@ -351,25 +351,25 @@ class GameScene extends Phaser.Scene {
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
 		const prevY = amountText.y;
-		// this.add.tween({
-		// 	targets: [amountText],
-		// 	props: {
-		// 		y: {
-		// 			value: prevY - 100,
-		// 			duration: 500,
-		// 			ease: "Sine.easeIn",
-		// 		},
-		// 		alpha: {
-		// 			value: 0,
-		// 			duration: 500,
-		// 			ease: "Sine.easeIn",
-		// 		},
-		// 	},
-		// 	onStart: () => {
-		// 		amountText.setAlpha(1);
-		// 	},
-		// 	callbackScope: this,
-		// });
+		this.add.tween({
+			targets: [amountText],
+			props: {
+				y: {
+					value: prevY - 100,
+					duration: 500,
+					ease: "Sine.easeIn",
+				},
+				alpha: {
+					value: 0,
+					duration: 500,
+					ease: "Sine.easeIn",
+				},
+			},
+			onStart: () => {
+				amountText.setAlpha(1);
+			},
+			callbackScope: this,
+		});
 	}
 
 	makePopup() {
