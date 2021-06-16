@@ -3,6 +3,7 @@ import { fontFamily } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 
 interface ItemDetail {
+	DisplayName: string;
 	Description: string;
 	Levels: { [key: string]: { Cost: string; Effect: string } };
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
@@ -15,7 +16,7 @@ class GameScene extends Phaser.Scene {
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	catalogItems: PlayFabClientModels.CatalogItem[];
+	storeItems: PlayFabClientModels.StoreItem[];
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	popup: Phaser.GameObjects.Container;
@@ -31,7 +32,7 @@ class GameScene extends Phaser.Scene {
 		this.add.image(400, 300, "sky");
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
-		this.catalogItems = [];
+		this.storeItems = [];
 		this.itemsMap = {};
 		this.makeToast();
 		this.makePopup();
@@ -44,12 +45,18 @@ class GameScene extends Phaser.Scene {
 		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				this.makeCatalogItem(item);
 				this.itemsMap[item.ItemId] = {
+					DisplayName: item.DisplayName,
 					Description: item.Description,
 					Levels: JSON.parse(item.CustomData)["Levels"],
 					Instances: {},
 				};
+			});
+
+			PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
+				result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
+					this.makeStoreItem(storeItem);
+				});
 			});
 
 			PlayFabClient.GetUserInventory({}, (error, result) => {
@@ -125,32 +132,32 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
-	makeCatalogItem(item: PlayFabClientModels.CatalogItem) {
-		const index = this.catalogItems.length;
-		this.catalogItems.push(item);
+	makeStoreItem(storeItem: PlayFabClientModels.StoreItem) {
+		const index = this.storeItems.length;
+		this.storeItems.push(storeItem);
 		const background = this.add
 			.existing(new RoundRectangle(this, 0, 120 + index * 100, 200, 80, 15, 0x385666))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.sync(() => this.purchaseItem(item));
+				this.sync(() => this.purchaseItem(storeItem));
 			});
 
 		let image: Phaser.GameObjects.Image;
-		if (item.DisplayName === "Igloo Factory") {
-			image = this.add.image(-60, 120 + index * 100, "igloo").setScale(0.3);
-		} else if (item.DisplayName === "Bonfire") {
-			image = this.add.image(-60, 120 + index * 100, "fire").setScale(0.3);
-		} else if (item.DisplayName === "Snowman") {
-			image = this.add.image(-60, 120 + index * 100, "snowman").setScale(0.3);
-		} else if (item.DisplayName === "Mittens") {
+		if (storeItem.ItemId === "0") {
 			image = this.add.image(-60, 120 + index * 100, "mittens").setScale(0.3);
-		} else if (item.DisplayName === "Arctic Vault") {
+		} else if (storeItem.ItemId === "1") {
+			image = this.add.image(-60, 120 + index * 100, "fire").setScale(0.3);
+		} else if (storeItem.ItemId === "2") {
+			image = this.add.image(-60, 120 + index * 100, "snowman").setScale(0.3);
+		} else if (storeItem.ItemId === "3") {
+			image = this.add.image(-60, 120 + index * 100, "igloo").setScale(0.3);
+		} else if (storeItem.ItemId === "4") {
 			image = this.add.image(-60, 120 + index * 100, "vault").setScale(0.3);
 		}
 		image
 			.setInteractive()
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
-				this.showCatalogItemDetails(pointer, localX, localY, event, item)
+				this.showStoreItemDetails(pointer, localX, localY, event, storeItem)
 			)
 			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
 				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
@@ -158,10 +165,10 @@ class GameScene extends Phaser.Scene {
 				this.popup.setVisible(false);
 			});
 
-		const nameText = this.add.text(-20, 100 + index * 100, item.DisplayName, {
+		const nameText = this.add.text(-20, 100 + index * 100, this.itemsMap[storeItem.ItemId].DisplayName, {
 			fontFamily: fontFamily,
 		});
-		const priceText = this.add.text(-20, 130 + index * 100, `${item.VirtualCurrencyPrices.SB} snowballs`, {
+		const priceText = this.add.text(-20, 130 + index * 100, `${storeItem.VirtualCurrencyPrices.SB} snowballs`, {
 			fontFamily: fontFamily,
 		});
 
@@ -169,9 +176,9 @@ class GameScene extends Phaser.Scene {
 		this.storeContainer.add(row);
 	}
 
-	purchaseItem(item: PlayFabClientModels.CatalogItem) {
-		const price = item.VirtualCurrencyPrices.SB;
-		PlayFabClient.PurchaseItem({ ItemId: item.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
+	purchaseItem(storeItem: PlayFabClientModels.StoreItem) {
+		const price = storeItem.VirtualCurrencyPrices.SB;
+		PlayFabClient.PurchaseItem({ ItemId: storeItem.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
 			if (e !== null) {
 				this.showToast("Not enough snowballs");
 			} else {
@@ -188,7 +195,7 @@ class GameScene extends Phaser.Scene {
 					(a, b) => {
 						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
 						this.makeInventoryItem(newItem);
-						this.showToast(`1 ${item.DisplayName.toLowerCase()} successfully purchased`);
+						this.showToast(`1 ${this.itemsMap[storeItem.ItemId].DisplayName} successfully purchased`);
 					}
 				);
 
@@ -196,7 +203,7 @@ class GameScene extends Phaser.Scene {
 					{
 						FunctionName: "updateStatistics",
 						FunctionParameter: {
-							[`${item.ItemId}_purchased`]: 1,
+							[`${storeItem.ItemId}_purchased`]: 1,
 						},
 					},
 					() => {}
@@ -408,22 +415,23 @@ class GameScene extends Phaser.Scene {
 		this.popup.setVisible(true);
 	}
 
-	showCatalogItemDetails(
+	showStoreItemDetails(
 		pointer: Phaser.Input.Pointer,
 		localX,
 		localY,
 		event,
-		item: PlayFabClientModels.CatalogItem
+		storeItem: PlayFabClientModels.StoreItem
 	) {
+		const ItemDetail = this.itemsMap[storeItem.ItemId];
 		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
-		nameText.setText(`Name: ${item.DisplayName}`);
+		nameText.setText(`Name: ${ItemDetail.DisplayName}`);
 		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
-		descriptionText.setText(`Description: ${item.Description}`);
+		descriptionText.setText(`Description: ${ItemDetail.Description}`);
 		const priceText = this.popup.getAt(2) as Phaser.GameObjects.Text;
-		priceText.setText(`Price: ${item.VirtualCurrencyPrices.SB}`);
+		priceText.setText(`Price: ${storeItem.VirtualCurrencyPrices.SB}`);
 
 		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-		const levels = JSON.parse(item.CustomData)["Levels"];
+		const levels = JSON.parse(storeItem.CustomData)["Levels"];
 		Object.keys(levels).forEach((key, i) => {
 			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
 			const costText = this.add.text(50, i * 20, `Cost: ${levels[key]["Cost"]}`, { fontFamily: fontFamily });
