@@ -1,4 +1,3 @@
-import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import LeaderboardScene from "./leaderboard";
 import GameScene from "./game";
@@ -6,10 +5,8 @@ import SigninScene from "./signin";
 import sky from "../assets/sky.png";
 import fire from "../assets/fire.png";
 import igloo from "../assets/igloo.png";
-import penguin1 from "../assets/penguin1.png";
-import penguin2 from "../assets/penguin2.png";
-import penguin3 from "../assets/penguin3.png";
 import snowball from "../assets/snowball.png";
+import snowman from "../assets/snowman.png";
 import MenuScene from "./menu";
 
 class Controller extends Phaser.Scene {
@@ -19,12 +16,10 @@ class Controller extends Phaser.Scene {
 
 	preload() {
 		this.load.image("sky", sky);
-		this.load.image("fire", fire, { frameWidth: 210, frameHeight: 270 } as PlayFab.ImageFrameConfig);
-		this.load.image("igloo", igloo, { frameWidth: 770, frameHeight: 620 } as PlayFab.ImageFrameConfig);
-		this.load.image("penguin1", penguin1, { frameWidth: 355, frameHeight: 450 } as PlayFab.ImageFrameConfig);
-		this.load.image("penguin2", penguin2, { frameWidth: 355, frameHeight: 450 } as PlayFab.ImageFrameConfig);
-		this.load.image("penguin3", penguin3, { frameWidth: 355, frameHeight: 450 } as PlayFab.ImageFrameConfig);
-		this.load.image("snowball", snowball, { frameWidth: 100, frameHeight: 100 } as PlayFab.ImageFrameConfig);
+		this.load.image("fire", fire);
+		this.load.image("igloo", igloo);
+		this.load.image("snowball", snowball);
+		this.load.image("snowman", snowman);
 	}
 
 	create() {
