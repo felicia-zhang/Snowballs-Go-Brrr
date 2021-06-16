@@ -7,6 +7,7 @@ import fire from "../assets/fire.png";
 import igloo from "../assets/igloo.png";
 import snowball from "../assets/snowball.png";
 import snowman from "../assets/snowman.png";
+import mittens from "../assets/mittens.png";
 import MenuScene from "./menu";
 
 class Controller extends Phaser.Scene {
@@ -20,6 +21,7 @@ class Controller extends Phaser.Scene {
 		this.load.image("igloo", igloo);
 		this.load.image("snowball", snowball);
 		this.load.image("snowman", snowman);
+		this.load.image("mittens", mittens);
 	}
 
 	create() {
