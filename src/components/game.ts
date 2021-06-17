@@ -45,25 +45,6 @@ class GameScene extends Phaser.Scene {
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
 		this.makeSnowball();
 
-		this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-			if (pointer.x < 560) {
-				// TODO: might change depending on location and stuff
-				this.add.tween({
-					targets: [this.storeContainer, this.overlay],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.storeButton.setInteractive({ useHandCursor: true });
-						this.time.paused = false;
-						this.storeContainer.removeAll(true);
-						this.storeItems = [];
-					},
-					callbackScope: this,
-				});
-			}
-		});
-
 		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
@@ -113,6 +94,13 @@ class GameScene extends Phaser.Scene {
 			.text(700, 550, "STORE", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
+				this.add.tween({
+					targets: [this.overlay],
+					ease: "Sine.easeIn",
+					duration: 800,
+					alpha: 0.6,
+					callbackScope: this,
+				});
 				this.sync(() => this.showStore());
 			});
 	}
@@ -135,17 +123,27 @@ class GameScene extends Phaser.Scene {
 
 	showStore() {
 		this.storeButton.disableInteractive();
-
-		this.add.tween({
-			targets: [this.overlay],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 0.6,
-			callbackScope: this,
-		});
-
-		const background = this.add.existing(new RoundRectangle(this, 0, 0, 220, 510, 15, 0x1a252e));
-		this.storeContainer.add(background);
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, 370, 510, 15, 0x1a252e));
+		const close = this.add
+			.image(170, -250, "close")
+			.setScale(0.3)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				this.add.tween({
+					targets: [this.storeContainer, this.overlay],
+					ease: "Sine.easeIn",
+					duration: 100,
+					alpha: 0,
+					onComplete: () => {
+						this.storeButton.setInteractive({ useHandCursor: true });
+						this.time.paused = false;
+						this.storeContainer.removeAll(true);
+						this.storeItems = [];
+					},
+					callbackScope: this,
+				});
+			});
+		this.storeContainer.add([background, close]);
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeStoreItem(storeItem);
@@ -153,7 +151,7 @@ class GameScene extends Phaser.Scene {
 			this.add.tween({
 				targets: [this.storeContainer],
 				ease: "Sine.easeIn",
-				duration: 100,
+				duration: 300,
 				alpha: 1,
 				onComplete: () => {
 					this.time.paused = true;
@@ -216,7 +214,7 @@ class GameScene extends Phaser.Scene {
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
 		const background = this.add
-			.existing(new RoundRectangle(this, 0, -200 + index * 100, 200, 80, 15, 0x385666))
+			.existing(new RoundRectangle(this, 0, -200 + index * 100, 340, 80, 15, 0x385666))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(itemDetail, storeItem.VirtualCurrencyPrices.SB));
