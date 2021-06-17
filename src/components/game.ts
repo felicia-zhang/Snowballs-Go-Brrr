@@ -567,9 +567,9 @@ class GameScene extends Phaser.Scene {
 	makeToast() {
 		const toastText = this.add.text(0, 0, "", { fontFamily: fontFamily });
 		const bg = this.add.existing(
-			new RoundRectangle(this, 0, 0, 0, 0, 15, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1)
+			new RoundRectangle(this, 0, 0, 0, 0, 10, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1)
 		);
-		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(1);
+		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(22);
 	}
 
 	showToast(message: string, isError: boolean) {
