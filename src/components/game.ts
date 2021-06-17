@@ -38,7 +38,7 @@ class GameScene extends Phaser.Scene {
 		this.itemsMap = {};
 		this.makeToast();
 		this.makePopup();
-		this.storeContainer = this.add.container(670, 0, []).setAlpha(0);
+		this.storeContainer = this.add.container(670, 0, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(140, 0, []);
 		this.makeSnowball();
 
@@ -100,7 +100,7 @@ class GameScene extends Phaser.Scene {
 		this.syncTimer = this.time.addEvent({
 			delay: this.syncDelay,
 			loop: true,
-			callback: () => this.sync(),
+			callback: () => this.sync(() => this.showToast("Saved")),
 		});
 
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
@@ -446,7 +446,7 @@ class GameScene extends Phaser.Scene {
 		const container = this.add.container(0, 0, [nameText, descriptionText, currentLevelText, levelsContainer]);
 		this.popup = container;
 		this.popup.setVisible(false);
-		this.popup.setDepth(1);
+		this.popup.setDepth(21);
 	}
 
 	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
@@ -565,7 +565,7 @@ class GameScene extends Phaser.Scene {
 		});
 	}
 
-	sync(func?: () => any) {
+	sync(func: () => any) {
 		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, () => {});
 
 		const totalAdded = this.totalAddedSnowballs;
@@ -575,7 +575,6 @@ class GameScene extends Phaser.Scene {
 			if (func !== undefined) {
 				func();
 			}
-			this.showToast("Saved");
 		} else {
 			PlayFabClient.ExecuteCloudScript(
 				{
@@ -599,7 +598,6 @@ class GameScene extends Phaser.Scene {
 							if (func !== undefined) {
 								func();
 							}
-							this.showToast("Saved");
 						}
 					);
 				}
