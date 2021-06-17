@@ -233,15 +233,15 @@ class GameScene extends Phaser.Scene {
 
 		let image: Phaser.GameObjects.Image;
 		if (storeItem.ItemId === "0") {
-			image = this.add.image(-130, -170 + index * 85, "mittens").setScale(0.25);
+			image = this.add.image(-135, -170 + index * 85, "mittens").setScale(0.25);
 		} else if (storeItem.ItemId === "1") {
-			image = this.add.image(-130, -170 + index * 85, "fire").setScale(0.25);
+			image = this.add.image(-135, -170 + index * 85, "fire").setScale(0.25);
 		} else if (storeItem.ItemId === "2") {
-			image = this.add.image(-130, -170 + index * 85, "snowman").setScale(0.25);
+			image = this.add.image(-135, -170 + index * 85, "snowman").setScale(0.25);
 		} else if (storeItem.ItemId === "3") {
-			image = this.add.image(-130, -170 + index * 85, "igloo").setScale(0.25);
+			image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
 		} else if (storeItem.ItemId === "4") {
-			image = this.add.image(-130, -170 + index * 85, "vault").setScale(0.25);
+			image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
 		}
 		image
 			.setInteractive()
