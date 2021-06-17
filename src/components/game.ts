@@ -40,7 +40,7 @@ class GameScene extends Phaser.Scene {
 		this.itemsMap = {};
 		this.makeToast();
 		this.makePopup();
-		this.storeContainer = this.add.container(670, 0, []).setAlpha(0).setDepth(20);
+		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(140, 0, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
 		this.makeSnowball();
@@ -144,7 +144,7 @@ class GameScene extends Phaser.Scene {
 			callbackScope: this,
 		});
 
-		const background = this.add.existing(new RoundRectangle(this, 0, 275, 220, 510, 15, 0x1a252e));
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, 220, 510, 15, 0x1a252e));
 		this.storeContainer.add(background);
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
@@ -216,7 +216,7 @@ class GameScene extends Phaser.Scene {
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
 		const background = this.add
-			.existing(new RoundRectangle(this, 0, 75 + index * 100, 200, 80, 15, 0x385666))
+			.existing(new RoundRectangle(this, 0, -200 + index * 100, 200, 80, 15, 0x385666))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(itemDetail, storeItem.VirtualCurrencyPrices.SB));
@@ -224,15 +224,15 @@ class GameScene extends Phaser.Scene {
 
 		let image: Phaser.GameObjects.Image;
 		if (storeItem.ItemId === "0") {
-			image = this.add.image(-60, 75 + index * 100, "mittens").setScale(0.3);
+			image = this.add.image(-60, -200 + index * 100, "mittens").setScale(0.3);
 		} else if (storeItem.ItemId === "1") {
-			image = this.add.image(-60, 75 + index * 100, "fire").setScale(0.3);
+			image = this.add.image(-60, -200 + index * 100, "fire").setScale(0.3);
 		} else if (storeItem.ItemId === "2") {
-			image = this.add.image(-60, 75 + index * 100, "snowman").setScale(0.3);
+			image = this.add.image(-60, -200 + index * 100, "snowman").setScale(0.3);
 		} else if (storeItem.ItemId === "3") {
-			image = this.add.image(-60, 75 + index * 100, "igloo").setScale(0.3);
+			image = this.add.image(-60, -200 + index * 100, "igloo").setScale(0.3);
 		} else if (storeItem.ItemId === "4") {
-			image = this.add.image(-60, 75 + index * 100, "vault").setScale(0.3);
+			image = this.add.image(-60, -200 + index * 100, "vault").setScale(0.3);
 		}
 		image
 			.setInteractive()
@@ -252,10 +252,10 @@ class GameScene extends Phaser.Scene {
 				this.popup.setVisible(false);
 			});
 
-		const nameText = this.add.text(-20, 55 + index * 100, itemDetail.DisplayName, {
+		const nameText = this.add.text(-20, -215 + index * 100, itemDetail.DisplayName, {
 			fontFamily: fontFamily,
 		});
-		const priceText = this.add.text(-20, 85 + index * 100, `${storeItem.VirtualCurrencyPrices.SB} snowballs`, {
+		const priceText = this.add.text(-20, -185 + index * 100, `${storeItem.VirtualCurrencyPrices.SB} snowballs`, {
 			fontFamily: fontFamily,
 		});
 
