@@ -123,15 +123,15 @@ class GameScene extends Phaser.Scene {
 
 	showStore() {
 		this.storeButton.disableInteractive();
-		const background = this.add.existing(new RoundRectangle(this, 0, 0, 370, 450, 15, 0x16252e));
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
 		this.storeContainer.add(background);
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeStoreItem(storeItem);
 			});
 			const closeButton = this.add
-				.image(170, -210, "close")
-				.setScale(0.4)
+				.image(175, -215, "close")
+				.setScale(0.35)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.add.tween({
