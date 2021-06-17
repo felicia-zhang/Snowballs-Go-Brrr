@@ -224,6 +224,7 @@ class GameScene extends Phaser.Scene {
 
 	makeStoreItem(storeItem: PlayFabClientModels.StoreItem) {
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
+		const itemPrice = storeItem.VirtualCurrencyPrices.SB;
 
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
@@ -231,7 +232,23 @@ class GameScene extends Phaser.Scene {
 			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, 0x2e5767))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.sync(() => this.purchaseItem(itemDetail, storeItem.VirtualCurrencyPrices.SB));
+				this.sync(() => this.purchaseItem(itemDetail, itemPrice));
+			})
+			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) => {
+				this.add.tween({
+					targets: [this.popup],
+					ease: "Sine.easeIn",
+					alpha: 1,
+					duration: 300,
+					delay: 800,
+					onStart: () => this.setStoreItemDetails(pointer, itemDetail, itemPrice),
+					callbackScope: this,
+				});
+			})
+			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
+				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
+				levelsContainer.removeAll(true);
+				this.popup.setAlpha(0);
 			});
 
 		let image: Phaser.GameObjects.Image;
@@ -246,23 +263,6 @@ class GameScene extends Phaser.Scene {
 		} else if (storeItem.ItemId === "4") {
 			image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
 		}
-		image
-			.setInteractive()
-			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
-				this.showStoreItemDetails(
-					pointer,
-					localX,
-					localY,
-					event,
-					itemDetail,
-					storeItem.VirtualCurrencyPrices.SB
-				)
-			)
-			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-				levelsContainer.removeAll(true);
-				this.popup.setVisible(false);
-			});
 
 		const nameText = this.add
 			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), {
@@ -271,7 +271,7 @@ class GameScene extends Phaser.Scene {
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const priceText = this.add
-			.text(125, -170 + index * 85, `${storeItem.VirtualCurrencyPrices.SB} x`, {
+			.text(125, -170 + index * 85, `${itemPrice} x`, {
 				fontFamily: fontFamily,
 			})
 			.setAlign("right")
@@ -339,12 +339,12 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
-				this.showItemDetails(pointer, localX, localY, event, inventory)
+				this.setInventoryItemDetails(pointer, inventory)
 			)
 			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
 				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
 				levelsContainer.removeAll(true);
-				this.popup.setVisible(false);
+				this.popup.setAlpha(0);
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.rightButtonReleased()) {
@@ -477,13 +477,13 @@ class GameScene extends Phaser.Scene {
 		const descriptionText = this.add.text(0, 20, "", { fontFamily: fontFamily });
 		const currentLevelText = this.add.text(0, 40, "", { fontFamily: fontFamily });
 		const levelsContainer = this.add.container(0, 60, []);
-		const container = this.add.container(0, 0, [nameText, descriptionText, currentLevelText, levelsContainer]);
-		this.popup = container;
-		this.popup.setVisible(false);
-		this.popup.setDepth(21);
+		this.popup = this.add
+			.container(0, 0, [nameText, descriptionText, currentLevelText, levelsContainer])
+			.setAlpha(0)
+			.setDepth(21);
 	}
 
-	showItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, item: PlayFabClientModels.ItemInstance) {
+	setInventoryItemDetails(pointer: Phaser.Input.Pointer, item: PlayFabClientModels.ItemInstance) {
 		const itemType = this.itemsMap[item.ItemId];
 
 		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
@@ -506,10 +506,9 @@ class GameScene extends Phaser.Scene {
 
 		this.popup.setX(pointer.x);
 		this.popup.setY(pointer.y);
-		this.popup.setVisible(true);
 	}
 
-	showStoreItemDetails(pointer: Phaser.Input.Pointer, localX, localY, event, itemDetail: ItemDetail, price: number) {
+	setStoreItemDetails(pointer: Phaser.Input.Pointer, itemDetail: ItemDetail, price: number) {
 		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
 		nameText.setText(`Name: ${itemDetail.DisplayName}`);
 		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
@@ -530,7 +529,6 @@ class GameScene extends Phaser.Scene {
 
 		this.popup.setX(pointer.x);
 		this.popup.setY(pointer.y);
-		this.popup.setVisible(true);
 	}
 
 	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
