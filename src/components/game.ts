@@ -86,7 +86,8 @@ class GameScene extends Phaser.Scene {
 
 		this.interactiveGameSceneObjects.push(
 			this.add
-				.text(16, 550, "MENU", { fontFamily: fontFamily })
+				.text(16, 584, "MENU", { fontFamily: fontFamily })
+				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.scene.start("Menu");
@@ -95,7 +96,8 @@ class GameScene extends Phaser.Scene {
 
 		this.interactiveGameSceneObjects.push(
 			this.add
-				.text(700, 550, "STORE", { fontFamily: fontFamily })
+				.text(784, 584, "STORE", { fontFamily: fontFamily })
+				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.add.tween({
