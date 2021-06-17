@@ -25,6 +25,7 @@ class GameScene extends Phaser.Scene {
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
 	storeButton: Phaser.GameObjects.Text;
+	overlay: Phaser.GameObjects.Rectangle;
 
 	constructor() {
 		super("Game");
@@ -41,13 +42,14 @@ class GameScene extends Phaser.Scene {
 		this.makePopup();
 		this.storeContainer = this.add.container(670, 0, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(140, 0, []);
+		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
 		this.makeSnowball();
 
 		this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 			if (pointer.x < 560) {
 				// TODO: might change depending on location and stuff
 				this.add.tween({
-					targets: [this.storeContainer],
+					targets: [this.storeContainer, this.overlay],
 					ease: "Sine.easeIn",
 					duration: 100,
 					alpha: 0,
@@ -133,6 +135,15 @@ class GameScene extends Phaser.Scene {
 
 	showStore() {
 		this.storeButton.disableInteractive();
+
+		this.add.tween({
+			targets: [this.overlay],
+			ease: "Sine.easeIn",
+			duration: 500,
+			alpha: 0.6,
+			callbackScope: this,
+		});
+
 		const background = this.add.existing(new RoundRectangle(this, 0, 275, 220, 510, 15, 0x1a252e));
 		this.storeContainer.add(background);
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
