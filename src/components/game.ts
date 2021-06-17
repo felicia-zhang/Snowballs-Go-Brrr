@@ -123,31 +123,32 @@ class GameScene extends Phaser.Scene {
 
 	showStore() {
 		this.storeButton.disableInteractive();
-		const background = this.add.existing(new RoundRectangle(this, 0, 0, 370, 510, 15, 0x1a252e));
-		const close = this.add
-			.image(170, -250, "close")
-			.setScale(0.3)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.add.tween({
-					targets: [this.storeContainer, this.overlay],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.storeButton.setInteractive({ useHandCursor: true });
-						this.time.paused = false;
-						this.storeContainer.removeAll(true);
-						this.storeItems = [];
-					},
-					callbackScope: this,
-				});
-			});
-		this.storeContainer.add([background, close]);
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, 370, 510, 15, 0x16252e));
+		this.storeContainer.add(background);
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeStoreItem(storeItem);
 			});
+			const closeButton = this.add
+				.image(170, -250, "close")
+				.setScale(0.4)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerup", () => {
+					this.add.tween({
+						targets: [this.storeContainer, this.overlay],
+						ease: "Sine.easeIn",
+						duration: 100,
+						alpha: 0,
+						onComplete: () => {
+							this.storeButton.setInteractive({ useHandCursor: true });
+							this.time.paused = false;
+							this.storeContainer.removeAll(true);
+							this.storeItems = [];
+						},
+						callbackScope: this,
+					});
+				});
+			this.storeContainer.add(closeButton);
 			this.add.tween({
 				targets: [this.storeContainer],
 				ease: "Sine.easeIn",
@@ -214,7 +215,7 @@ class GameScene extends Phaser.Scene {
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
 		const background = this.add
-			.existing(new RoundRectangle(this, 0, -200 + index * 100, 340, 80, 15, 0x385666))
+			.existing(new RoundRectangle(this, 0, -200 + index * 100, 340, 80, 15, 0x2e5767))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(itemDetail, storeItem.VirtualCurrencyPrices.SB));
