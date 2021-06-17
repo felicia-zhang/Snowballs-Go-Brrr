@@ -24,8 +24,8 @@ class GameScene extends Phaser.Scene {
 	toast: Phaser.GameObjects.Container;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
-	storeButton: Phaser.GameObjects.Text;
 	overlay: Phaser.GameObjects.Rectangle;
+	interactiveGameSceneObjects: Phaser.GameObjects.GameObject[];
 
 	constructor() {
 		super("Game");
@@ -43,6 +43,7 @@ class GameScene extends Phaser.Scene {
 		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(140, 0, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
+		this.interactiveGameSceneObjects = [];
 		this.makeSnowball();
 
 		const scene = this;
@@ -83,26 +84,30 @@ class GameScene extends Phaser.Scene {
 
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
 
-		this.add
-			.text(16, 550, "MENU", { fontFamily: fontFamily })
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.scene.start("Menu");
-			});
+		this.interactiveGameSceneObjects.push(
+			this.add
+				.text(16, 550, "MENU", { fontFamily: fontFamily })
+				.setInteractive({ useHandCursor: true })
+				.on("pointerup", () => {
+					this.scene.start("Menu");
+				})
+		);
 
-		this.storeButton = this.add
-			.text(700, 550, "STORE", { fontFamily: fontFamily })
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.add.tween({
-					targets: [this.overlay],
-					ease: "Sine.easeIn",
-					duration: 800,
-					alpha: 0.6,
-					callbackScope: this,
-				});
-				this.sync(() => this.showStore());
-			});
+		this.interactiveGameSceneObjects.push(
+			this.add
+				.text(700, 550, "STORE", { fontFamily: fontFamily })
+				.setInteractive({ useHandCursor: true })
+				.on("pointerup", () => {
+					this.add.tween({
+						targets: [this.overlay],
+						ease: "Sine.easeIn",
+						duration: 800,
+						alpha: 0.6,
+						callbackScope: this,
+					});
+					this.sync(() => this.showStore());
+				})
+		);
 	}
 
 	calculateAwaySnowballs(elapsedSeconds: number) {
@@ -122,7 +127,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	showStore() {
-		this.storeButton.disableInteractive();
+		this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
 		const background = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
 		this.storeContainer.add(background);
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
@@ -140,7 +145,9 @@ class GameScene extends Phaser.Scene {
 						duration: 100,
 						alpha: 0,
 						onComplete: () => {
-							this.storeButton.setInteractive({ useHandCursor: true });
+							this.interactiveGameSceneObjects.forEach(object =>
+								object.setInteractive({ useHandCursor: true })
+							);
 							this.time.paused = false;
 							this.storeContainer.removeAll(true);
 							this.storeItems = [];
@@ -206,6 +213,7 @@ class GameScene extends Phaser.Scene {
 					}
 				}
 			});
+		this.interactiveGameSceneObjects.push(sprite);
 		return sprite;
 	}
 
@@ -321,6 +329,10 @@ class GameScene extends Phaser.Scene {
 			sprite = this.makeVault(index, inventory);
 		}
 		sprite
+			.setOrigin(0, 0)
+			.setScale(0.5)
+			.setInteractive({ useHandCursor: true })
+
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
 				this.showItemDetails(pointer, localX, localY, event, inventory)
 			)
@@ -334,16 +346,13 @@ class GameScene extends Phaser.Scene {
 					this.sync(() => this.upgradeItemLevel(inventory));
 				}
 			});
+		this.interactiveGameSceneObjects.push(sprite);
+		this.inventoryContainer.add(sprite);
 	}
 
 	makeMittens(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		this.clickMultiplier += 1;
-		const sprite = this.add
-			.sprite(index * 100, 50, "mittens")
-			.setOrigin(0, 0)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true });
-		this.inventoryContainer.add(sprite);
+		const sprite = this.add.sprite(index * 100, 50, "mittens");
 		return sprite;
 	}
 
@@ -364,12 +373,7 @@ class GameScene extends Phaser.Scene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add
-			.sprite(index * 100, 150, "fire")
-			.setOrigin(0, 0)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true });
-		this.inventoryContainer.add(sprite);
+		const sprite = this.add.sprite(index * 100, 150, "fire");
 		this.inventoryContainer.add(amountText);
 		return sprite;
 	}
@@ -391,12 +395,7 @@ class GameScene extends Phaser.Scene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add
-			.sprite(index * 100, 250, "snowman")
-			.setOrigin(0, 0)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true });
-		this.inventoryContainer.add(sprite);
+		const sprite = this.add.sprite(index * 100, 250, "snowman");
 		this.inventoryContainer.add(amountText);
 		return sprite;
 	}
@@ -418,12 +417,7 @@ class GameScene extends Phaser.Scene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add
-			.sprite(index * 100, 350, "igloo")
-			.setOrigin(0, 0)
-			.setScale(0.5)
-			.setInteractive();
-		this.inventoryContainer.add(sprite);
+		const sprite = this.add.sprite(index * 100, 350, "igloo");
 		this.inventoryContainer.add(amountText);
 		return sprite;
 	}
@@ -445,12 +439,7 @@ class GameScene extends Phaser.Scene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add
-			.sprite(index * 100, 450, "vault")
-			.setOrigin(0, 0)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true });
-		this.inventoryContainer.add(sprite);
+		const sprite = this.add.sprite(index * 100, 450, "vault");
 		this.inventoryContainer.add(amountText);
 		return sprite;
 	}
