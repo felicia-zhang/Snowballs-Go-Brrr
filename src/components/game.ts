@@ -83,15 +83,7 @@ class GameScene extends Phaser.Scene {
 						const elapsed = new Date().valueOf() - Number(lastUpdated);
 						const elapsedSeconds = elapsed / 1000;
 						console.log("Elapsed seconds:", elapsedSeconds);
-						//TODO: needs to be fixed
-						// const numberOfIgloos = Object.keys(this.itemsMap.3.Instances).length;
-						// const numberOfTorches = Object.keys(this.itemsMap.1.Instances).length;
-						// const sb =
-						// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfIgloos +
-						// 	Math.floor(elapsedSeconds / (this.AUTO_DELAY / 1000)) * numberOfTorches;
-						// this.totalSnowballs += sb;
-						// this.totalAddedSnowballs += sb;
-						// this.showToast(`${sb} snowballs added by \nIgloo factories while \nplayer was gone`);
+						this.calculateAwaySnowballs(elapsedSeconds);
 					}
 				});
 			});
@@ -118,6 +110,22 @@ class GameScene extends Phaser.Scene {
 			.on("pointerup", () => {
 				this.showStore();
 			});
+	}
+
+	calculateAwaySnowballs(elapsedSeconds: number) {
+		const numberOfFires = Object.keys(this.itemsMap[1].Instances).length;
+		const numberOfSnowmans = Object.keys(this.itemsMap[2].Instances).length;
+		const numberOfIgloos = Object.keys(this.itemsMap[3].Instances).length;
+		const numberOfVaults = Object.keys(this.itemsMap[4].Instances).length;
+		const sb =
+			Math.floor(elapsedSeconds / 10) * numberOfFires +
+			Math.floor(elapsedSeconds) * numberOfSnowmans +
+			Math.floor(elapsedSeconds) * numberOfIgloos * 10 +
+			Math.floor(elapsedSeconds) * numberOfVaults * 100;
+
+		this.totalSnowballs += sb;
+		this.totalAddedSnowballs += sb;
+		this.showToast(`${sb} snowballs added \nwhile player was away`);
 	}
 
 	showStore() {
@@ -392,7 +400,7 @@ class GameScene extends Phaser.Scene {
 
 	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(index * 100, 450, "+10", { fontFamily: fontFamily })
+			.text(index * 100, 450, "+100", { fontFamily: fontFamily })
 			.setAlpha(0)
 			.setDepth(10);
 		this.time.addEvent({
