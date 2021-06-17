@@ -108,7 +108,7 @@ class GameScene extends Phaser.Scene {
 			.text(700, 550, "STORE", { fontFamily: fontFamily })
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				this.showStore();
+				this.sync(() => this.showStore());
 			});
 	}
 
