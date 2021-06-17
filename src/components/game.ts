@@ -123,14 +123,14 @@ class GameScene extends Phaser.Scene {
 
 	showStore() {
 		this.storeButton.disableInteractive();
-		const background = this.add.existing(new RoundRectangle(this, 0, 0, 370, 510, 15, 0x16252e));
+		const background = this.add.existing(new RoundRectangle(this, 0, 0, 370, 450, 15, 0x16252e));
 		this.storeContainer.add(background);
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeStoreItem(storeItem);
 			});
 			const closeButton = this.add
-				.image(170, -250, "close")
+				.image(170, -210, "close")
 				.setScale(0.4)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
@@ -215,7 +215,7 @@ class GameScene extends Phaser.Scene {
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
 		const background = this.add
-			.existing(new RoundRectangle(this, 0, -200 + index * 100, 340, 80, 15, 0x2e5767))
+			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, 0x2e5767))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(itemDetail, storeItem.VirtualCurrencyPrices.SB));
@@ -223,15 +223,15 @@ class GameScene extends Phaser.Scene {
 
 		let image: Phaser.GameObjects.Image;
 		if (storeItem.ItemId === "0") {
-			image = this.add.image(-60, -200 + index * 100, "mittens").setScale(0.3);
+			image = this.add.image(-130, -170 + index * 85, "mittens").setScale(0.25);
 		} else if (storeItem.ItemId === "1") {
-			image = this.add.image(-60, -200 + index * 100, "fire").setScale(0.3);
+			image = this.add.image(-130, -170 + index * 85, "fire").setScale(0.25);
 		} else if (storeItem.ItemId === "2") {
-			image = this.add.image(-60, -200 + index * 100, "snowman").setScale(0.3);
+			image = this.add.image(-130, -170 + index * 85, "snowman").setScale(0.25);
 		} else if (storeItem.ItemId === "3") {
-			image = this.add.image(-60, -200 + index * 100, "igloo").setScale(0.3);
+			image = this.add.image(-130, -170 + index * 85, "igloo").setScale(0.25);
 		} else if (storeItem.ItemId === "4") {
-			image = this.add.image(-60, -200 + index * 100, "vault").setScale(0.3);
+			image = this.add.image(-130, -170 + index * 85, "vault").setScale(0.25);
 		}
 		image
 			.setInteractive()
@@ -251,14 +251,21 @@ class GameScene extends Phaser.Scene {
 				this.popup.setVisible(false);
 			});
 
-		const nameText = this.add.text(-20, -215 + index * 100, itemDetail.DisplayName, {
-			fontFamily: fontFamily,
-		});
-		const priceText = this.add.text(-20, -185 + index * 100, `${storeItem.VirtualCurrencyPrices.SB} snowballs`, {
-			fontFamily: fontFamily,
-		});
+		const nameText = this.add
+			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), {
+				fontFamily: fontFamily,
+			})
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const priceText = this.add
+			.text(125, -170 + index * 85, `${storeItem.VirtualCurrencyPrices.SB} x`, {
+				fontFamily: fontFamily,
+			})
+			.setAlign("right")
+			.setOrigin(1, 0.5);
+		const snowballIcon = this.add.image(145, -170 + index * 85, "snowball1").setScale(0.15);
 
-		const row = this.add.container(0, 0, [background, image, nameText, priceText]);
+		const row = this.add.container(0, 0, [background, image, nameText, priceText, snowballIcon]);
 		this.storeContainer.add(row);
 	}
 
