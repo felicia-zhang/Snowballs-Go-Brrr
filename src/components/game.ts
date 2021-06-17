@@ -169,7 +169,6 @@ class GameScene extends Phaser.Scene {
 			frameRate: 8,
 		});
 
-		const amountText = this.add.text(0, 0, "", { fontFamily: fontFamily }).setAlpha(0).setDepth(10);
 		const sprite = this.add
 			.sprite(0, 60, "snowball1")
 			.setOrigin(0, 0)
@@ -178,11 +177,15 @@ class GameScene extends Phaser.Scene {
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
 					const currentClickMultiplier = this.clickMultiplier;
-					amountText.setText(currentClickMultiplier.toString());
-					amountText.setPosition(pointer.x, pointer.y);
 					this.totalManualPenguinClicks += 1;
 					this.totalAddedSnowballs += currentClickMultiplier;
 					this.totalSnowballs += currentClickMultiplier;
+					const amountText = this.add
+						.text(pointer.x, pointer.y, currentClickMultiplier.toString(), { fontFamily: fontFamily })
+						.setAlpha(0)
+						.setAlign("center")
+						.setOrigin(0.5, 0.5)
+						.setDepth(10);
 					this.showClickAnimation(amountText);
 					if (!sprite.anims.isPlaying) {
 						sprite.anims.play("squish");
@@ -325,14 +328,16 @@ class GameScene extends Phaser.Scene {
 
 	makeFire(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(index * 100, 150, "+1", { fontFamily: fontFamily })
+			.text(50 + index * 100, 150, "+1", { fontFamily: fontFamily })
 			.setAlpha(0)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5)
 			.setDepth(10);
 		this.time.addEvent({
 			delay: 10000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(index * 100, 150);
+				amountText.setPosition(50 + index * 100, 150);
 				this.totalSnowballs += 1;
 				this.totalAddedSnowballs += 1;
 				this.showClickAnimation(amountText);
@@ -350,14 +355,16 @@ class GameScene extends Phaser.Scene {
 
 	makeSnowman(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(index * 100, 250, "+1", { fontFamily: fontFamily })
+			.text(50 + index * 100, 250, "+1", { fontFamily: fontFamily })
 			.setAlpha(0)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5)
 			.setDepth(10);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(index * 100, 250);
+				amountText.setPosition(50 + index * 100, 250);
 				this.totalSnowballs += 1;
 				this.totalAddedSnowballs += 1;
 				this.showClickAnimation(amountText);
@@ -375,14 +382,16 @@ class GameScene extends Phaser.Scene {
 
 	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(index * 100, 350, "+10", { fontFamily: fontFamily })
+			.text(50 + index * 100, 350, "+10", { fontFamily: fontFamily })
 			.setAlpha(0)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5)
 			.setDepth(10);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(index * 100, 350);
+				amountText.setPosition(50 + index * 100, 350);
 				this.totalSnowballs += 10;
 				this.totalAddedSnowballs += 10;
 				this.showClickAnimation(amountText);
@@ -400,14 +409,16 @@ class GameScene extends Phaser.Scene {
 
 	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(index * 100, 450, "+100", { fontFamily: fontFamily })
+			.text(50 + index * 100, 450, "+100", { fontFamily: fontFamily })
 			.setAlpha(0)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5)
 			.setDepth(10);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(index * 100, 450);
+				amountText.setPosition(50 + index * 100, 450);
 				this.totalSnowballs += 100;
 				this.totalAddedSnowballs += 100;
 				this.showClickAnimation(amountText);
@@ -424,12 +435,12 @@ class GameScene extends Phaser.Scene {
 	}
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
-		const prevY = amountText.y;
+		const startingY = amountText.y;
 		this.add.tween({
 			targets: [amountText],
 			props: {
 				y: {
-					value: prevY - 100,
+					value: startingY - 100,
 					duration: 500,
 					ease: "Sine.easeIn",
 				},
