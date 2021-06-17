@@ -20,6 +20,7 @@ class GameScene extends Phaser.Scene {
 	storeItems: PlayFabClientModels.StoreItem[];
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
+	snowballIcon: Phaser.GameObjects.Image;
 	popup: Phaser.GameObjects.Container;
 	toast: Phaser.GameObjects.Container;
 	storeContainer: Phaser.GameObjects.Container;
@@ -82,7 +83,8 @@ class GameScene extends Phaser.Scene {
 			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
-		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
+		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs} x`, { fontFamily: fontFamily });
+		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball1").setScale(0.15);
 
 		this.interactiveGameSceneObjects.push(
 			this.add
@@ -173,7 +175,8 @@ class GameScene extends Phaser.Scene {
 
 	update() {
 		const totalSnowballs = this.totalSnowballs | 0;
-		this.snowballText.setText(`Snowballs: ${totalSnowballs}`);
+		this.snowballText.setText(`Snowballs: ${totalSnowballs} x`);
+		this.snowballIcon.setX(36 + this.snowballText.width);
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
@@ -369,7 +372,7 @@ class GameScene extends Phaser.Scene {
 			delay: 10000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(50 + index * 100, 150);
+				amountText.setY(150);
 				this.totalSnowballs += 1;
 				this.totalAddedSnowballs += 1;
 				this.showClickAnimation(amountText);
@@ -391,7 +394,7 @@ class GameScene extends Phaser.Scene {
 			delay: 1000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(50 + index * 100, 250);
+				amountText.setY(250);
 				this.totalSnowballs += 1;
 				this.totalAddedSnowballs += 1;
 				this.showClickAnimation(amountText);
@@ -413,7 +416,7 @@ class GameScene extends Phaser.Scene {
 			delay: 1000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(50 + index * 100, 350);
+				amountText.setY(350);
 				this.totalSnowballs += 10;
 				this.totalAddedSnowballs += 10;
 				this.showClickAnimation(amountText);
@@ -435,7 +438,7 @@ class GameScene extends Phaser.Scene {
 			delay: 1000,
 			loop: true,
 			callback: () => {
-				amountText.setPosition(50 + index * 100, 450);
+				amountText.setY(450);
 				this.totalSnowballs += 100;
 				this.totalAddedSnowballs += 100;
 				this.showClickAnimation(amountText);
