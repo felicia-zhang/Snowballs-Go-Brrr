@@ -37,11 +37,26 @@ class GameScene extends Phaser.Scene {
 		this.itemsMap = {};
 		this.makeToast();
 		this.makePopup();
-		this.add.text(600, 20, "STORE", { fontFamily: fontFamily });
-		const background = this.add.existing(new RoundRectangle(this, 0, 320, 220, 510, 15, 0x1a252e));
-		this.storeContainer = this.add.container(670, 0, [background]);
+		this.storeContainer = this.add.container(670, 0, []).setAlpha(0);
 		this.inventoryContainer = this.add.container(140, 0, []);
 		this.makeSnowball();
+
+		this.input.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+			if (pointer.x < 560) {
+				this.add.tween({
+					targets: [this.storeContainer],
+					ease: "Sine.easeIn",
+					duration: 100,
+					alpha: 0,
+					onComplete: () => {
+						this.time.paused = false;
+						this.storeContainer.removeAll(true);
+						this.storeItems = [];
+					},
+					callbackScope: this,
+				});
+			}
+		});
 
 		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
@@ -53,12 +68,6 @@ class GameScene extends Phaser.Scene {
 					Levels: JSON.parse(item.CustomData)["Levels"],
 					Instances: {},
 				};
-			});
-
-			PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
-				result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-					this.makeStoreItem(storeItem);
-				});
 			});
 
 			PlayFabClient.GetUserInventory({}, (error, result) => {
@@ -101,6 +110,33 @@ class GameScene extends Phaser.Scene {
 			.on("pointerup", () => {
 				this.scene.start("Menu");
 			});
+
+		this.add
+			.text(700, 550, "STORE", { fontFamily: fontFamily })
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				this.showStore();
+			});
+	}
+
+	showStore() {
+		const background = this.add.existing(new RoundRectangle(this, 0, 320, 220, 510, 15, 0x1a252e));
+		this.storeContainer.add(background);
+		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
+			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
+				this.makeStoreItem(storeItem);
+			});
+			this.add.tween({
+				targets: [this.storeContainer],
+				ease: "Sine.easeIn",
+				duration: 100,
+				alpha: 1,
+				onComplete: () => {
+					this.time.paused = true;
+				},
+				callbackScope: this,
+			});
+		});
 	}
 
 	update() {
