@@ -11,8 +11,8 @@ interface ItemDetail {
 }
 
 class GameScene extends Phaser.Scene {
-	SYNC_DELAY = 60000;
-	CLICK_MULTIPLIER = 1;
+	readonly syncDelay = 60000;
+	clickMultiplier: number;
 	totalSnowballs: number;
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
@@ -31,6 +31,7 @@ class GameScene extends Phaser.Scene {
 
 	create() {
 		this.add.image(400, 300, "sky");
+		this.clickMultiplier = 1;
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
@@ -97,7 +98,7 @@ class GameScene extends Phaser.Scene {
 		});
 
 		this.syncTimer = this.time.addEvent({
-			delay: this.SYNC_DELAY,
+			delay: this.syncDelay,
 			loop: true,
 			callback: () => this.sync(),
 		});
@@ -140,7 +141,8 @@ class GameScene extends Phaser.Scene {
 	}
 
 	update() {
-		this.snowballText.setText(`Snowballs: ${this.totalSnowballs}`);
+		const totalSnowballs = this.totalSnowballs | 0;
+		this.snowballText.setText(`Snowballs: ${totalSnowballs}`);
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
@@ -167,7 +169,7 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					const currentClickMultiplier = this.CLICK_MULTIPLIER;
+					const currentClickMultiplier = this.clickMultiplier;
 					amountText.setText(currentClickMultiplier.toString());
 					amountText.setPosition(pointer.x, pointer.y);
 					this.totalManualPenguinClicks += 1;
@@ -265,7 +267,6 @@ class GameScene extends Phaser.Scene {
 						},
 					},
 					() => {}
-					//TODO: store needs to be a popup or something so we can fetch storeItems everytime
 				);
 			}
 		});
@@ -304,7 +305,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	makeMittens(index: number, inventory: PlayFabClientModels.ItemInstance) {
-		this.CLICK_MULTIPLIER += 1;
+		this.clickMultiplier += 1;
 		const sprite = this.add
 			.sprite(index * 100, 50, "mittens")
 			.setOrigin(0, 0)
