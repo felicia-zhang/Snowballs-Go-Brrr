@@ -41,7 +41,7 @@ class GameScene extends Phaser.Scene {
 		this.makeToast();
 		this.makePopup();
 		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
-		this.inventoryContainer = this.add.container(140, 0, []);
+		this.inventoryContainer = this.add.container(170, 5, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
 		this.interactiveGameSceneObjects = [];
 		this.makeSnowball();
@@ -191,8 +191,8 @@ class GameScene extends Phaser.Scene {
 		});
 
 		const sprite = this.add
-			.sprite(0, 60, "snowball1")
-			.setOrigin(0, 0)
+			.sprite(35, 300, "snowball1")
+			.setOrigin(0, 0.5)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
@@ -588,7 +588,7 @@ class GameScene extends Phaser.Scene {
 			bg.setStrokeStyle(2, 0xffffff, 1);
 		}
 
-		this.toast.setPosition(400, 8 + bg.height / 2);
+		this.toast.setPosition(400, 14 + bg.height / 2);
 		this.add.tween({
 			targets: [this.toast],
 			ease: "Sine.easeIn",
