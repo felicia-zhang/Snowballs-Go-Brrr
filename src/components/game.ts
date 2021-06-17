@@ -92,7 +92,7 @@ class GameScene extends Phaser.Scene {
 		this.syncTimer = this.time.addEvent({
 			delay: this.syncDelay,
 			loop: true,
-			callback: () => this.sync(() => this.showToast("Saved")),
+			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs}`, { fontFamily: fontFamily });
@@ -125,7 +125,7 @@ class GameScene extends Phaser.Scene {
 
 		this.totalSnowballs += sb;
 		this.totalAddedSnowballs += sb;
-		this.showToast(`${sb} snowballs added \nwhile player was away`);
+		this.showToast(`${sb} snowballs added \nwhile player was away`, false);
 	}
 
 	showStore() {
@@ -251,7 +251,7 @@ class GameScene extends Phaser.Scene {
 	purchaseItem(itemDetail: ItemDetail, price: number) {
 		PlayFabClient.PurchaseItem({ ItemId: itemDetail.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
 			if (e !== null) {
-				this.showToast("Not enough snowballs");
+				this.showToast("Not enough snowballs", true);
 			} else {
 				this.totalSnowballs -= price;
 				PlayFabClient.ExecuteCloudScript(
@@ -266,7 +266,7 @@ class GameScene extends Phaser.Scene {
 					(a, b) => {
 						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
 						this.makeInventoryItem(newItem);
-						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`);
+						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 					}
 				);
 
@@ -525,12 +525,12 @@ class GameScene extends Phaser.Scene {
 		PlayFabClient.GetUserInventory({}, (error, result) => {
 			const sb = result.data.VirtualCurrency.SB;
 			if (!(newLevel.toString() in itemType.Levels)) {
-				this.showToast(`${newLevel} is not a valid level`);
+				this.showToast(`${newLevel} is not a valid level`, true);
 				return;
 			}
 			const cost = itemType.Levels[newLevel].Cost;
 			if (Number(cost) > sb) {
-				this.showToast("Insufficient funds");
+				this.showToast("Not enough snowballs", true);
 				return;
 			}
 			PlayFabClient.ExecuteCloudScript(
@@ -562,13 +562,21 @@ class GameScene extends Phaser.Scene {
 		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(1);
 	}
 
-	showToast(message: string) {
+	showToast(message: string, isError: boolean) {
 		const toastText = this.toast.getAt(1) as Phaser.GameObjects.Text;
 		toastText.setText(message).setAlign("center").setOrigin(0.5, 0.5);
 
 		const bg = this.toast.getAt(0) as RoundRectangle;
 		bg.width = toastText.width + 16;
 		bg.height = toastText.height + 8;
+
+		if (isError) {
+			toastText.setColor("#ff7360");
+			bg.setStrokeStyle(2, 0xff7360, 1);
+		} else {
+			toastText.setColor("#ffffff");
+			bg.setStrokeStyle(2, 0xffffff, 1);
+		}
 
 		this.toast.setPosition(400, 8 + bg.height / 2);
 		this.add.tween({
