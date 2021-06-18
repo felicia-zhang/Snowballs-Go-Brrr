@@ -2,7 +2,7 @@ import { PhaserGame } from "./components/phaser";
 import React from "react";
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
-import { Button, ChakraProvider, Divider, HStack, Input, Link, VStack } from "@chakra-ui/react";
+import { Button, ChakraProvider, Divider, Flex, HStack, Input, Link, Spacer, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily, normalFontSize } from "./utils/font";
@@ -80,7 +80,13 @@ class App extends React.PureComponent<any, IState> {
 	render() {
 		return (
 			<ChakraProvider>
-				<div style={{ position: "absolute", left: "300px", top: "200px" }}>
+				<div
+					style={{
+						position: "absolute",
+						left: 287.5,
+						width: "225",
+						top: "200px",
+					}}>
 					{this.state.isSignedIn ? null : (
 						<VStack>
 							{this.state.isRegistering ? (
@@ -117,13 +123,7 @@ class App extends React.PureComponent<any, IState> {
 								}}
 							/>
 							{this.state.isRegistering ? (
-								<HStack>
-									<Button
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										onClick={this.registerWithPlayFab}>
-										Register With PlayFab
-									</Button>
+								<Flex width={225}>
 									<Link
 										fontFamily={fontFamily}
 										fontSize={normalFontSize}
@@ -131,15 +131,17 @@ class App extends React.PureComponent<any, IState> {
 										onClick={() => this.setState({ isRegistering: false })}>
 										Sign in
 									</Link>
-								</HStack>
-							) : (
-								<HStack>
+									<Spacer />
 									<Button
 										fontFamily={fontFamily}
 										fontSize={normalFontSize}
-										onClick={this.signInWithPlayFab}>
-										Sign in With PlayFab
+										colorScheme="whiteAlpha"
+										onClick={this.registerWithPlayFab}>
+										Register
 									</Button>
+								</Flex>
+							) : (
+								<Flex width={225}>
 									<Link
 										fontFamily={fontFamily}
 										fontSize={normalFontSize}
@@ -147,13 +149,22 @@ class App extends React.PureComponent<any, IState> {
 										onClick={() => this.setState({ isRegistering: true })}>
 										Register
 									</Link>
-								</HStack>
+									<Spacer />
+									<Button
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
+										colorScheme="whiteAlpha"
+										onClick={this.signInWithPlayFab}>
+										Sign in
+									</Button>
+								</Flex>
 							)}
 							<Divider />
 							<GoogleLogin
 								clientId={process.env.REACT_APP_GOOGLE_ID}
 								render={renderProps => (
 									<Button
+										width={225}
 										fontFamily={fontFamily}
 										fontSize={normalFontSize}
 										onClick={renderProps.onClick}
@@ -172,6 +183,7 @@ class App extends React.PureComponent<any, IState> {
 								autoLoad={true}
 								render={renderProps => (
 									<Button
+										width={225}
 										fontFamily={fontFamily}
 										fontSize={normalFontSize}
 										onClick={renderProps.onClick}
