@@ -21,7 +21,6 @@ class GameScene extends Phaser.Scene {
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
-	popup: Phaser.GameObjects.Container;
 	toast: Phaser.GameObjects.Container;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
@@ -40,7 +39,6 @@ class GameScene extends Phaser.Scene {
 		this.storeItems = [];
 		this.itemsMap = {};
 		this.makeToast();
-		this.makePopup();
 		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(170, 5, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
@@ -132,11 +130,16 @@ class GameScene extends Phaser.Scene {
 
 	showStore() {
 		this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
-		const background = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
-		this.storeContainer.add(background);
+
+		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
+		const popupBackground = this.add.existing(new RoundRectangle(this, 0, 0, 180, 150, 15, 0x16252e));
+		const itemDescription = this.add.text(-75, -60, "", { fontFamily: fontFamily });
+		const popup = this.add.container(280, 0, [popupBackground, itemDescription]).setDepth(22).setAlpha(0);
+		this.storeContainer.add([mainBackground, popup]);
+
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem);
+				this.makeStoreItem(storeItem, popup);
 			});
 			const closeButton = this.add
 				.image(175, -215, "close")
@@ -222,9 +225,10 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem) {
+	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, popup: Phaser.GameObjects.Container) {
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const itemPrice = storeItem.VirtualCurrencyPrices.SB;
+		const wrap = (s: string) => s.replace(/(?![^\n]{1,20}$)([^\n]{1,20})\s/g, "$1\n");
 
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
@@ -236,19 +240,19 @@ class GameScene extends Phaser.Scene {
 			})
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) => {
 				this.add.tween({
-					targets: [this.popup],
+					targets: [popup],
 					ease: "Sine.easeIn",
 					alpha: 1,
 					duration: 300,
-					delay: 800,
-					onStart: () => this.setStoreItemDetails(pointer, itemDetail, itemPrice),
+					onStart: () => {
+						const itemDescription = popup.getAt(1) as Phaser.GameObjects.Text;
+						itemDescription.setText(wrap(itemDetail.Description));
+					},
 					callbackScope: this,
 				});
 			})
 			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-				levelsContainer.removeAll(true);
-				this.popup.setAlpha(0);
+				popup.setAlpha(0);
 			});
 
 		const nameText = this.add
@@ -341,24 +345,7 @@ class GameScene extends Phaser.Scene {
 		} else if (inventory.DisplayName === "Arctic Vault") {
 			sprite = this.makeVault(index, inventory);
 		}
-		sprite
-			.setOrigin(0, 0)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true })
-
-			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) =>
-				this.setInventoryItemDetails(pointer, inventory)
-			)
-			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-				const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-				levelsContainer.removeAll(true);
-				this.popup.setAlpha(0);
-			})
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (pointer.rightButtonReleased()) {
-					this.sync(() => this.upgradeItemLevel(inventory));
-				}
-			});
+		sprite.setOrigin(0, 0).setScale(0.5);
 		this.interactiveGameSceneObjects.push(sprite);
 		this.inventoryContainer.add(sprite);
 	}
@@ -477,102 +464,6 @@ class GameScene extends Phaser.Scene {
 				amountText.setAlpha(1);
 			},
 			callbackScope: this,
-		});
-	}
-
-	makePopup() {
-		const nameText = this.add.text(0, 0, "", { fontFamily: fontFamily });
-		const descriptionText = this.add.text(0, 20, "", { fontFamily: fontFamily });
-		const currentLevelText = this.add.text(0, 40, "", { fontFamily: fontFamily });
-		const levelsContainer = this.add.container(0, 60, []);
-		this.popup = this.add
-			.container(0, 0, [nameText, descriptionText, currentLevelText, levelsContainer])
-			.setAlpha(0)
-			.setDepth(21);
-	}
-
-	setInventoryItemDetails(pointer: Phaser.Input.Pointer, item: PlayFabClientModels.ItemInstance) {
-		const itemType = this.itemsMap[item.ItemId];
-
-		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
-		nameText.setText(`Name: ${item.DisplayName}`);
-		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
-		descriptionText.setText(`Description: ${itemType.Description}`);
-		const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
-		currentLevelText.setText(`Current level: ${item.CustomData["Level"]}`);
-
-		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-		const levels = itemType.Levels as { [key: string]: { Cost: string; Effect: string } };
-		Object.keys(levels).forEach((key, i) => {
-			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
-			const costText = this.add.text(50, i * 20, `Cost: ${levels[key].Cost}`, { fontFamily: fontFamily });
-			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key].Effect}`, {
-				fontFamily: fontFamily,
-			});
-			levelsContainer.add([levelText, costText, effectText]);
-		});
-
-		this.popup.setX(pointer.x);
-		this.popup.setY(pointer.y);
-	}
-
-	setStoreItemDetails(pointer: Phaser.Input.Pointer, itemDetail: ItemDetail, price: number) {
-		// TODO: needs to hide info if item is locked
-		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
-		nameText.setText(`Name: ${itemDetail.DisplayName}`);
-		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
-		descriptionText.setText(`Description: ${itemDetail.Description}`);
-		const priceText = this.popup.getAt(2) as Phaser.GameObjects.Text;
-		priceText.setText(`Price: ${price}`);
-
-		const levelsContainer = this.popup.getAt(3) as Phaser.GameObjects.Container;
-		const levels = itemDetail.Levels;
-		Object.keys(levels).forEach((key, i) => {
-			const levelText = this.add.text(0, i * 20, key, { fontFamily: fontFamily });
-			const costText = this.add.text(50, i * 20, `Cost: ${levels[key].Cost}`, { fontFamily: fontFamily });
-			const effectText = this.add.text(200, i * 20, `Effect: ${levels[key].Effect}`, {
-				fontFamily: fontFamily,
-			});
-			levelsContainer.add([levelText, costText, effectText]);
-		});
-
-		this.popup.setX(pointer.x);
-		this.popup.setY(pointer.y);
-	}
-
-	upgradeItemLevel(item: PlayFabClientModels.ItemInstance) {
-		const itemType = this.itemsMap[item.ItemId];
-
-		const newLevel = Number(item.CustomData["Level"]) + 1;
-		PlayFabClient.GetUserInventory({}, (error, result) => {
-			const sb = result.data.VirtualCurrency.SB;
-			if (!(newLevel.toString() in itemType.Levels)) {
-				this.showToast(`${newLevel} is not a valid level`, true);
-				return;
-			}
-			const cost = itemType.Levels[newLevel].Cost;
-			if (Number(cost) > sb) {
-				this.showToast("Not enough snowballs", true);
-				return;
-			}
-			PlayFabClient.ExecuteCloudScript(
-				{
-					FunctionName: "updateItemLevel",
-					FunctionParameter: {
-						instanceId: item.ItemInstanceId,
-						level: newLevel,
-						cost: cost,
-					},
-				},
-				(error, result) => {
-					console.log("Update item level result:", result);
-					this.totalSnowballs -= Number(cost);
-					const i: PlayFabClientModels.ItemInstance = itemType.Instances[item.ItemInstanceId];
-					i.CustomData["Level"] = newLevel.toString();
-					const currentLevelText = this.popup.getAt(2) as Phaser.GameObjects.Text;
-					currentLevelText.setText(`Current level: ${newLevel}`);
-				}
-			);
 		});
 	}
 
