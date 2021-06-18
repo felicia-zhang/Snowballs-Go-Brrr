@@ -1,56 +1,79 @@
 import { PlayFabClient } from "playfab-sdk";
-import { fontFamily } from "../utils/font";
+import { textStyle } from "../utils/font";
+import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 
 class LeaderboardScene extends Phaser.Scene {
-	leaderboardName: Phaser.GameObjects.Text;
 	list: Phaser.GameObjects.Container;
+	tabSelector: RoundRectangle;
 	constructor() {
 		super("Leaderboard");
 	}
 
 	create() {
 		this.add.image(400, 300, "sky");
-		this.add.text(300, 9, "Leaderboard", { fontFamily: fontFamily });
-		this.leaderboardName = this.add.text(300, 50, "", { fontFamily: fontFamily });
-		this.add.text(200, 80, "PLACE", { fontFamily: fontFamily });
-		this.add.text(300, 80, "NAME", { fontFamily: fontFamily });
-		this.add.text(500, 80, "STATISTIC", { fontFamily: fontFamily });
-		this.list = this.add.container(200, 110, []);
-		this.showLeaderboard("5");
+		this.add.existing(new RoundRectangle(this, 400, 330, 480, 400, 15, 0x16252e));
+		this.list = this.add.container(230, 180, []);
+		this.add.text(400, 16, "Leaderboard", textStyle).setOrigin(0.5, 0.5).setAlign("center");
+		this.tabSelector = this.add.existing(new RoundRectangle(this, 240, 110, 160, 95, 15, 0x16252e));
+		this.add
+			.text(172, 100, "Current Snowballs", textStyle)
+			.setOrigin(0, 0.5)
+			.setAlign("left")
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => this.showLeaderboard("5", 240, 160));
+		this.add
+			.text(400, 100, "Total Snowballs", textStyle)
+			.setOrigin(0.5, 0.5)
+			.setAlign("center")
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => this.showLeaderboard("6", 400, 150));
+		this.add
+			.text(627, 100, "Manual Clicks", textStyle)
+			.setOrigin(1, 0.5)
+			.setAlign("right")
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => this.showLeaderboard("7", 573, 135));
+		this.showLeaderboard("5", 240, 160);
 
 		this.add
-			.text(80, 400, "current_snowballs", { fontFamily: fontFamily })
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => this.showLeaderboard("5"));
-		this.add
-			.text(80 + 200, 400, "total_added_snowballs", { fontFamily: fontFamily })
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => this.showLeaderboard("6"));
-		this.add
-			.text(80 + 400, 400, "total_manual_penguin_clicks", { fontFamily: fontFamily })
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => this.showLeaderboard("7"));
-
-		this.add
-			.text(700, 550, "MENU", { fontFamily: fontFamily })
+			.text(784, 584, "MENU", textStyle)
+			.setOrigin(1, 1)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Menu");
 			});
 	}
 
-	showLeaderboard(stat: string) {
-		this.leaderboardName.setText(stat);
+	showLeaderboard(stat: string, position: number, width: number) {
+		this.add.tween({
+			targets: [this.tabSelector],
+			props: {
+				x: {
+					value: position,
+					ease: "Sine.easeIn",
+					duration: 600,
+				},
+				width: {
+					value: width,
+					ease: "Sine.easeIn",
+					duration: 600,
+				},
+			},
+			callbackScope: this,
+		});
 		this.list.removeAll(true);
 		PlayFabClient.GetLeaderboard({ StatisticName: stat, StartPosition: 0 }, (error, result) => {
 			const players = result.data.Leaderboard;
-			const texts: Phaser.GameObjects.Text[] = [];
 			players.forEach((player, i) => {
-				texts.push(this.add.text(0, i * 20, (i + 1).toString(), { fontFamily: fontFamily }));
-				texts.push(this.add.text(100, i * 20, player.DisplayName, { fontFamily: fontFamily }));
-				texts.push(this.add.text(300, i * 20, player.StatValue.toString(), { fontFamily: fontFamily }));
+				const bg = this.add.existing(new RoundRectangle(this, 170, i * 80 + 8, 390, 50, 15, 0x2e5767));
+				const rankText = this.add.text(0, i * 80, `#${(i + 1).toString()}`, textStyle);
+				const playerText = this.add.text(50, i * 80, player.DisplayName, textStyle);
+				const statText = this.add
+					.text(340, i * 80, player.StatValue.toString(), textStyle)
+					.setOrigin(1, 0)
+					.setAlign("right");
+				this.list.add([bg, rankText, playerText, statText]);
 			});
-			this.list.add(texts);
 		});
 	}
 

@@ -1,1 +1,5 @@
-export const fontFamily = 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif'
+export const fontFamily = "Didact Gothic";
+
+export const normalFontSize = "18px";
+
+export const textStyle = { fontFamily: fontFamily, fontSize: normalFontSize };

@@ -12,6 +12,7 @@ import snowman from "../assets/snowman.png";
 import mittens from "../assets/mittens.png";
 import vault from "../assets/vault.png";
 import close from "../assets/close.png";
+import lock from "../assets/lock.png";
 import MenuScene from "./menu";
 
 class Controller extends Phaser.Scene {
@@ -30,6 +31,7 @@ class Controller extends Phaser.Scene {
 		this.load.image("mittens", mittens);
 		this.load.image("vault", vault);
 		this.load.image("close", close);
+		this.load.image("lock", lock);
 	}
 
 	create() {
