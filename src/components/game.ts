@@ -1,5 +1,5 @@
 import { PlayFabClient } from "playfab-sdk";
-import { fontFamily } from "../utils/font";
+import { textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 
 interface ItemDetail {
@@ -39,7 +39,7 @@ class GameScene extends Phaser.Scene {
 		this.storeItems = [];
 		this.itemsMap = {};
 		this.toast = this.add
-			.text(400, 16, "", { fontFamily: fontFamily })
+			.text(400, 16, "", textStyle)
 			.setAlpha(0)
 			.setDepth(22)
 			.setAlign("center")
@@ -86,12 +86,12 @@ class GameScene extends Phaser.Scene {
 			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
-		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs} x`, { fontFamily: fontFamily });
+		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs} x`, textStyle);
 		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball1").setScale(0.15);
 
 		this.interactiveGameSceneObjects.push(
 			this.add
-				.text(16, 584, "MENU", { fontFamily: fontFamily })
+				.text(16, 584, "MENU", textStyle)
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
@@ -101,7 +101,7 @@ class GameScene extends Phaser.Scene {
 
 		this.interactiveGameSceneObjects.push(
 			this.add
-				.text(784, 584, "STORE", { fontFamily: fontFamily })
+				.text(784, 584, "STORE", textStyle)
 				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
@@ -137,7 +137,7 @@ class GameScene extends Phaser.Scene {
 		this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
 
 		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
-		const itemDescriptionPopup = this.add.text(200, -60, "", { fontFamily: fontFamily }).setAlpha(0);
+		const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
 		this.storeContainer.add([mainBackground, itemDescriptionPopup]);
 
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
@@ -213,7 +213,7 @@ class GameScene extends Phaser.Scene {
 					this.totalAddedSnowballs += currentClickMultiplier;
 					this.totalSnowballs += currentClickMultiplier;
 					const amountText = this.add
-						.text(pointer.x, pointer.y, currentClickMultiplier.toString(), { fontFamily: fontFamily })
+						.text(pointer.x, pointer.y, currentClickMultiplier.toString(), textStyle)
 						.setAlpha(0)
 						.setAlign("center")
 						.setOrigin(0.5, 0.5)
@@ -248,7 +248,7 @@ class GameScene extends Phaser.Scene {
 					duration: 300,
 					onStart: () => {
 						itemDescriptionPopup.setText(wrap(itemDetail.Description));
-						itemDescriptionPopup.setY(pointer.y - 320);
+						itemDescriptionPopup.setY(pointer.y - 330);
 					},
 					callbackScope: this,
 				});
@@ -258,15 +258,11 @@ class GameScene extends Phaser.Scene {
 			});
 
 		const nameText = this.add
-			.text(-100, -170 + index * 85, "", {
-				fontFamily: fontFamily,
-			})
+			.text(-100, -170 + index * 85, "", textStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const priceText = this.add
-			.text(125, -170 + index * 85, "", {
-				fontFamily: fontFamily,
-			})
+			.text(125, -170 + index * 85, "", textStyle)
 			.setAlign("right")
 			.setOrigin(1, 0.5);
 
@@ -361,7 +357,7 @@ class GameScene extends Phaser.Scene {
 
 	makeFire(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(50 + index * 100, 150, "+1", { fontFamily: fontFamily })
+			.text(50 + index * 100, 150, "+1", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -383,7 +379,7 @@ class GameScene extends Phaser.Scene {
 
 	makeSnowman(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(50 + index * 100, 250, "+1", { fontFamily: fontFamily })
+			.text(50 + index * 100, 250, "+1", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -405,7 +401,7 @@ class GameScene extends Phaser.Scene {
 
 	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(50 + index * 100, 350, "+10", { fontFamily: fontFamily })
+			.text(50 + index * 100, 350, "+10", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -427,7 +423,7 @@ class GameScene extends Phaser.Scene {
 
 	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
 		const amountText = this.add
-			.text(50 + index * 100, 450, "+100", { fontFamily: fontFamily })
+			.text(50 + index * 100, 450, "+100", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)

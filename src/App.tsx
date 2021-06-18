@@ -5,6 +5,7 @@ import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props
 import { Button, ChakraProvider, Divider, HStack, Input, Link, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { PlayFabClient } from "playfab-sdk";
+import { fontFamily, normalFontSize } from "./utils/font";
 
 interface IState {
 	game: PhaserGame;
@@ -84,7 +85,8 @@ class App extends React.PureComponent<any, IState> {
 						<VStack>
 							{this.state.isRegistering ? (
 								<Input
-									fontFamily="Didact Gothic"
+									fontFamily={fontFamily}
+									fontSize={normalFontSize}
 									color="white"
 									size="md"
 									placeholder="Email"
@@ -94,7 +96,8 @@ class App extends React.PureComponent<any, IState> {
 								/>
 							) : null}
 							<Input
-								fontFamily="Didact Gothic"
+								fontFamily={fontFamily}
+								fontSize={normalFontSize}
 								color="white"
 								size="md"
 								placeholder="Username"
@@ -103,7 +106,8 @@ class App extends React.PureComponent<any, IState> {
 								}}
 							/>
 							<Input
-								fontFamily="Didact Gothic"
+								fontFamily={fontFamily}
+								fontSize={normalFontSize}
 								color="white"
 								size="md"
 								type="password"
@@ -114,11 +118,15 @@ class App extends React.PureComponent<any, IState> {
 							/>
 							{this.state.isRegistering ? (
 								<HStack>
-									<Button fontFamily="Didact Gothic" onClick={this.registerWithPlayFab}>
+									<Button
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
+										onClick={this.registerWithPlayFab}>
 										Register With PlayFab
 									</Button>
 									<Link
-										fontFamily="Didact Gothic"
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
 										color="white"
 										onClick={() => this.setState({ isRegistering: false })}>
 										Sign in
@@ -126,11 +134,15 @@ class App extends React.PureComponent<any, IState> {
 								</HStack>
 							) : (
 								<HStack>
-									<Button fontFamily="Didact Gothic" onClick={this.signInWithPlayFab}>
+									<Button
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
+										onClick={this.signInWithPlayFab}>
 										Sign in With PlayFab
 									</Button>
 									<Link
-										fontFamily="Didact Gothic"
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
 										color="white"
 										onClick={() => this.setState({ isRegistering: true })}>
 										Register
@@ -142,7 +154,8 @@ class App extends React.PureComponent<any, IState> {
 								clientId={process.env.REACT_APP_GOOGLE_ID}
 								render={renderProps => (
 									<Button
-										fontFamily="Didact Gothic"
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
 										onClick={renderProps.onClick}
 										leftIcon={<FaGoogle />}>
 										Sign in with Google
@@ -159,7 +172,8 @@ class App extends React.PureComponent<any, IState> {
 								autoLoad={true}
 								render={renderProps => (
 									<Button
-										fontFamily="Didact Gothic"
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
 										onClick={renderProps.onClick}
 										leftIcon={<FaFacebook />}>
 										Sign in with Facebook
