@@ -264,11 +264,11 @@ class GameScene extends Phaser.Scene {
 			.setAlign("right")
 			.setOrigin(1, 0.5);
 
-		let image: Phaser.GameObjects.GameObject;
+		let image: Phaser.GameObjects.Image;
 		if (itemPrice === 0) {
 			nameText.setText("???");
 			priceText.setText("??? x");
-			image = this.add.rectangle(-135, -170 + index * 85, 10, 10, 0x000000, 1);
+			image = this.add.image(-135, -170 + index * 85, "lock").setScale(0.25);
 		} else {
 			nameText.setText(itemDetail.DisplayName.toUpperCase());
 			priceText.setText(`${itemPrice} x`);
