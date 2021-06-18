@@ -12,28 +12,28 @@ class LeaderboardScene extends Phaser.Scene {
 	create() {
 		this.add.image(400, 300, "sky");
 		this.add.existing(new RoundRectangle(this, 400, 330, 480, 400, 15, 0x16252e));
-		this.list = this.add.container(230, 210, []);
+		this.list = this.add.container(230, 180, []);
 		this.add.text(400, 16, "Leaderboard", textStyle).setOrigin(0.5, 0.5).setAlign("center");
-		this.tabSelector = this.add.existing(new RoundRectangle(this, 225, 110, 130, 95, 15, 0x16252e));
+		this.tabSelector = this.add.existing(new RoundRectangle(this, 240, 110, 160, 95, 15, 0x16252e));
 		this.add
-			.text(175, 100, "Best Collector", textStyle)
+			.text(172, 100, "Current Snowballs", textStyle)
 			.setOrigin(0, 0.5)
 			.setAlign("left")
 			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => this.showLeaderboard("5", 225, 130));
+			.on("pointerup", () => this.showLeaderboard("5", 240, 160));
 		this.add
-			.text(400, 100, "Best Earner", textStyle)
+			.text(400, 100, "Total Snowballs", textStyle)
 			.setOrigin(0.5, 0.5)
 			.setAlign("center")
 			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => this.showLeaderboard("6", 400, 115));
+			.on("pointerup", () => this.showLeaderboard("6", 400, 150));
 		this.add
-			.text(625, 100, "Muscle Spasms", textStyle)
+			.text(627, 100, "Manual Clicks", textStyle)
 			.setOrigin(1, 0.5)
 			.setAlign("right")
 			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => this.showLeaderboard("7", 565, 150));
-		this.showLeaderboard("5", 225, 130);
+			.on("pointerup", () => this.showLeaderboard("7", 573, 135));
+		this.showLeaderboard("5", 240, 160);
 
 		this.add
 			.text(784, 584, "MENU", textStyle)
