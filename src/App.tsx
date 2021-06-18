@@ -84,6 +84,7 @@ class App extends React.PureComponent<any, IState> {
 						<VStack>
 							{this.state.isRegistering ? (
 								<Input
+									fontFamily="Didact Gothic"
 									color="white"
 									size="md"
 									placeholder="Email"
@@ -93,6 +94,7 @@ class App extends React.PureComponent<any, IState> {
 								/>
 							) : null}
 							<Input
+								fontFamily="Didact Gothic"
 								color="white"
 								size="md"
 								placeholder="Username"
@@ -101,6 +103,7 @@ class App extends React.PureComponent<any, IState> {
 								}}
 							/>
 							<Input
+								fontFamily="Didact Gothic"
 								color="white"
 								size="md"
 								type="password"
@@ -111,20 +114,37 @@ class App extends React.PureComponent<any, IState> {
 							/>
 							{this.state.isRegistering ? (
 								<HStack>
-									<Button onClick={this.registerWithPlayFab}>Register With PlayFab</Button>
-									<Link onClick={() => this.setState({ isRegistering: false })}>Sign in</Link>
+									<Button fontFamily="Didact Gothic" onClick={this.registerWithPlayFab}>
+										Register With PlayFab
+									</Button>
+									<Link
+										fontFamily="Didact Gothic"
+										color="white"
+										onClick={() => this.setState({ isRegistering: false })}>
+										Sign in
+									</Link>
 								</HStack>
 							) : (
 								<HStack>
-									<Button onClick={this.signInWithPlayFab}>Sign in With PlayFab</Button>
-									<Link onClick={() => this.setState({ isRegistering: true })}>Register</Link>
+									<Button fontFamily="Didact Gothic" onClick={this.signInWithPlayFab}>
+										Sign in With PlayFab
+									</Button>
+									<Link
+										fontFamily="Didact Gothic"
+										color="white"
+										onClick={() => this.setState({ isRegistering: true })}>
+										Register
+									</Link>
 								</HStack>
 							)}
 							<Divider />
 							<GoogleLogin
 								clientId={process.env.REACT_APP_GOOGLE_ID}
 								render={renderProps => (
-									<Button onClick={renderProps.onClick} leftIcon={<FaGoogle />}>
+									<Button
+										fontFamily="Didact Gothic"
+										onClick={renderProps.onClick}
+										leftIcon={<FaGoogle />}>
 										Sign in with Google
 									</Button>
 								)}
@@ -138,7 +158,10 @@ class App extends React.PureComponent<any, IState> {
 								appId={process.env.REACT_APP_FACEBOOK_ID}
 								autoLoad={true}
 								render={renderProps => (
-									<Button onClick={renderProps.onClick} leftIcon={<FaFacebook />}>
+									<Button
+										fontFamily="Didact Gothic"
+										onClick={renderProps.onClick}
+										leftIcon={<FaFacebook />}>
 										Sign in with Facebook
 									</Button>
 								)}

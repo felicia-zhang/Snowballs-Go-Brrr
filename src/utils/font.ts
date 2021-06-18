@@ -1,1 +1,1 @@
-export const fontFamily = 'Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif'
+export const fontFamily = "Didact Gothic";
