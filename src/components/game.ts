@@ -237,7 +237,6 @@ class GameScene extends Phaser.Scene {
 		this.storeItems.push(storeItem);
 		const background = this.add
 			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, 0x2e5767))
-			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(itemDetail, itemPrice));
 			})
@@ -273,10 +272,12 @@ class GameScene extends Phaser.Scene {
 
 		let image: Phaser.GameObjects.Image;
 		if (itemPrice === 0) {
+			background.disableInteractive();
 			nameText.setText("???");
 			priceText.setText("??? x");
 			image = this.add.image(-135, -170 + index * 85, "lock").setScale(0.25);
 		} else {
+			background.setInteractive({ useHandCursor: true });
 			nameText.setText(itemDetail.DisplayName.toUpperCase());
 			priceText.setText(`${itemPrice} x`);
 			if (storeItem.ItemId === "0") {
