@@ -1,5 +1,5 @@
 import { PlayFabClient } from "playfab-sdk";
-import { fontFamily } from "../utils/font";
+import { textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 
 class LeaderboardScene extends Phaser.Scene {
@@ -10,29 +10,25 @@ class LeaderboardScene extends Phaser.Scene {
 
 	create() {
 		this.add.image(400, 300, "sky");
-		const bg = this.add.existing(new RoundRectangle(this, 400, 300, 380, 450, 15, 0x16252e));
-		this.list = this.add.container(230, 130, []);
-
+		this.add.existing(new RoundRectangle(this, 400, 340, 380, 400, 15, 0x16252e));
+		this.list = this.add.container(230, 180, []);
+		this.add.text(400, 16, "Leaderboard", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 		this.add
-			.text(80, 50, "current_snowballs", { fontFamily: fontFamily })
+			.text(130, 100, "Best Collector", textStyle)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => this.showLeaderboard("5"));
 		this.add
-			.text(80 + 200, 50, "total_added_snowballs", { fontFamily: fontFamily })
+			.text(130 + 200, 100, "Best Earner", textStyle)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => this.showLeaderboard("6"));
 		this.add
-			.text(80 + 400, 50, "total_manual_penguin_clicks", { fontFamily: fontFamily })
+			.text(130 + 400, 100, "Most Muscle Spasms", textStyle)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => this.showLeaderboard("7"));
-		this.add.text(400, 16, "Leaderboard", { fontFamily: fontFamily }).setOrigin(0.5, 0.5).setAlign("center");
-		this.add.text(230, 80, "RANK", { fontFamily: fontFamily });
-		this.add.text(300, 80, "PLAYER", { fontFamily: fontFamily });
-		this.add.text(500, 80, "STATISTIC", { fontFamily: fontFamily });
 		this.showLeaderboard("5");
 
 		this.add
-			.text(784, 584, "MENU", { fontFamily: fontFamily })
+			.text(784, 584, "MENU", textStyle)
 			.setOrigin(1, 1)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
@@ -46,9 +42,9 @@ class LeaderboardScene extends Phaser.Scene {
 			const players = result.data.Leaderboard;
 			players.forEach((player, i) => {
 				const bg = this.add.existing(new RoundRectangle(this, 170, i * 70 + 6, 340, 40, 15, 0x2e5767));
-				const rankText = this.add.text(10, i * 70, (i + 1).toString(), { fontFamily: fontFamily });
-				const playerText = this.add.text(50, i * 70, player.DisplayName, { fontFamily: fontFamily });
-				const statText = this.add.text(250, i * 70, player.StatValue.toString(), { fontFamily: fontFamily });
+				const rankText = this.add.text(10, i * 70, (i + 1).toString(), textStyle);
+				const playerText = this.add.text(50, i * 70, player.DisplayName, textStyle);
+				const statText = this.add.text(250, i * 70, player.StatValue.toString(), textStyle);
 				this.list.add([bg, rankText, playerText, statText]);
 			});
 		});
