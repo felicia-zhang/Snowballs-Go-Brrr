@@ -251,31 +251,39 @@ class GameScene extends Phaser.Scene {
 				this.popup.setAlpha(0);
 			});
 
-		let image: Phaser.GameObjects.Image;
-		if (storeItem.ItemId === "0") {
-			image = this.add.image(-135, -170 + index * 85, "mittens").setScale(0.25);
-		} else if (storeItem.ItemId === "1") {
-			image = this.add.image(-135, -170 + index * 85, "fire").setScale(0.25);
-		} else if (storeItem.ItemId === "2") {
-			image = this.add.image(-135, -170 + index * 85, "snowman").setScale(0.25);
-		} else if (storeItem.ItemId === "3") {
-			image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
-		} else if (storeItem.ItemId === "4") {
-			image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
-		}
-
 		const nameText = this.add
-			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), {
+			.text(-100, -170 + index * 85, "", {
 				fontFamily: fontFamily,
 			})
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const priceText = this.add
-			.text(125, -170 + index * 85, `${itemPrice} x`, {
+			.text(125, -170 + index * 85, "", {
 				fontFamily: fontFamily,
 			})
 			.setAlign("right")
 			.setOrigin(1, 0.5);
+
+		let image: Phaser.GameObjects.GameObject;
+		if (itemPrice === 0) {
+			nameText.setText("???");
+			priceText.setText("??? x");
+			image = this.add.rectangle(-135, -170 + index * 85, 10, 10, 0x000000, 1);
+		} else {
+			nameText.setText(itemDetail.DisplayName.toUpperCase());
+			priceText.setText(`${itemPrice} x`);
+			if (storeItem.ItemId === "0") {
+				image = this.add.image(-135, -170 + index * 85, "mittens").setScale(0.25);
+			} else if (storeItem.ItemId === "1") {
+				image = this.add.image(-135, -170 + index * 85, "fire").setScale(0.25);
+			} else if (storeItem.ItemId === "2") {
+				image = this.add.image(-135, -170 + index * 85, "snowman").setScale(0.25);
+			} else if (storeItem.ItemId === "3") {
+				image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
+			} else if (storeItem.ItemId === "4") {
+				image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
+			}
+		}
 		const snowballIcon = this.add.image(145, -170 + index * 85, "snowball1").setScale(0.15);
 
 		const row = this.add.container(0, 0, [background, image, nameText, priceText, snowballIcon]);
@@ -509,6 +517,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	setStoreItemDetails(pointer: Phaser.Input.Pointer, itemDetail: ItemDetail, price: number) {
+		// TODO: needs to hide info if item is locked
 		const nameText = this.popup.getAt(0) as Phaser.GameObjects.Text;
 		nameText.setText(`Name: ${itemDetail.DisplayName}`);
 		const descriptionText = this.popup.getAt(1) as Phaser.GameObjects.Text;
