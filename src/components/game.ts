@@ -21,7 +21,7 @@ class GameScene extends Phaser.Scene {
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
-	toast: Phaser.GameObjects.Container;
+	toast: Phaser.GameObjects.Text;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
 	overlay: Phaser.GameObjects.Rectangle;
@@ -38,7 +38,12 @@ class GameScene extends Phaser.Scene {
 		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
 		this.itemsMap = {};
-		this.makeToast();
+		this.toast = this.add
+			.text(400, 16, "", { fontFamily: fontFamily })
+			.setAlpha(0)
+			.setDepth(22)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
 		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(170, 5, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
@@ -132,14 +137,12 @@ class GameScene extends Phaser.Scene {
 		this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
 
 		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
-		const popupBackground = this.add.existing(new RoundRectangle(this, 0, 0, 180, 150, 15, 0x16252e));
-		const itemDescription = this.add.text(-75, -60, "", { fontFamily: fontFamily });
-		const popup = this.add.container(280, 0, [popupBackground, itemDescription]).setDepth(22).setAlpha(0);
-		this.storeContainer.add([mainBackground, popup]);
+		const itemDescriptionPopup = this.add.text(200, -60, "", { fontFamily: fontFamily }).setAlpha(0);
+		this.storeContainer.add([mainBackground, itemDescriptionPopup]);
 
 		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem, popup);
+				this.makeStoreItem(storeItem, itemDescriptionPopup);
 			});
 			const closeButton = this.add
 				.image(175, -215, "close")
@@ -225,10 +228,10 @@ class GameScene extends Phaser.Scene {
 		return sprite;
 	}
 
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, popup: Phaser.GameObjects.Container) {
+	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, itemDescriptionPopup: Phaser.GameObjects.Text) {
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const itemPrice = storeItem.VirtualCurrencyPrices.SB;
-		const wrap = (s: string) => s.replace(/(?![^\n]{1,20}$)([^\n]{1,20})\s/g, "$1\n");
+		const wrap = (s: string) => s.replace(/(?![^\n]{1,22}$)([^\n]{1,22})\s/g, "$1\n");
 
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
@@ -240,19 +243,19 @@ class GameScene extends Phaser.Scene {
 			})
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) => {
 				this.add.tween({
-					targets: [popup],
+					targets: [itemDescriptionPopup],
 					ease: "Sine.easeIn",
 					alpha: 1,
 					duration: 300,
 					onStart: () => {
-						const itemDescription = popup.getAt(1) as Phaser.GameObjects.Text;
-						itemDescription.setText(wrap(itemDetail.Description));
+						itemDescriptionPopup.setText(wrap(itemDetail.Description));
+						itemDescriptionPopup.setY(pointer.y - 320);
 					},
 					callbackScope: this,
 				});
 			})
 			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-				popup.setAlpha(0);
+				itemDescriptionPopup.setAlpha(0);
 			});
 
 		const nameText = this.add
@@ -346,7 +349,6 @@ class GameScene extends Phaser.Scene {
 			sprite = this.makeVault(index, inventory);
 		}
 		sprite.setOrigin(0, 0).setScale(0.5);
-		this.interactiveGameSceneObjects.push(sprite);
 		this.inventoryContainer.add(sprite);
 	}
 
@@ -467,31 +469,14 @@ class GameScene extends Phaser.Scene {
 		});
 	}
 
-	makeToast() {
-		const toastText = this.add.text(0, 0, "", { fontFamily: fontFamily });
-		const bg = this.add.existing(
-			new RoundRectangle(this, 0, 0, 0, 0, 10, 0xffffff, 0.1).setStrokeStyle(2, 0xffffff, 1)
-		);
-		this.toast = this.add.container(0, 0, [bg, toastText]).setAlpha(0).setDepth(22);
-	}
-
 	showToast(message: string, isError: boolean) {
-		const toastText = this.toast.getAt(1) as Phaser.GameObjects.Text;
-		toastText.setText(message).setAlign("center").setOrigin(0.5, 0.5);
-
-		const bg = this.toast.getAt(0) as RoundRectangle;
-		bg.width = toastText.width + 16;
-		bg.height = toastText.height + 8;
-
+		this.toast.setText(message);
 		if (isError) {
-			toastText.setColor("#ff7360");
-			bg.setStrokeStyle(2, 0xff7360, 1);
+			this.toast.setColor("#ff7360");
 		} else {
-			toastText.setColor("#ffffff");
-			bg.setStrokeStyle(2, 0xffffff, 1);
+			this.toast.setColor("#ffffff");
 		}
 
-		this.toast.setPosition(400, 14 + bg.height / 2);
 		this.add.tween({
 			targets: [this.toast],
 			ease: "Sine.easeIn",
