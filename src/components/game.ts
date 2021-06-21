@@ -5,6 +5,7 @@ import AScene from "./AScene";
 
 interface ItemDetail {
 	ItemId: string;
+	Price: number;
 	DisplayName: string;
 	Description: string;
 	Levels: { [key: string]: { Cost: string; Effect: string } };
@@ -49,6 +50,7 @@ class GameScene extends AScene {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
+					Price: item.VirtualCurrencyPrices.SB,
 					DisplayName: item.DisplayName,
 					Description: item.Description,
 					Levels: JSON.parse(item.CustomData)["Levels"],
@@ -269,7 +271,7 @@ class GameScene extends AScene {
 		if (itemPrice === 0) {
 			background.disableInteractive();
 			nameText.setText("???");
-			priceText.setText("??? x");
+			priceText.setText(`${itemDetail.Price} x`);
 			image = this.add.image(-135, -170 + index * 85, "lock").setScale(0.25);
 		} else {
 			background.setInteractive({ useHandCursor: true });
