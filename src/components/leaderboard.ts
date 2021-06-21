@@ -1,8 +1,9 @@
 import { PlayFabClient } from "playfab-sdk";
 import { textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
+import AScene from "./AScene";
 
-class LeaderboardScene extends Phaser.Scene {
+class LeaderboardScene extends AScene {
 	list: Phaser.GameObjects.Container;
 	tabSelector: RoundRectangle;
 	constructor() {

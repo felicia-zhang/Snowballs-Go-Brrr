@@ -1,11 +1,10 @@
 import { PhaserGame } from "./components/phaser";
 import React from "react";
-import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
-import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
-import { Button, ChakraProvider, Divider, HStack, Input, Link, VStack } from "@chakra-ui/react";
-import { FaFacebook, FaGoogle } from "react-icons/fa";
+import { GoogleLoginResponse } from "react-google-login";
+import { Button, ChakraProvider, Divider, Flex, Input, Link, Spacer, VStack } from "@chakra-ui/react";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily, normalFontSize } from "./utils/font";
+import { SocialSignins } from "./SocialSignins";
 
 interface IState {
 	game: PhaserGame;
@@ -22,7 +21,7 @@ class App extends React.PureComponent<any, IState> {
 		this.state = {
 			game: null,
 			isSignedIn: false,
-			isRegistering: false,
+			isRegistering: true,
 			email: "",
 			username: "",
 			password: "",
@@ -80,110 +79,89 @@ class App extends React.PureComponent<any, IState> {
 	render() {
 		return (
 			<ChakraProvider>
-				<div style={{ position: "absolute", left: "300px", top: "200px" }}>
-					{this.state.isSignedIn ? null : (
-						<VStack>
-							{this.state.isRegistering ? (
-								<Input
+				{this.state.isSignedIn ? null : (
+					<VStack position="absolute" left={287.5} top={150} width={225} height={300}>
+						{this.state.isRegistering ? (
+							<Input
+								fontFamily={fontFamily}
+								fontSize={normalFontSize}
+								color="white"
+								size="md"
+								placeholder="Email"
+								onChange={e => {
+									this.setState({ email: e.target.value });
+								}}
+							/>
+						) : null}
+						<Input
+							fontFamily={fontFamily}
+							fontSize={normalFontSize}
+							color="white"
+							size="md"
+							placeholder="Username"
+							onChange={e => {
+								this.setState({ username: e.target.value });
+							}}
+						/>
+						<Input
+							fontFamily={fontFamily}
+							fontSize={normalFontSize}
+							color="white"
+							size="md"
+							type="password"
+							placeholder="Password"
+							onChange={e => {
+								this.setState({ password: e.target.value });
+							}}
+						/>
+						{this.state.isRegistering ? (
+							<Flex width={225}>
+								<Link
 									fontFamily={fontFamily}
 									fontSize={normalFontSize}
 									color="white"
-									size="md"
-									placeholder="Email"
-									onChange={e => {
-										this.setState({ email: e.target.value });
-									}}
-								/>
-							) : null}
-							<Input
-								fontFamily={fontFamily}
-								fontSize={normalFontSize}
-								color="white"
-								size="md"
-								placeholder="Username"
-								onChange={e => {
-									this.setState({ username: e.target.value });
-								}}
-							/>
-							<Input
-								fontFamily={fontFamily}
-								fontSize={normalFontSize}
-								color="white"
-								size="md"
-								type="password"
-								placeholder="Enter password"
-								onChange={e => {
-									this.setState({ password: e.target.value });
-								}}
-							/>
-							{this.state.isRegistering ? (
-								<HStack>
-									<Button
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										onClick={this.registerWithPlayFab}>
-										Register With PlayFab
-									</Button>
-									<Link
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										color="white"
-										onClick={() => this.setState({ isRegistering: false })}>
-										Sign in
-									</Link>
-								</HStack>
-							) : (
-								<HStack>
-									<Button
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										onClick={this.signInWithPlayFab}>
-										Sign in With PlayFab
-									</Button>
-									<Link
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										color="white"
-										onClick={() => this.setState({ isRegistering: true })}>
-										Register
-									</Link>
-								</HStack>
-							)}
-							<Divider />
-							<GoogleLogin
-								clientId={process.env.REACT_APP_GOOGLE_ID}
-								render={renderProps => (
-									<Button
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										onClick={renderProps.onClick}
-										leftIcon={<FaGoogle />}>
-										Sign in with Google
-									</Button>
-								)}
-								buttonText="Login"
-								onSuccess={this.onGoogleSuccess}
-								onFailure={this.onGoogleFailure}
-								isSignedIn={this.state.isSignedIn}
-								cookiePolicy={"single_host_origin"}
-							/>
-							<FacebookLogin
-								appId={process.env.REACT_APP_FACEBOOK_ID}
-								autoLoad={true}
-								render={renderProps => (
-									<Button
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										onClick={renderProps.onClick}
-										leftIcon={<FaFacebook />}>
-										Sign in with Facebook
-									</Button>
-								)}
-								callback={this.onFacebookSignin}
-							/>
-						</VStack>
-					)}
-				</div>
+									onClick={() => this.setState({ isRegistering: false })}>
+									Sign in
+								</Link>
+								<Spacer />
+								<Button
+									fontFamily={fontFamily}
+									fontSize={normalFontSize}
+									colorScheme="whiteAlpha"
+									onClick={this.registerWithPlayFab}>
+									Register
+								</Button>
+							</Flex>
+						) : (
+							<Flex width={225}>
+								<Link
+									fontFamily={fontFamily}
+									fontSize={normalFontSize}
+									color="white"
+									onClick={() => this.setState({ isRegistering: true })}>
+									Register
+								</Link>
+								<Spacer />
+								<Button
+									fontFamily={fontFamily}
+									fontSize={normalFontSize}
+									colorScheme="whiteAlpha"
+									onClick={this.signInWithPlayFab}>
+									Sign in
+								</Button>
+							</Flex>
+						)}
+						<Spacer />
+						<Divider />
+						<Spacer />
+						<SocialSignins
+							isSignedIn={this.state.isSignedIn}
+							onGoogleSuccess={this.onGoogleSuccess}
+							onGoogleFailure={this.onGoogleFailure}
+							onFacebookSignin={this.onFacebookSignin}
+						/>
+					</VStack>
+				)}
 			</ChakraProvider>
 		);
 	}

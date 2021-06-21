@@ -1,7 +1,7 @@
 import { PlayFabClient } from "playfab-sdk";
+import AScene from "./AScene";
 
-class SigninScene extends Phaser.Scene {
-	playerName: string;
+class SigninScene extends AScene {
 	constructor() {
 		super("Signin");
 	}
