@@ -1,7 +1,8 @@
 import { PlayFabClient } from "playfab-sdk";
 import { textStyle } from "../utils/font";
+import AScene from "./AScene";
 
-class MenuScene extends Phaser.Scene {
+class MenuScene extends AScene {
 	constructor() {
 		super("Menu");
 	}

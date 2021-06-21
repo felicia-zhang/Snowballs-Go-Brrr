@@ -1,6 +1,7 @@
 import { PlayFabClient } from "playfab-sdk";
 import { textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
+import AScene from "./AScene";
 
 interface ItemDetail {
 	ItemId: string;
@@ -10,7 +11,7 @@ interface ItemDetail {
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
 }
 
-class GameScene extends Phaser.Scene {
+class GameScene extends AScene {
 	readonly syncDelay = 60000;
 	clickMultiplier: number;
 	totalSnowballs: number;
@@ -21,7 +22,6 @@ class GameScene extends Phaser.Scene {
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
-	toast: Phaser.GameObjects.Text;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
 	overlay: Phaser.GameObjects.Rectangle;
@@ -38,12 +38,6 @@ class GameScene extends Phaser.Scene {
 		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
 		this.itemsMap = {};
-		this.toast = this.add
-			.text(400, 16, "", textStyle)
-			.setAlpha(0)
-			.setDepth(22)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
 		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(170, 5, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
@@ -461,27 +455,6 @@ class GameScene extends Phaser.Scene {
 			},
 			onStart: () => {
 				amountText.setAlpha(1);
-			},
-			callbackScope: this,
-		});
-	}
-
-	showToast(message: string, isError: boolean) {
-		this.toast.setText(message);
-		if (isError) {
-			this.toast.setColor("#ff7360");
-		} else {
-			this.toast.setColor("#ffffff");
-		}
-
-		this.add.tween({
-			targets: [this.toast],
-			ease: "Sine.easeIn",
-			duration: 300,
-			alpha: 1,
-			completeDelay: 1000,
-			onComplete: () => {
-				this.toast.setAlpha(0);
 			},
 			callbackScope: this,
 		});

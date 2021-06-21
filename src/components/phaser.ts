@@ -3,6 +3,7 @@ import Controller from "./controller";
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import InputTextPlugin from "phaser3-rex-plugins/plugins/inputtext-plugin.js";
+import SigninScene from "./signin";
 
 const config = {
 	type: Phaser.AUTO,
@@ -49,10 +50,28 @@ export class PhaserGame extends Phaser.Game {
 
 	playfabSignInCallback(error: PlayFabModule.IPlayFabError, result, handlePlayFab: (success: boolean) => void) {
 		if (result === null) {
-			console.log("Failed to sign in", error);
+			if (this.scene.isActive("Signin")) {
+				const scene = this.scene.getScene("Signin") as SigninScene
+				const errorMessage = error.errorDetails ? Object.values(error.errorDetails)[0] : error.errorMessage
+				scene.showToast(`${errorMessage}`, true)
+			}
 		} else {
 			handlePlayFab(true);
-			console.log("Signed in as", result.data.PlayFabId);
+			console.log(`Signed in as ${result.data.PlayFabId}`)
+		}
+	}
+
+	playfabRegisterCallback(error: PlayFabModule.IPlayFabError, result, handlePlayFab: (success: boolean) => void) {
+		if (result === null) {
+			console.log(error)
+			if (this.scene.isActive("Signin")) {
+				const scene = this.scene.getScene("Signin") as SigninScene
+				const errorMessage = error.errorDetails ? Object.values(error.errorDetails)[0] : error.errorMessage
+				scene.showToast(`${errorMessage}`, true)
+			}
+		} else {
+			handlePlayFab(true);
+			console.log(`Registered as ${result.data.PlayFabId}`)
 		}
 	}
 
@@ -77,7 +96,7 @@ export class PhaserGame extends Phaser.Game {
 				Password: password,
 			},
 			(error, result) => {
-				this.playfabSignInCallback(error, result, handlePlayFab);
+				this.playfabRegisterCallback(error, result, handlePlayFab);
 			}
 		);
 	}
