@@ -1,9 +1,7 @@
 import { PhaserGame } from "./components/phaser";
 import React from "react";
-import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
-import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
-import { Button, ChakraProvider, Divider, Flex, HStack, Input, Link, Spacer, VStack } from "@chakra-ui/react";
-import { FaFacebook, FaGoogle } from "react-icons/fa";
+import { GoogleLoginResponse } from "react-google-login";
+import { Button, ChakraProvider, Divider, Flex, Input, Link, Spacer, VStack } from "@chakra-ui/react";
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily, normalFontSize } from "./utils/font";
 import { SocialSignins } from "./SocialSignins";
