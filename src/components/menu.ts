@@ -1,28 +1,33 @@
 import { PlayFabClient } from "playfab-sdk";
 import { textStyle } from "../utils/font";
+import AScene from "./AScene";
 
-class MenuScene extends Phaser.Scene {
+class MenuScene extends AScene {
 	constructor() {
 		super("Menu");
 	}
 
 	create() {
 		this.add.image(400, 300, "sky");
-		this.add.text(300, 50, "Menu", textStyle);
+		this.add.text(400, 16, "Menu", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 
 		this.add
-			.text(300, 200, "GAME", textStyle)
+			.text(400, 200, "GAME", textStyle)
+			.setOrigin(0.5, 0.5)
+			.setAlign("center")
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Game");
 			});
 		this.add
-			.text(300, 250, "LEADERBOARD", textStyle)
+			.text(400, 250, "LEADERBOARD", textStyle)
+			.setOrigin(0.5, 0.5)
+			.setAlign("center")
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.scene.start("Leaderboard");
 			});
-		this.add.text(300, 300, "SETTINGS", textStyle);
+		this.add.text(400, 300, "SETTINGS", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 		// TODO:
 		// .setInteractive({ useHandCursor: true }).on("pointerup", () => {
 		// 	this.scene.start("Settings");

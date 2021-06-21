@@ -1,16 +1,18 @@
 import { PlayFabClient } from "playfab-sdk";
 import { textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
+import AScene from "./AScene";
 
 interface ItemDetail {
 	ItemId: string;
+	Price: number;
 	DisplayName: string;
 	Description: string;
 	Levels: { [key: string]: { Cost: string; Effect: string } };
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
 }
 
-class GameScene extends Phaser.Scene {
+class GameScene extends AScene {
 	readonly syncDelay = 60000;
 	clickMultiplier: number;
 	totalSnowballs: number;
@@ -21,7 +23,6 @@ class GameScene extends Phaser.Scene {
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
-	toast: Phaser.GameObjects.Text;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
 	overlay: Phaser.GameObjects.Rectangle;
@@ -38,12 +39,6 @@ class GameScene extends Phaser.Scene {
 		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
 		this.itemsMap = {};
-		this.toast = this.add
-			.text(400, 16, "", textStyle)
-			.setAlpha(0)
-			.setDepth(22)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
 		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(170, 5, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
@@ -55,6 +50,7 @@ class GameScene extends Phaser.Scene {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
+					Price: item.VirtualCurrencyPrices.SB,
 					DisplayName: item.DisplayName,
 					Description: item.Description,
 					Levels: JSON.parse(item.CustomData)["Levels"],
@@ -112,7 +108,12 @@ class GameScene extends Phaser.Scene {
 						alpha: 0.6,
 						callbackScope: this,
 					});
-					this.sync(() => this.showStore());
+					this.sync(() => {
+						this.time.addEvent({
+							delay: 500,
+							callback: () => this.showStore(),
+						});
+					});
 				})
 		);
 	}
@@ -270,7 +271,7 @@ class GameScene extends Phaser.Scene {
 		if (itemPrice === 0) {
 			background.disableInteractive();
 			nameText.setText("???");
-			priceText.setText("??? x");
+			priceText.setText(`${itemDetail.Price} x`);
 			image = this.add.image(-135, -170 + index * 85, "lock").setScale(0.25);
 		} else {
 			background.setInteractive({ useHandCursor: true });
@@ -295,38 +296,42 @@ class GameScene extends Phaser.Scene {
 	}
 
 	purchaseItem(itemDetail: ItemDetail, price: number) {
-		PlayFabClient.PurchaseItem({ ItemId: itemDetail.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
-			if (e !== null) {
-				this.showToast("Not enough snowballs", true);
-			} else {
-				this.totalSnowballs -= price;
-				PlayFabClient.ExecuteCloudScript(
-					{
-						FunctionName: "updateItemLevel",
-						FunctionParameter: {
-							cost: "0",
-							instanceId: r.data.Items[0].ItemInstanceId,
-							level: "1",
+		if (Object.keys(itemDetail.Instances).length === 6) {
+			this.showToast("Not enough room", true);
+		} else {
+			PlayFabClient.PurchaseItem({ ItemId: itemDetail.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
+				if (e !== null) {
+					this.showToast("Not enough snowballs", true);
+				} else {
+					this.totalSnowballs -= price;
+					PlayFabClient.ExecuteCloudScript(
+						{
+							FunctionName: "updateItemLevel",
+							FunctionParameter: {
+								cost: "0",
+								instanceId: r.data.Items[0].ItemInstanceId,
+								level: "1",
+							},
 						},
-					},
-					(a, b) => {
-						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
-						this.makeInventoryItem(newItem);
-						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-					}
-				);
+						(a, b) => {
+							const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
+							this.makeInventoryItem(newItem);
+							this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+						}
+					);
 
-				PlayFabClient.ExecuteCloudScript(
-					{
-						FunctionName: "updateStatistics",
-						FunctionParameter: {
-							[`${itemDetail.ItemId}_purchased`]: 1,
+					PlayFabClient.ExecuteCloudScript(
+						{
+							FunctionName: "updateStatistics",
+							FunctionParameter: {
+								[`${itemDetail.ItemId}_purchased`]: 1,
+							},
 						},
-					},
-					() => {}
-				);
-			}
-		});
+						() => {}
+					);
+				}
+			});
+		}
 	}
 
 	makeInventoryItem(inventory: PlayFabClientModels.ItemInstance) {
@@ -461,27 +466,6 @@ class GameScene extends Phaser.Scene {
 			},
 			onStart: () => {
 				amountText.setAlpha(1);
-			},
-			callbackScope: this,
-		});
-	}
-
-	showToast(message: string, isError: boolean) {
-		this.toast.setText(message);
-		if (isError) {
-			this.toast.setColor("#ff7360");
-		} else {
-			this.toast.setColor("#ffffff");
-		}
-
-		this.add.tween({
-			targets: [this.toast],
-			ease: "Sine.easeIn",
-			duration: 300,
-			alpha: 1,
-			completeDelay: 1000,
-			onComplete: () => {
-				this.toast.setAlpha(0);
 			},
 			callbackScope: this,
 		});

@@ -14,8 +14,9 @@ import vault from "../assets/vault.png";
 import close from "../assets/close.png";
 import lock from "../assets/lock.png";
 import MenuScene from "./menu";
+import AScene from "./AScene";
 
-class Controller extends Phaser.Scene {
+class Controller extends AScene {
 	constructor() {
 		super("Controller");
 	}
