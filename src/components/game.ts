@@ -106,7 +106,12 @@ class GameScene extends AScene {
 						alpha: 0.6,
 						callbackScope: this,
 					});
-					this.sync(() => this.showStore());
+					this.sync(() => {
+						this.time.addEvent({
+							delay: 500,
+							callback: () => this.showStore(),
+						});
+					});
 				})
 		);
 	}
