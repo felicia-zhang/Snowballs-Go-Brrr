@@ -43,7 +43,7 @@ class GameScene extends AScene {
 		this.inventoryContainer = this.add.container(170, 5, []);
 		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
 		this.interactiveGameSceneObjects = [];
-		this.makeSnowball();
+		this.makePenguin();
 
 		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
@@ -83,7 +83,7 @@ class GameScene extends AScene {
 		});
 
 		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs} x`, textStyle);
-		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball1").setScale(0.15);
+		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
 
 		this.interactiveGameSceneObjects.push(
 			this.add
@@ -189,21 +189,21 @@ class GameScene extends AScene {
 		}
 	}
 
-	makeSnowball() {
+	makePenguin() {
 		this.anims.create({
 			key: "squish",
 			frames: [
-				{ key: "snowball1" },
-				{ key: "snowball2" },
-				{ key: "snowball3" },
-				{ key: "snowball2" },
-				{ key: "snowball1" },
+				{ key: "penguin1" },
+				{ key: "penguin2" },
+				{ key: "penguin3" },
+				{ key: "penguin2" },
+				{ key: "penguin1" },
 			],
 			frameRate: 8,
 		});
 
 		const sprite = this.add
-			.sprite(35, 300, "snowball1")
+			.sprite(35, 300, "penguin1")
 			.setOrigin(0, 0.5)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
@@ -289,7 +289,7 @@ class GameScene extends AScene {
 				image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
 			}
 		}
-		const snowballIcon = this.add.image(145, -170 + index * 85, "snowball1").setScale(0.15);
+		const snowballIcon = this.add.image(145, -170 + index * 85, "snowball").setScale(0.15);
 
 		const row = this.add.container(0, 0, [background, image, nameText, priceText, snowballIcon]);
 		this.storeContainer.add(row);
