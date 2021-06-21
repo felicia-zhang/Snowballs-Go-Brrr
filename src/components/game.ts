@@ -289,38 +289,42 @@ class GameScene extends AScene {
 	}
 
 	purchaseItem(itemDetail: ItemDetail, price: number) {
-		PlayFabClient.PurchaseItem({ ItemId: itemDetail.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
-			if (e !== null) {
-				this.showToast("Not enough snowballs", true);
-			} else {
-				this.totalSnowballs -= price;
-				PlayFabClient.ExecuteCloudScript(
-					{
-						FunctionName: "updateItemLevel",
-						FunctionParameter: {
-							cost: "0",
-							instanceId: r.data.Items[0].ItemInstanceId,
-							level: "1",
+		if (Object.keys(itemDetail.Instances).length === 6) {
+			this.showToast("Not enough room", true);
+		} else {
+			PlayFabClient.PurchaseItem({ ItemId: itemDetail.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
+				if (e !== null) {
+					this.showToast("Not enough snowballs", true);
+				} else {
+					this.totalSnowballs -= price;
+					PlayFabClient.ExecuteCloudScript(
+						{
+							FunctionName: "updateItemLevel",
+							FunctionParameter: {
+								cost: "0",
+								instanceId: r.data.Items[0].ItemInstanceId,
+								level: "1",
+							},
 						},
-					},
-					(a, b) => {
-						const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
-						this.makeInventoryItem(newItem);
-						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-					}
-				);
+						(a, b) => {
+							const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
+							this.makeInventoryItem(newItem);
+							this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+						}
+					);
 
-				PlayFabClient.ExecuteCloudScript(
-					{
-						FunctionName: "updateStatistics",
-						FunctionParameter: {
-							[`${itemDetail.ItemId}_purchased`]: 1,
+					PlayFabClient.ExecuteCloudScript(
+						{
+							FunctionName: "updateStatistics",
+							FunctionParameter: {
+								[`${itemDetail.ItemId}_purchased`]: 1,
+							},
 						},
-					},
-					() => {}
-				);
-			}
-		});
+						() => {}
+					);
+				}
+			});
+		}
 	}
 
 	makeInventoryItem(inventory: PlayFabClientModels.ItemInstance) {
