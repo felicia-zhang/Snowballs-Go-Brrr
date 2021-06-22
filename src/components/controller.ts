@@ -6,6 +6,7 @@ import sky from "../assets/sky.png";
 import fire from "../assets/fire.png";
 import igloo from "../assets/igloo.png";
 import snowball from "../assets/snowball.png";
+import icicle from "../assets/icicle.png";
 import snowman from "../assets/snowman.png";
 import mittens from "../assets/mittens.png";
 import vault from "../assets/vault.png";
@@ -27,6 +28,7 @@ class Controller extends AScene {
 		this.load.image("fire", fire);
 		this.load.image("igloo", igloo);
 		this.load.image("snowball", snowball);
+		this.load.image("icicle", icicle);
 		this.load.image("snowman", snowman);
 		this.load.image("mittens", mittens);
 		this.load.image("vault", vault);

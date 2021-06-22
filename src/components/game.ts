@@ -21,6 +21,8 @@ class GameScene extends AScene {
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
+	icicleText: Phaser.GameObjects.Text;
+	icicleIcon: Phaser.GameObjects.Image;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
 	interactiveGameSceneObjects: Phaser.GameObjects.GameObject[];
@@ -107,8 +109,12 @@ class GameScene extends AScene {
 			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
-		this.snowballText = this.add.text(16, 16, `Snowballs: ${this.totalSnowballs} x`, textStyle);
+		this.snowballText = this.add.text(16, 16, `${this.totalSnowballs} x`, textStyle);
 		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
+		this.icicleText = this.add.text(40 + this.snowballText.width, 16, "0 x", textStyle);
+		this.icicleIcon = this.add
+			.image(96 + this.snowballText.width + this.icicleText.width, 25, "icicle")
+			.setScale(0.15);
 
 		this.interactiveGameSceneObjects.push(
 			this.add
@@ -156,8 +162,9 @@ class GameScene extends AScene {
 
 	update() {
 		const totalSnowballs = this.totalSnowballs | 0;
-		this.snowballText.setText(`Snowballs: ${totalSnowballs} x`);
+		this.snowballText.setText(`${totalSnowballs} x`);
 		this.snowballIcon.setX(36 + this.snowballText.width);
+		this.icicleIcon.setX(96 + this.snowballText.width + this.icicleText.width);
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
