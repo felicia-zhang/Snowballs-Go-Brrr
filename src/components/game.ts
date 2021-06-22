@@ -90,7 +90,7 @@ class GameScene extends AScene {
 
 			PlayFabClient.GetStoreItems({ StoreId: "Currencies" }, (error, result) => {
 				const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-				const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
+				const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 245, 15, 0x16252e));
 				this.currencyContainer = this.add
 					.container(400, 300, [overlay, mainBackground])
 					.setAlpha(0)
@@ -99,7 +99,7 @@ class GameScene extends AScene {
 					this.makeCurrency(storeItem);
 				});
 				const closeButton = this.add
-					.image(175, -215, "close")
+					.image(320, -110, "close")
 					.setScale(0.35)
 					.setInteractive({ useHandCursor: true })
 					.on("pointerup", () => {
@@ -321,21 +321,28 @@ class GameScene extends AScene {
 		const index = this.currencies.length;
 		this.currencies.push(storeItem);
 		const background = this.add
-			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, 0x2e5767))
+			.existing(new RoundRectangle(this, 160 * index - 240, 0, 140, 200, 15, 0x2e5767))
 			.setInteractive({ useHandCursor: true })
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				// this.sync(() => this.purchaseItem(itemDetail, itemPrice));
-			});
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => this.purchaseCurrency(itemDetail, usd));
 
-		let image = this.add.image(-135, -170 + index * 85, "icicle").setScale(0.25);
+		let image: Phaser.GameObjects.Image;
+		if (storeItem.ItemId === "100") {
+			image = this.add.image(160 * index - 240, 0, "icicle1").setScale(0.7);
+		} else if (storeItem.ItemId === "101") {
+			image = this.add.image(160 * index - 240, 0, "icicle2").setScale(0.7);
+		} else if (storeItem.ItemId === "102") {
+			image = this.add.image(160 * index - 240, 0, "icicle3").setScale(0.7);
+		} else if (storeItem.ItemId === "103") {
+			image = this.add.image(160 * index - 240, 0, "icicle4").setScale(0.7);
+		}
 		const nameText = this.add
-			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), textStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5);
+			.text(160 * index - 240, -80, itemDetail.DisplayName.toUpperCase(), textStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5);
 		const usdText = this.add
-			.text(160, -170 + index * 85, `$${usd} USD`, textStyle)
-			.setAlign("right")
-			.setOrigin(1, 0.5);
+			.text(160 * index - 240, 80, `$${usd} USD`, textStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5);
 		const row = this.add.container(0, 0, [background, image, nameText, usdText]);
 		this.currencyContainer.add(row);
 	}
@@ -355,6 +362,8 @@ class GameScene extends AScene {
 			});
 		}
 	}
+
+	purchaseCurrency(itemDetail: ItemDetail, usd: number) {}
 
 	makeInventoryItem(inventory: PlayFabClientModels.ItemInstance) {
 		const itemType = this.itemsMap[inventory.ItemId];
