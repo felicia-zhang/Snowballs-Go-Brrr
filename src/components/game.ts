@@ -5,10 +5,8 @@ import AScene from "./AScene";
 
 interface ItemDetail {
 	ItemId: string;
-	Price: number;
 	DisplayName: string;
 	Description: string;
-	Levels: { [key: string]: { Cost: string; Effect: string } };
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
 }
 
@@ -47,10 +45,8 @@ class GameScene extends AScene {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
-					Price: item.VirtualCurrencyPrices.SB,
 					DisplayName: item.DisplayName,
 					Description: item.Description,
-					Levels: JSON.parse(item.CustomData)["Levels"],
 					Instances: {},
 				};
 			});
@@ -271,31 +267,8 @@ class GameScene extends AScene {
 					this.showToast("Not enough snowballs", true);
 				} else {
 					this.totalSnowballs -= price;
-					PlayFabClient.ExecuteCloudScript(
-						{
-							FunctionName: "updateItemLevel",
-							FunctionParameter: {
-								cost: "0",
-								instanceId: r.data.Items[0].ItemInstanceId,
-								level: "1",
-							},
-						},
-						(a, b) => {
-							const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
-							this.makeInventoryItem(newItem);
-							this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-						}
-					);
-
-					PlayFabClient.ExecuteCloudScript(
-						{
-							FunctionName: "updateStatistics",
-							FunctionParameter: {
-								[`${itemDetail.ItemId}_purchased`]: 1,
-							},
-						},
-						() => {}
-					);
+					this.makeInventoryItem(r.data.Items[0]);
+					this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 				}
 			});
 		}
