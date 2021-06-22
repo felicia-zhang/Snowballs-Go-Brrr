@@ -5,10 +5,8 @@ import AScene from "./AScene";
 
 interface ItemDetail {
 	ItemId: string;
-	Price: number;
 	DisplayName: string;
 	Description: string;
-	Levels: { [key: string]: { Cost: string; Effect: string } };
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
 }
 
@@ -25,7 +23,6 @@ class GameScene extends AScene {
 	snowballIcon: Phaser.GameObjects.Image;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
-	overlay: Phaser.GameObjects.Rectangle;
 	interactiveGameSceneObjects: Phaser.GameObjects.GameObject[];
 
 	constructor() {
@@ -39,9 +36,7 @@ class GameScene extends AScene {
 		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
 		this.itemsMap = {};
-		this.storeContainer = this.add.container(400, 300, []).setAlpha(0).setDepth(20);
 		this.inventoryContainer = this.add.container(170, 5, []);
-		this.overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setOrigin(0, 0).setDepth(19).setAlpha(0);
 		this.interactiveGameSceneObjects = [];
 		this.makePenguin();
 
@@ -50,12 +45,42 @@ class GameScene extends AScene {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
-					Price: item.VirtualCurrencyPrices.SB,
 					DisplayName: item.DisplayName,
 					Description: item.Description,
-					Levels: JSON.parse(item.CustomData)["Levels"],
 					Instances: {},
 				};
+			});
+
+			PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
+				const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
+				const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
+				const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
+				this.storeContainer = this.add
+					.container(400, 300, [overlay, mainBackground, itemDescriptionPopup])
+					.setAlpha(0)
+					.setDepth(20);
+				result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
+					this.makeStoreItem(storeItem, itemDescriptionPopup);
+				});
+				const closeButton = this.add
+					.image(175, -215, "close")
+					.setScale(0.35)
+					.setInteractive({ useHandCursor: true })
+					.on("pointerup", () => {
+						this.add.tween({
+							targets: [this.storeContainer],
+							ease: "Sine.easeIn",
+							duration: 100,
+							alpha: 0,
+							onComplete: () => {
+								this.interactiveGameSceneObjects.forEach(object =>
+									object.setInteractive({ useHandCursor: true })
+								);
+							},
+							callbackScope: this,
+						});
+					});
+				this.storeContainer.add(closeButton);
 			});
 
 			PlayFabClient.GetUserInventory({}, (error, result) => {
@@ -101,18 +126,13 @@ class GameScene extends AScene {
 				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
+					this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
 					this.add.tween({
-						targets: [this.overlay],
+						targets: [this.storeContainer],
 						ease: "Sine.easeIn",
-						duration: 800,
-						alpha: 0.6,
+						duration: 500,
+						alpha: 1,
 						callbackScope: this,
-					});
-					this.sync(() => {
-						this.time.addEvent({
-							delay: 500,
-							callback: () => this.showStore(),
-						});
 					});
 				})
 		);
@@ -132,52 +152,6 @@ class GameScene extends AScene {
 		this.totalSnowballs += sb;
 		this.totalAddedSnowballs += sb;
 		this.showToast(`${sb} snowballs added \nwhile player was away`, false);
-	}
-
-	showStore() {
-		this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
-
-		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
-		const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
-		this.storeContainer.add([mainBackground, itemDescriptionPopup]);
-
-		PlayFabClient.GetStoreItems({ StoreId: "Main" }, (error, result) => {
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem, itemDescriptionPopup);
-			});
-			const closeButton = this.add
-				.image(175, -215, "close")
-				.setScale(0.35)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
-					this.add.tween({
-						targets: [this.storeContainer, this.overlay],
-						ease: "Sine.easeIn",
-						duration: 100,
-						alpha: 0,
-						onComplete: () => {
-							this.interactiveGameSceneObjects.forEach(object =>
-								object.setInteractive({ useHandCursor: true })
-							);
-							this.time.paused = false;
-							this.storeContainer.removeAll(true);
-							this.storeItems = [];
-						},
-						callbackScope: this,
-					});
-				});
-			this.storeContainer.add(closeButton);
-			this.add.tween({
-				targets: [this.storeContainer],
-				ease: "Sine.easeIn",
-				duration: 300,
-				alpha: 1,
-				onComplete: () => {
-					this.time.paused = true;
-				},
-				callbackScope: this,
-			});
-		});
 	}
 
 	update() {
@@ -238,6 +212,7 @@ class GameScene extends AScene {
 		this.storeItems.push(storeItem);
 		const background = this.add
 			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, 0x2e5767))
+			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(itemDetail, itemPrice));
 			})
@@ -258,39 +233,27 @@ class GameScene extends AScene {
 				itemDescriptionPopup.setAlpha(0);
 			});
 
+		let image: Phaser.GameObjects.Image;
+		if (storeItem.ItemId === "0") {
+			image = this.add.image(-135, -170 + index * 85, "mittens").setScale(0.25);
+		} else if (storeItem.ItemId === "1") {
+			image = this.add.image(-135, -170 + index * 85, "fire").setScale(0.25);
+		} else if (storeItem.ItemId === "2") {
+			image = this.add.image(-135, -170 + index * 85, "snowman").setScale(0.25);
+		} else if (storeItem.ItemId === "3") {
+			image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
+		} else if (storeItem.ItemId === "4") {
+			image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
+		}
 		const nameText = this.add
-			.text(-100, -170 + index * 85, "", textStyle)
+			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const priceText = this.add
-			.text(125, -170 + index * 85, "", textStyle)
+			.text(125, -170 + index * 85, `${itemPrice} x`, textStyle)
 			.setAlign("right")
 			.setOrigin(1, 0.5);
-
-		let image: Phaser.GameObjects.Image;
-		if (itemPrice === 0) {
-			background.disableInteractive();
-			nameText.setText("???");
-			priceText.setText(`${itemDetail.Price} x`);
-			image = this.add.image(-135, -170 + index * 85, "lock").setScale(0.25);
-		} else {
-			background.setInteractive({ useHandCursor: true });
-			nameText.setText(itemDetail.DisplayName.toUpperCase());
-			priceText.setText(`${itemPrice} x`);
-			if (storeItem.ItemId === "0") {
-				image = this.add.image(-135, -170 + index * 85, "mittens").setScale(0.25);
-			} else if (storeItem.ItemId === "1") {
-				image = this.add.image(-135, -170 + index * 85, "fire").setScale(0.25);
-			} else if (storeItem.ItemId === "2") {
-				image = this.add.image(-135, -170 + index * 85, "snowman").setScale(0.25);
-			} else if (storeItem.ItemId === "3") {
-				image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
-			} else if (storeItem.ItemId === "4") {
-				image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
-			}
-		}
 		const snowballIcon = this.add.image(145, -170 + index * 85, "snowball").setScale(0.15);
-
 		const row = this.add.container(0, 0, [background, image, nameText, priceText, snowballIcon]);
 		this.storeContainer.add(row);
 	}
@@ -304,31 +267,8 @@ class GameScene extends AScene {
 					this.showToast("Not enough snowballs", true);
 				} else {
 					this.totalSnowballs -= price;
-					PlayFabClient.ExecuteCloudScript(
-						{
-							FunctionName: "updateItemLevel",
-							FunctionParameter: {
-								cost: "0",
-								instanceId: r.data.Items[0].ItemInstanceId,
-								level: "1",
-							},
-						},
-						(a, b) => {
-							const newItem: PlayFabClientModels.ItemInstance = b.data.FunctionResult;
-							this.makeInventoryItem(newItem);
-							this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-						}
-					);
-
-					PlayFabClient.ExecuteCloudScript(
-						{
-							FunctionName: "updateStatistics",
-							FunctionParameter: {
-								[`${itemDetail.ItemId}_purchased`]: 1,
-							},
-						},
-						() => {}
-					);
+					this.makeInventoryItem(r.data.Items[0]);
+					this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 				}
 			});
 		}
@@ -340,33 +280,33 @@ class GameScene extends AScene {
 		itemType.Instances[inventory.ItemInstanceId] = inventory;
 		let sprite: Phaser.GameObjects.Sprite;
 		if (inventory.DisplayName === "Igloo Factory") {
-			sprite = this.makeIgloo(index, inventory);
+			sprite = this.makeIgloo(index);
 		} else if (inventory.DisplayName === "Bonfire") {
-			sprite = this.makeFire(index, inventory);
+			sprite = this.makeFire(index);
 		} else if (inventory.DisplayName === "Snowman") {
-			sprite = this.makeSnowman(index, inventory);
+			sprite = this.makeSnowman(index);
 		} else if (inventory.DisplayName === "Mittens") {
-			sprite = this.makeMittens(index, inventory);
+			sprite = this.makeMittens(index);
 		} else if (inventory.DisplayName === "Arctic Vault") {
-			sprite = this.makeVault(index, inventory);
+			sprite = this.makeVault(index);
 		}
 		sprite.setOrigin(0, 0).setScale(0.5);
 		this.inventoryContainer.add(sprite);
 	}
 
-	makeMittens(index: number, inventory: PlayFabClientModels.ItemInstance) {
+	makeMittens(index: number) {
 		this.clickMultiplier += 1;
-		const sprite = this.add.sprite(index * 100, 50, "mittens");
-		return sprite;
+		return this.add.sprite(index * 100, 50, "mittens");
 	}
 
-	makeFire(index: number, inventory: PlayFabClientModels.ItemInstance) {
+	makeFire(index: number) {
 		const amountText = this.add
 			.text(50 + index * 100, 150, "+1", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
 			.setDepth(10);
+		this.inventoryContainer.add(amountText);
 		this.time.addEvent({
 			delay: 10000,
 			loop: true,
@@ -377,18 +317,17 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add.sprite(index * 100, 150, "fire");
-		this.inventoryContainer.add(amountText);
-		return sprite;
+		return this.add.sprite(index * 100, 150, "fire");
 	}
 
-	makeSnowman(index: number, inventory: PlayFabClientModels.ItemInstance) {
+	makeSnowman(index: number) {
 		const amountText = this.add
 			.text(50 + index * 100, 250, "+1", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
 			.setDepth(10);
+		this.inventoryContainer.add(amountText);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
@@ -399,18 +338,17 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add.sprite(index * 100, 250, "snowman");
-		this.inventoryContainer.add(amountText);
-		return sprite;
+		return this.add.sprite(index * 100, 250, "snowman");
 	}
 
-	makeIgloo(index: number, inventory: PlayFabClientModels.ItemInstance) {
+	makeIgloo(index: number) {
 		const amountText = this.add
 			.text(50 + index * 100, 350, "+10", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
 			.setDepth(10);
+		this.inventoryContainer.add(amountText);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
@@ -421,18 +359,17 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add.sprite(index * 100, 350, "igloo");
-		this.inventoryContainer.add(amountText);
-		return sprite;
+		return this.add.sprite(index * 100, 350, "igloo");
 	}
 
-	makeVault(index: number, inventory: PlayFabClientModels.ItemInstance) {
+	makeVault(index: number) {
 		const amountText = this.add
 			.text(50 + index * 100, 450, "+100", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
 			.setDepth(10);
+		this.inventoryContainer.add(amountText);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
@@ -443,9 +380,7 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		const sprite = this.add.sprite(index * 100, 450, "vault");
-		this.inventoryContainer.add(amountText);
-		return sprite;
+		return this.add.sprite(index * 100, 450, "vault");
 	}
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
