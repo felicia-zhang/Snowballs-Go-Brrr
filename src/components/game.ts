@@ -121,6 +121,23 @@ class GameScene extends AScene {
 							callbackScope: this,
 						});
 					});
+				if (result.data.StoreId === "CurrenciesWithDiscount") {
+					mainBackground.height = 305;
+					mainBackground.y = -25;
+					overlay.setY(-25);
+					closeButton.setY(-165);
+					this.currencyContainer.setY(325);
+					const discountText = this.add
+						.text(
+							0,
+							-145,
+							"ONE TIME OFFER!!\nReceive 10% off ALL in-game items after your first icicle purchase!",
+							textStyle
+						)
+						.setAlign("center")
+						.setOrigin(0.5, 0.5);
+					this.currencyContainer.add(discountText);
+				}
 				this.interactiveCurrencyStoreObjets.push(closeButton);
 				this.currencyContainer.add(closeButton);
 			});
