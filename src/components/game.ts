@@ -92,7 +92,7 @@ class GameScene extends AScene {
 				this.storeContainer.add(closeButton);
 			});
 
-			PlayFabClient.GetStoreItems({ StoreId: "Currencies" }, (error, result) => {
+			PlayFabClient.GetStoreItems({ StoreId: "CurrenciesWithDiscount" }, (error, result) => {
 				this.makePaymentContainer();
 				const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
 				const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, 0x16252e));
@@ -307,6 +307,8 @@ class GameScene extends AScene {
 			image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
 		} else if (storeItem.ItemId === "4") {
 			image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
+		} else {
+			return;
 		}
 		const nameText = this.add
 			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), textStyle)
@@ -449,7 +451,7 @@ class GameScene extends AScene {
 			PlayFabClient.ExecuteCloudScript(
 				{
 					FunctionName: "grantIcicleBundle",
-					FunctionParameter: { itemId: itemDetail.ItemId },
+					FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
 				},
 				(error, result) => {
 					PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
