@@ -48,6 +48,8 @@ class GameScene extends AScene {
 		this.interactiveGameSceneObjects = [];
 		this.interactiveCurrencyStoreObjets = [];
 		this.makePenguin();
+		this.makeCurrencyContainer();
+		this.makePaymentContainer();
 
 		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
@@ -90,56 +92,6 @@ class GameScene extends AScene {
 						});
 					});
 				this.storeContainer.add(closeButton);
-			});
-
-			PlayFabClient.GetStoreItems({ StoreId: "CurrenciesWithDiscount" }, (error, result) => {
-				this.makePaymentContainer();
-				const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-				const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, 0x16252e));
-				this.currencyContainer = this.add
-					.container(400, 300, [overlay, mainBackground])
-					.setAlpha(0)
-					.setDepth(20);
-				result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-					this.makeCurrency(storeItem);
-				});
-				const closeButton = this.add
-					.image(320, -115, "close")
-					.setScale(0.35)
-					.setInteractive({ useHandCursor: true })
-					.on("pointerup", () => {
-						this.add.tween({
-							targets: [this.currencyContainer],
-							ease: "Sine.easeIn",
-							duration: 100,
-							alpha: 0,
-							onComplete: () => {
-								this.interactiveGameSceneObjects.forEach(object =>
-									object.setInteractive({ useHandCursor: true })
-								);
-							},
-							callbackScope: this,
-						});
-					});
-				if (result.data.StoreId === "CurrenciesWithDiscount") {
-					mainBackground.height = 305;
-					mainBackground.y = -25;
-					overlay.setY(-25);
-					closeButton.setY(-165);
-					this.currencyContainer.setY(325);
-					const discountText = this.add
-						.text(
-							0,
-							-145,
-							"ONE TIME OFFER!!\nReceive 10% off ALL in-game items after your first icicle purchase!",
-							textStyle
-						)
-						.setAlign("center")
-						.setOrigin(0.5, 0.5);
-					this.currencyContainer.add(discountText);
-				}
-				this.interactiveCurrencyStoreObjets.push(closeButton);
-				this.currencyContainer.add(closeButton);
 			});
 
 			PlayFabClient.GetUserInventory({}, (error, result) => {
@@ -188,13 +140,7 @@ class GameScene extends AScene {
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
-					this.add.tween({
-						targets: [this.currencyContainer],
-						ease: "Sine.easeIn",
-						duration: 500,
-						alpha: 1,
-						callbackScope: this,
-					});
+					this.showCurrencyContainer();
 				})
 		);
 
@@ -244,6 +190,82 @@ class GameScene extends AScene {
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
+	}
+
+	makeCurrencyContainer() {
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
+		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, 0x16252e));
+		const currencyList = this.add.container(0, 0, []);
+		this.currencyContainer = this.add
+			.container(400, 300, [overlay, mainBackground, currencyList])
+			.setAlpha(0)
+			.setDepth(20);
+		const closeButton = this.add
+			.image(320, -115, "close")
+			.setScale(0.35)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				this.add.tween({
+					targets: [this.currencyContainer],
+					ease: "Sine.easeIn",
+					duration: 100,
+					alpha: 0,
+					onComplete: () => {
+						this.interactiveGameSceneObjects.forEach(object =>
+							object.setInteractive({ useHandCursor: true })
+						);
+						const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
+						currencyList.removeAll(true);
+						this.currencies = [];
+						this.interactiveCurrencyStoreObjets = [];
+					},
+					callbackScope: this,
+				});
+			});
+		this.currencyContainer.add(closeButton);
+	}
+
+	showCurrencyContainer() {
+		PlayFabClient.GetStoreItems({ StoreId: "CurrenciesWithDiscount" }, (error, result) => {
+			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
+				this.makeCurrency(storeItem);
+			});
+			const overlay = this.currencyContainer.getAt(0) as Phaser.GameObjects.Rectangle;
+			const bg = this.currencyContainer.getAt(1) as RoundRectangle;
+			const closeButton = this.currencyContainer.getAt(3) as Phaser.GameObjects.Image;
+			this.interactiveCurrencyStoreObjets.push(closeButton);
+			if (result.data.StoreId === "CurrenciesWithDiscount") {
+				overlay.setY(-25);
+				bg.height = 305;
+				bg.y = -25;
+				closeButton.setY(-165);
+				this.currencyContainer.setY(325);
+				const discountText = this.add
+					.text(
+						0,
+						-145,
+						"ONE TIME OFFER!!\nReceive 10% off ALL in-game items after your first icicle purchase!",
+						textStyle
+					)
+					.setAlign("center")
+					.setOrigin(0.5, 0.5);
+				const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
+				currencyList.add(discountText);
+			} else {
+				overlay.setY(0);
+				bg.height = 255;
+				bg.y = 0;
+				closeButton.setY(-115);
+				this.currencyContainer.setY(300);
+			}
+		});
+		this.add.tween({
+			targets: [this.currencyContainer],
+			ease: "Sine.easeIn",
+			duration: 500,
+			alpha: 1,
+			callbackScope: this,
+		});
 	}
 
 	makePenguin() {
@@ -393,8 +415,8 @@ class GameScene extends AScene {
 				this.showPaymentContainer(itemDetail, usd, imageKey);
 			});
 		this.interactiveCurrencyStoreObjets.push(textBackground);
-		const column = this.add.container(0, 0, [background, image, nameText, textBackground, usdText]);
-		this.currencyContainer.add(column);
+		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
+		currencyList.add([background, image, nameText, textBackground, usdText]);
 	}
 
 	purchaseItem(itemDetail: ItemDetail, price: number) {
@@ -448,6 +470,7 @@ class GameScene extends AScene {
 						this.interactiveCurrencyStoreObjets.forEach(object =>
 							object.setInteractive({ useHandCursor: true })
 						);
+						button.removeAllListeners();
 					},
 					callbackScope: this,
 				});
@@ -464,7 +487,7 @@ class GameScene extends AScene {
 		const button = this.paymentContainer.getAt(3) as RoundRectangle;
 		button.width = buttonText.width + 16;
 		button.height = buttonText.height + 16;
-		button.once("pointerup", () => {
+		button.on("pointerup", () => {
 			PlayFabClient.ExecuteCloudScript(
 				{
 					FunctionName: "grantIcicleBundle",
