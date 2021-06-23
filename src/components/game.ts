@@ -1,10 +1,11 @@
 import { PlayFabClient } from "playfab-sdk";
-import { textStyle } from "../utils/font";
+import { fontFamily, smallFontSize, textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 
 interface ItemDetail {
 	ItemId: string;
+	Price: number;
 	DisplayName: string;
 	Description: string;
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
@@ -56,6 +57,7 @@ class GameScene extends AScene {
 			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
+					Price: item.VirtualCurrencyPrices.SB,
 					DisplayName: item.DisplayName,
 					Description: item.Description,
 					Instances: {},
@@ -263,8 +265,9 @@ class GameScene extends AScene {
 
 	showStoreContainer() {
 		PlayFabClient.GetStoreItems({ StoreId: "Items" }, (error, result) => {
+			const isDiscount = result.data.StoreId === "ItemsWithDiscount";
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem);
+				this.makeStoreItem(storeItem, isDiscount);
 			});
 		});
 		this.add.tween({
@@ -316,7 +319,7 @@ class GameScene extends AScene {
 		return sprite;
 	}
 
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem) {
+	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, isDiscount: boolean) {
 		const itemDescriptionPopup = this.storeContainer.getAt(2) as Phaser.GameObjects.Text;
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const itemPrice = storeItem.VirtualCurrencyPrices.SB;
@@ -366,7 +369,7 @@ class GameScene extends AScene {
 			.text(118, -170 + index * 85, `${itemPrice} x`, textStyle)
 			.setAlign("right")
 			.setOrigin(1, 0.5);
-		const textBackground = this.add
+		const priceButton = this.add
 			.existing(
 				new RoundRectangle(
 					this,
@@ -384,7 +387,27 @@ class GameScene extends AScene {
 			});
 		const snowballIcon = this.add.image(138, -170 + index * 85, "snowball").setScale(0.15);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
-		itemList.add([background, image, nameText, textBackground, priceText, snowballIcon]);
+		itemList.add([background, image, nameText, priceButton, priceText, snowballIcon]);
+
+		if (isDiscount) {
+			priceText.setY(-180 + index * 85);
+			priceButton.y = -180 + index * 85;
+			snowballIcon.setY(-180 + index * 85);
+			const oldPriceText = this.add
+				.text(121, -147 + index * 85, `${itemDetail.Price} x`, {
+					fontSize: smallFontSize,
+					fontFamily: fontFamily,
+				})
+				.setAlign("right")
+				.setOrigin(1, 0.5);
+
+			const oldSnowballIcon = this.add.image(135, -148 + index * 85, "snowball").setScale(0.09);
+			const yPosition = -72.5 + index * 42.5;
+			const line = this.add
+				.line(75, yPosition, 75, yPosition, 110 + oldPriceText.width, yPosition, 0xffffff)
+				.setOrigin(1, 0.5);
+			itemList.add([oldPriceText, oldSnowballIcon, line]);
+		}
 	}
 
 	makeCurrency(storeItem: PlayFabClientModels.StoreItem) {
