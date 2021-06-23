@@ -265,9 +265,9 @@ class GameScene extends AScene {
 
 	showStoreContainer() {
 		PlayFabClient.GetStoreItems({ StoreId: "Items" }, (error, result) => {
-			const isDiscount = result.data.StoreId === "ItemsWithDiscount";
+			const storeId = result.data.StoreId;
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem, isDiscount);
+				this.makeStoreItem(storeItem, storeId);
 			});
 		});
 		this.add.tween({
@@ -319,7 +319,7 @@ class GameScene extends AScene {
 		return sprite;
 	}
 
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, isDiscount: boolean) {
+	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, storeId: string) {
 		const itemDescriptionPopup = this.storeContainer.getAt(2) as Phaser.GameObjects.Text;
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const itemPrice = storeItem.VirtualCurrencyPrices.SB;
@@ -383,13 +383,13 @@ class GameScene extends AScene {
 			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.sync(() => this.purchaseItem(itemDetail, itemPrice));
+				this.sync(() => this.purchaseItem(itemDetail, itemPrice, storeId));
 			});
 		const snowballIcon = this.add.image(138, -170 + index * 85, "snowball").setScale(0.15);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
 		itemList.add([background, image, nameText, priceButton, priceText, snowballIcon]);
 
-		if (isDiscount) {
+		if (storeId === "ItemsWithDiscount") {
 			priceText.setY(-180 + index * 85);
 			priceButton.y = -180 + index * 85;
 			snowballIcon.setY(-180 + index * 85);
@@ -451,19 +451,22 @@ class GameScene extends AScene {
 		currencyList.add([background, image, nameText, textBackground, usdText]);
 	}
 
-	purchaseItem(itemDetail: ItemDetail, price: number) {
+	purchaseItem(itemDetail: ItemDetail, price: number, storeId: string) {
 		if (Object.keys(itemDetail.Instances).length === 6) {
 			this.showToast("Not enough room", true);
 		} else {
-			PlayFabClient.PurchaseItem({ ItemId: itemDetail.ItemId, Price: price, VirtualCurrency: "SB" }, (e, r) => {
-				if (e !== null) {
-					this.showToast("Not enough snowballs", true);
-				} else {
-					this.totalSnowballs -= price;
-					this.makeInventoryItem(r.data.Items[0]);
-					this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+			PlayFabClient.PurchaseItem(
+				{ ItemId: itemDetail.ItemId, Price: price, StoreId: storeId, VirtualCurrency: "SB" },
+				(e, r) => {
+					if (e !== null) {
+						this.showToast("Not enough snowballs", true);
+					} else {
+						this.totalSnowballs -= price;
+						this.makeInventoryItem(r.data.Items[0]);
+						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+					}
 				}
-			});
+			);
 		}
 	}
 
