@@ -13,6 +13,7 @@ interface ItemDetail {
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
 	clickMultiplier: number;
+	totalIcicles: number;
 	totalSnowballs: number;
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
@@ -126,8 +127,8 @@ class GameScene extends AScene {
 
 			PlayFabClient.GetUserInventory({}, (error, result) => {
 				const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
-				const sb = result.data.VirtualCurrency.SB;
-				scene.totalSnowballs = sb;
+				scene.totalSnowballs = result.data.VirtualCurrency.SB;
+				scene.totalIcicles = result.data.VirtualCurrency.IC;
 				inventories.forEach(inventory => this.makeInventoryItem(inventory));
 
 				PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
@@ -150,7 +151,7 @@ class GameScene extends AScene {
 
 		this.snowballText = this.add.text(16, 16, `${this.totalSnowballs} x`, textStyle);
 		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(16, 56, "0 x", textStyle);
+		this.icicleText = this.add.text(16, 56, `${this.totalIcicles} x`, textStyle);
 		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
 
 		this.interactiveGameSceneObjects.push(
@@ -218,7 +219,11 @@ class GameScene extends AScene {
 		const totalSnowballs = this.totalSnowballs | 0;
 		this.snowballText.setText(`${totalSnowballs} x`);
 		this.snowballIcon.setX(36 + this.snowballText.width);
+
+		const totalIcicles = this.totalIcicles | 0;
+		this.icicleText.setText(`${totalIcicles} x`);
 		this.icicleIcon.setX(32 + this.icicleText.width);
+
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
@@ -440,6 +445,21 @@ class GameScene extends AScene {
 		const button = this.paymentContainer.getAt(3) as RoundRectangle;
 		button.width = buttonText.width + 16;
 		button.height = buttonText.height + 16;
+		button.once("pointerup", () => {
+			PlayFabClient.ExecuteCloudScript(
+				{
+					FunctionName: "grantIcicleBundle",
+					FunctionParameter: { itemId: itemDetail.ItemId },
+				},
+				(error, result) => {
+					PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
+						const ic = r.data.VirtualCurrency.IC;
+						this.totalIcicles += ic;
+						this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
+					});
+				}
+			);
+		});
 		const image = this.paymentContainer.getAt(5) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		this.add.tween({
