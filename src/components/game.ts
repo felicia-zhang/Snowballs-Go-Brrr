@@ -18,7 +18,7 @@ class GameScene extends AScene {
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	currencies: PlayFabClientModels.StoreItem[];
+	currencyItems: PlayFabClientModels.StoreItem[];
 	storeItems: PlayFabClientModels.StoreItem[];
 	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
@@ -29,8 +29,8 @@ class GameScene extends AScene {
 	currencyContainer: Phaser.GameObjects.Container;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
-	interactiveGameSceneObjects: Phaser.GameObjects.GameObject[];
-	interactiveCurrencyStoreObjets: Phaser.GameObjects.GameObject[];
+	interactiveGameObjects: Phaser.GameObjects.GameObject[];
+	interactiveCurrencyObjets: Phaser.GameObjects.GameObject[];
 
 	constructor() {
 		super("Game");
@@ -41,12 +41,12 @@ class GameScene extends AScene {
 		this.clickMultiplier = 1;
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
-		this.currencies = [];
+		this.currencyItems = [];
 		this.storeItems = [];
 		this.itemsMap = {};
 		this.inventoryContainer = this.add.container(170, 5, []);
-		this.interactiveGameSceneObjects = [];
-		this.interactiveCurrencyStoreObjets = [];
+		this.interactiveGameObjects = [];
+		this.interactiveCurrencyObjets = [];
 		this.makePenguin();
 		this.makeCurrencyContainer();
 		this.makePaymentContainer();
@@ -62,37 +62,7 @@ class GameScene extends AScene {
 				};
 			});
 
-			PlayFabClient.GetStoreItems({ StoreId: "Items" }, (error, result) => {
-				const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-				const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
-				const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
-				this.storeContainer = this.add
-					.container(400, 300, [overlay, mainBackground, itemDescriptionPopup])
-					.setAlpha(0)
-					.setDepth(20);
-				result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-					this.makeStoreItem(storeItem, itemDescriptionPopup);
-				});
-				const closeButton = this.add
-					.image(175, -215, "close")
-					.setScale(0.35)
-					.setInteractive({ useHandCursor: true })
-					.on("pointerup", () => {
-						this.add.tween({
-							targets: [this.storeContainer],
-							ease: "Sine.easeIn",
-							duration: 100,
-							alpha: 0,
-							onComplete: () => {
-								this.interactiveGameSceneObjects.forEach(object =>
-									object.setInteractive({ useHandCursor: true })
-								);
-							},
-							callbackScope: this,
-						});
-					});
-				this.storeContainer.add(closeButton);
-			});
+			this.makeStoreContainer();
 
 			PlayFabClient.GetUserInventory({}, (error, result) => {
 				const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
@@ -123,7 +93,7 @@ class GameScene extends AScene {
 		this.icicleText = this.add.text(16, 56, `${this.totalIcicles} x`, textStyle);
 		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
 
-		this.interactiveGameSceneObjects.push(
+		this.interactiveGameObjects.push(
 			this.add
 				.text(16, 584, "MENU", textStyle)
 				.setOrigin(0, 1)
@@ -133,31 +103,25 @@ class GameScene extends AScene {
 				})
 		);
 
-		this.interactiveGameSceneObjects.push(
+		this.interactiveGameObjects.push(
 			this.add
 				.text(784, 544, "CURRENCIES", textStyle)
 				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
+					this.interactiveGameObjects.forEach(object => object.disableInteractive());
 					this.showCurrencyContainer();
 				})
 		);
 
-		this.interactiveGameSceneObjects.push(
+		this.interactiveGameObjects.push(
 			this.add
 				.text(784, 584, "STORE", textStyle)
 				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.interactiveGameSceneObjects.forEach(object => object.disableInteractive());
-					this.add.tween({
-						targets: [this.storeContainer],
-						ease: "Sine.easeIn",
-						duration: 500,
-						alpha: 1,
-						callbackScope: this,
-					});
+					this.interactiveGameObjects.forEach(object => object.disableInteractive());
+					this.showStoreContainer();
 				})
 		);
 	}
@@ -211,13 +175,11 @@ class GameScene extends AScene {
 					duration: 100,
 					alpha: 0,
 					onComplete: () => {
-						this.interactiveGameSceneObjects.forEach(object =>
-							object.setInteractive({ useHandCursor: true })
-						);
+						this.interactiveGameObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
 						currencyList.removeAll(true);
-						this.currencies = [];
-						this.interactiveCurrencyStoreObjets = [];
+						this.currencyItems = [];
+						this.interactiveCurrencyObjets = [];
 					},
 					callbackScope: this,
 				});
@@ -233,7 +195,7 @@ class GameScene extends AScene {
 			const overlay = this.currencyContainer.getAt(0) as Phaser.GameObjects.Rectangle;
 			const bg = this.currencyContainer.getAt(1) as RoundRectangle;
 			const closeButton = this.currencyContainer.getAt(3) as Phaser.GameObjects.Image;
-			this.interactiveCurrencyStoreObjets.push(closeButton);
+			this.interactiveCurrencyObjets.push(closeButton);
 			if (result.data.StoreId === "CurrenciesWithDiscount") {
 				overlay.setY(-25);
 				bg.height = 305;
@@ -261,6 +223,52 @@ class GameScene extends AScene {
 		});
 		this.add.tween({
 			targets: [this.currencyContainer],
+			ease: "Sine.easeIn",
+			duration: 500,
+			alpha: 1,
+			callbackScope: this,
+		});
+	}
+
+	makeStoreContainer() {
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
+		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
+		const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
+		const itemList = this.add.container(0, 0, []);
+		this.storeContainer = this.add
+			.container(400, 300, [overlay, mainBackground, itemDescriptionPopup, itemList])
+			.setAlpha(0)
+			.setDepth(20);
+		const closeButton = this.add
+			.image(175, -215, "close")
+			.setScale(0.35)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				this.add.tween({
+					targets: [this.storeContainer],
+					ease: "Sine.easeIn",
+					duration: 100,
+					alpha: 0,
+					onComplete: () => {
+						this.interactiveGameObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+						const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
+						itemList.removeAll(true);
+						this.storeItems = [];
+					},
+					callbackScope: this,
+				});
+			});
+		this.storeContainer.add(closeButton);
+	}
+
+	showStoreContainer() {
+		PlayFabClient.GetStoreItems({ StoreId: "Items" }, (error, result) => {
+			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
+				this.makeStoreItem(storeItem);
+			});
+		});
+		this.add.tween({
+			targets: [this.storeContainer],
 			ease: "Sine.easeIn",
 			duration: 500,
 			alpha: 1,
@@ -304,11 +312,12 @@ class GameScene extends AScene {
 					}
 				}
 			});
-		this.interactiveGameSceneObjects.push(sprite);
+		this.interactiveGameObjects.push(sprite);
 		return sprite;
 	}
 
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, itemDescriptionPopup: Phaser.GameObjects.Text) {
+	makeStoreItem(storeItem: PlayFabClientModels.StoreItem) {
+		const itemDescriptionPopup = this.storeContainer.getAt(2) as Phaser.GameObjects.Text;
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const itemPrice = storeItem.VirtualCurrencyPrices.SB;
 		const wrap = (s: string) => s.replace(/(?![^\n]{1,22}$)([^\n]{1,22})\s/g, "$1\n");
@@ -374,16 +383,16 @@ class GameScene extends AScene {
 				this.sync(() => this.purchaseItem(itemDetail, itemPrice));
 			});
 		const snowballIcon = this.add.image(138, -170 + index * 85, "snowball").setScale(0.15);
-		const row = this.add.container(0, 0, [background, image, nameText, textBackground, priceText, snowballIcon]);
-		this.storeContainer.add(row);
+		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
+		itemList.add([background, image, nameText, textBackground, priceText, snowballIcon]);
 	}
 
 	makeCurrency(storeItem: PlayFabClientModels.StoreItem) {
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const usd = storeItem.VirtualCurrencyPrices.RM;
 
-		const index = this.currencies.length;
-		this.currencies.push(storeItem);
+		const index = this.currencyItems.length;
+		this.currencyItems.push(storeItem);
 		const background = this.add.existing(new RoundRectangle(this, 160 * index - 240, 0, 140, 220, 15, 0x2e5767));
 
 		let imageKey: string;
@@ -411,10 +420,10 @@ class GameScene extends AScene {
 			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.interactiveCurrencyStoreObjets.forEach(object => object.disableInteractive());
+				this.interactiveCurrencyObjets.forEach(object => object.disableInteractive());
 				this.showPaymentContainer(itemDetail, usd, imageKey);
 			});
-		this.interactiveCurrencyStoreObjets.push(textBackground);
+		this.interactiveCurrencyObjets.push(textBackground);
 		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
 		currencyList.add([background, image, nameText, textBackground, usdText]);
 	}
@@ -467,7 +476,7 @@ class GameScene extends AScene {
 					duration: 100,
 					alpha: 0,
 					onComplete: () => {
-						this.interactiveCurrencyStoreObjets.forEach(object =>
+						this.interactiveCurrencyObjets.forEach(object =>
 							object.setInteractive({ useHandCursor: true })
 						);
 						button.removeAllListeners();
