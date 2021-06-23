@@ -390,19 +390,28 @@ class GameScene extends AScene {
 		itemList.add([background, image, nameText, priceButton, priceText, snowballIcon]);
 
 		if (storeId === "ItemsWithDiscount") {
-			priceText.setY(-180 + index * 85);
-			priceButton.y = -180 + index * 85;
-			snowballIcon.setY(-180 + index * 85);
+			priceText.setY(-160 + index * 85);
+			priceButton.y = -160 + index * 85;
+			snowballIcon.setY(-160 + index * 85);
+
+			// const discountText = this.add
+			// 	.text(-148, -203 + index * 85, "-10%", {
+			// 		fontSize: smallFontSize,
+			// 		fontFamily: fontFamily,
+			// 	})
+			// 	.setAlign("right")
+			// 	.setOrigin(1, 0.5)
+			// 	.setAngle(-45);
+			// const banner = this.add.image(-154, -190 + index * 85, "banner").setScale(0.14);
 			const oldPriceText = this.add
-				.text(121, -147 + index * 85, `${itemDetail.Price} x`, {
+				.text(121, -192 + index * 85, `${itemDetail.Price} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
 				.setAlign("right")
 				.setOrigin(1, 0.5);
-
-			const oldSnowballIcon = this.add.image(135, -148 + index * 85, "snowball").setScale(0.09);
-			const yPosition = -72.5 + index * 42.5;
+			const oldSnowballIcon = this.add.image(135, -191 + index * 85, "snowball").setScale(0.09);
+			const yPosition = -96 + index * 42.5;
 			const line = this.add
 				.line(75, yPosition, 75, yPosition, 110 + oldPriceText.width, yPosition, 0xffffff)
 				.setOrigin(1, 0.5);

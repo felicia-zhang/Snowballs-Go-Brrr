@@ -19,6 +19,7 @@ import lock from "../assets/lock.png";
 import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
 import penguin3 from "../assets/penguin3.png";
+import banner from "../assets/banner.png";
 import MenuScene from "./menu";
 import AScene from "./AScene";
 
@@ -45,6 +46,7 @@ class Controller extends AScene {
 		this.load.image("penguin1", penguin1);
 		this.load.image("penguin2", penguin2);
 		this.load.image("penguin3", penguin3);
+		this.load.image("banner", banner);
 	}
 
 	create() {
