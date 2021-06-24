@@ -47,15 +47,17 @@ class GameScene extends AScene {
 
 		const scene = this;
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
-			result.data.Catalog.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				this.itemsMap[item.ItemId] = {
-					ItemId: item.ItemId,
-					Price: item.VirtualCurrencyPrices.SB,
-					DisplayName: item.DisplayName,
-					Description: item.Description,
-					Instances: {},
-				};
-			});
+			result.data.Catalog.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "land").forEach(
+				(item: PlayFabClientModels.CatalogItem, i) => {
+					this.itemsMap[item.ItemId] = {
+						ItemId: item.ItemId,
+						Price: item.VirtualCurrencyPrices.SB,
+						DisplayName: item.DisplayName,
+						Description: item.Description,
+						Instances: {},
+					};
+				}
+			);
 
 			this.makeStoreContainer();
 
@@ -361,8 +363,6 @@ class GameScene extends AScene {
 			image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
 		} else if (storeItem.ItemId === "4") {
 			image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
-		} else {
-			return;
 		}
 		const nameText = this.add
 			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), textStyle)
