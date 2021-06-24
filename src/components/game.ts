@@ -2,14 +2,7 @@ import { PlayFabClient } from "playfab-sdk";
 import { fontFamily, smallFontSize, textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
-
-interface ItemDetail {
-	ItemId: string;
-	Price: number;
-	DisplayName: string;
-	Description: string;
-	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
-}
+import ItemDetail from "../utils/types";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
@@ -102,6 +95,16 @@ class GameScene extends AScene {
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.scene.start("Menu");
+				})
+		);
+
+		this.interactiveGameObjects.push(
+			this.add
+				.text(16, 544, "MAP", textStyle)
+				.setOrigin(0, 1)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerup", () => {
+					this.scene.start("Map");
 				})
 		);
 

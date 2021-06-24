@@ -22,6 +22,7 @@ import penguin3 from "../assets/penguin3.png";
 import banner from "../assets/banner.png";
 import MenuScene from "./menu";
 import AScene from "./AScene";
+import MapScene from "./map";
 
 class Controller extends AScene {
 	constructor() {
@@ -55,6 +56,7 @@ class Controller extends AScene {
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Menu", MenuScene);
 		this.scene.add("Game", GameScene);
+		this.scene.add("Map", MapScene);
 
 		if (PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Menu");
