@@ -50,26 +50,34 @@ class MapScene extends AScene {
 	}
 
 	makeLand(item: PlayFabClientModels.StoreItem) {
+		let imageKey: string;
 		let image: Phaser.GameObjects.Image;
 		if (item.ItemId === "5") {
-			image = this.add.image(400, 300, "landIce").setScale(0.5);
-		} else {
-			return;
+			imageKey = "iceCube";
+			image = this.add.image(200, 300, imageKey);
+		} else if (item.ItemId === "6") {
+			imageKey = "lavaCube";
+			image = this.add.image(400, 300, imageKey);
+		} else if (item.ItemId === "7") {
+			imageKey = "sandCube";
+			image = this.add.image(600, 300, imageKey);
 		}
-
-		image.setInteractive({ useHandCursor: true }).on("pointerup", () => {
-			if (this.landItems.has(item.ItemId)) {
-				this.showLandOwnedContainer(item, "landIce");
-			} else {
-				this.showLandNotOwnedContainer(item, "landIce");
-			}
-		});
+		image
+			.setScale(0.5)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				if (this.landItems.has(item.ItemId)) {
+					this.showLandOwnedContainer(item, imageKey);
+				} else {
+					this.showLandNotOwnedContainer(item, imageKey);
+				}
+			});
 	}
 
 	makeLandOwnedContainer() {
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 500, 400, 15, 0x16252e));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const image = this.add.image(0, -10, "landIce").setScale(0.7);
+		const image = this.add.image(0, -10, "iceCube").setScale(0.7);
 		const buttonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const button = this.add
 			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
@@ -101,7 +109,7 @@ class MapScene extends AScene {
 	makeLandNotOwnedContainer() {
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 500, 400, 15, 0x16252e));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const image = this.add.image(0, -10, "landIce").setScale(0.7);
+		const image = this.add.image(0, -10, "iceCube").setScale(0.7);
 		const snowballButtonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballButton = this.add
 			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
