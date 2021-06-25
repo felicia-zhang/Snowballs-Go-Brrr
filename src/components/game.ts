@@ -473,7 +473,7 @@ class GameScene extends AScene {
 						this.showToast("Not enough snowballs", true);
 					} else {
 						this.registry.values.SB -= maybeItemDiscountPrice;
-						this.registry.values.Inventories.push(...r.data.Items);
+						this.registry.values.Inventories.push(...r.data.Items); // mutating the array will not fire registry changedata event
 						this.makeInventoryItem(r.data.Items[0]);
 						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 					}

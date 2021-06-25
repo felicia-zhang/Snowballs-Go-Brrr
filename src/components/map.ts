@@ -270,11 +270,9 @@ class MapScene extends AScene {
 						? this.showToast("Not enough snowballs", true)
 						: this.showToast("Not enough icicles", true);
 				} else {
-					if (currencyType === "SB") {
-						this.registry.values.SB -= maybeDiscountPrice;
-					} else {
-						this.registry.values.IC -= maybeDiscountPrice;
-					}
+					currencyType === "SB"
+						? (this.registry.values.SB -= maybeDiscountPrice)
+						: (this.registry.values.IC -= maybeDiscountPrice);
 					this.registry.values.Inventories.push(...r.data.Items);
 					this.showToast(`${landDetail.DisplayName} successfully purchased`, false);
 					this.scene.start("Game");
