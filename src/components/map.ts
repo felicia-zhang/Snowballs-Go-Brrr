@@ -129,10 +129,16 @@ class MapScene extends AScene {
 		const button = this.add
 			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
-		const details = this.add.container(140, 0, [lightBg, title, button, buttonText]);
+		const details = this.add.container(140, 0, [
+			lightBg,
+			title,
+			button,
+			buttonText,
+			this.add.container(0, -100, []),
+		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
 		const closeButton = this.add
-			.image(245, -140, "close")
+			.image(245, -160, "close")
 			.setScale(0.35)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
@@ -144,6 +150,8 @@ class MapScene extends AScene {
 					onComplete: () => {
 						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						button.removeAllListeners();
+						const counterText = details.getAt(4) as Phaser.GameObjects.Container;
+						counterText.removeAll(true);
 					},
 					callbackScope: this,
 				});
@@ -181,7 +189,7 @@ class MapScene extends AScene {
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
 		const closeButton = this.add
-			.image(245, -140, "close")
+			.image(245, -160, "close")
 			.setScale(0.35)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
@@ -219,6 +227,26 @@ class MapScene extends AScene {
 		});
 		const image = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
+		const counter = {};
+		this.registry
+			.get("Inventories")
+			.filter(
+				(inventory: PlayFabClientModels.ItemInstance) =>
+					inventory.CustomData !== undefined && inventory.CustomData.CubeId === landDetail.ItemId
+			)
+			.forEach((inventory: PlayFabClientModels.ItemInstance) =>
+				inventory.DisplayName in counter
+					? (counter[inventory.DisplayName] += 1)
+					: (counter[inventory.DisplayName] = 1)
+			);
+		const counterText = details.getAt(4) as Phaser.GameObjects.Container;
+		Object.keys(counter).forEach((name: string, i: number) => {
+			const text = this.add
+				.text(0, 30 * i, `${name}: ${counter[name]}`, textStyle)
+				.setAlign("left")
+				.setOrigin(0.5, 0);
+			counterText.add(text);
+		});
 		this.add.tween({
 			targets: [this.landOwnedContainer],
 			ease: "Sine.easeIn",
