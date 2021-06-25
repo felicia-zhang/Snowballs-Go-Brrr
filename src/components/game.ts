@@ -3,9 +3,11 @@ import { fontFamily, smallFontSize, textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import ItemDetail from "../utils/types";
+import LandDetail from "../utils/types";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
+	landDetail: LandDetail;
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
@@ -28,8 +30,9 @@ class GameScene extends AScene {
 		super("Game");
 	}
 
-	create() {
+	create({ landDetail }) {
 		this.add.image(400, 300, "sky");
+		this.landDetail = landDetail;
 		this.clickMultiplier = 1;
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
@@ -59,7 +62,10 @@ class GameScene extends AScene {
 
 		this.registry
 			.get("Inventories")
-			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass !== "land")
+			.filter(
+				(inventory: PlayFabClientModels.ItemInstance) =>
+					inventory.CustomData !== undefined && inventory.CustomData.CubeId === this.landDetail.ItemId
+			)
 			.forEach(inventory => this.makeInventoryItem(inventory));
 
 		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
@@ -84,6 +90,8 @@ class GameScene extends AScene {
 		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
 		this.icicleText = this.add.text(16, 56, `${this.registry.get("IC")} x`, textStyle);
 		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
+
+		this.add.text(400, 16, this.landDetail.DisplayName, textStyle).setAlign("center").setOrigin(0.5, 0.5);
 
 		this.interactiveGameObjects.push(
 			this.add
@@ -396,15 +404,6 @@ class GameScene extends AScene {
 			priceButton.y = -160 + index * 85;
 			snowballIcon.setY(-160 + index * 85);
 
-			// const discountText = this.add
-			// 	.text(-148, -203 + index * 85, "-10%", {
-			// 		fontSize: smallFontSize,
-			// 		fontFamily: fontFamily,
-			// 	})
-			// 	.setAlign("right")
-			// 	.setOrigin(1, 0.5)
-			// 	.setAngle(-45);
-			// const banner = this.add.image(-154, -190 + index * 85, "banner").setScale(0.14);
 			const fullPriceText = this.add
 				.text(121, -192 + index * 85, `${itemDetail.FullPrice} x`, {
 					fontSize: smallFontSize,
@@ -472,10 +471,21 @@ class GameScene extends AScene {
 					if (e !== null) {
 						this.showToast("Not enough snowballs", true);
 					} else {
-						this.registry.values.SB -= maybeItemDiscountPrice;
-						this.registry.values.Inventories.push(...r.data.Items); // mutating the array will not fire registry changedata event
-						this.makeInventoryItem(r.data.Items[0]);
-						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+						PlayFabClient.ExecuteCloudScript(
+							{
+								FunctionName: "updateCustomData",
+								FunctionParameter: {
+									instanceId: r.data.Items[0].ItemInstanceId,
+									cubeId: this.landDetail.ItemId,
+								},
+							},
+							(error, result) => {
+								this.registry.values.SB -= maybeItemDiscountPrice;
+								this.registry.values.Inventories.push(result.data.FunctionResult); // mutating the array will not fire registry changedata event
+								this.makeInventoryItem(result.data.FunctionResult);
+								this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+							}
+						);
 					}
 				}
 			);

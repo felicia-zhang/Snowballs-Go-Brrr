@@ -215,7 +215,7 @@ class MapScene extends AScene {
 		button.width = buttonText.width + 16;
 		button.height = buttonText.height + 16;
 		button.on("pointerup", () => {
-			this.scene.start("Game");
+			this.scene.start("Game", { landDetail: landDetail });
 		});
 		const image = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
@@ -324,7 +324,7 @@ class MapScene extends AScene {
 						: (this.registry.values.IC -= maybeDiscountPrice);
 					this.registry.values.Inventories.push(...r.data.Items);
 					this.showToast(`${landDetail.DisplayName} successfully purchased`, false);
-					this.scene.start("Game");
+					this.scene.start("Game", { landDetail: landDetail });
 				}
 			}
 		);
