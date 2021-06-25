@@ -121,7 +121,7 @@ class MapScene extends AScene {
 			.existing(new RoundRectangle(this, 0, 100, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
 		const details = this.add.container(140, 0, [lightBg, title, button, buttonText]);
-		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(30).setAlpha(0);
+		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -140, "close")
 			.setScale(0.35)
@@ -169,7 +169,7 @@ class MapScene extends AScene {
 			icicleButtonText,
 			icicleIcon,
 		]);
-		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(30).setAlpha(0);
+		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -140, "close")
 			.setScale(0.35)
@@ -254,23 +254,23 @@ class MapScene extends AScene {
 		});
 	}
 
-	purchaseLand(landDetail: LandDetail, price: number, currencyType: string) {
-		// if (Object.keys(itemDetail.Instances).length === 6) {
-		// 	this.showToast("Not enough room", true);
-		// } else {
-		// 	PlayFabClient.PurchaseItem(
-		// 		{ ItemId: itemDetail.ItemId, Price: price, StoreId: storeId, VirtualCurrency: "SB" },
-		// 		(e, r) => {
-		// 			if (e !== null) {
-		// 				this.showToast("Not enough snowballs", true);
-		// 			} else {
-		// 				this.totalSnowballs -= price;
-		// 				this.makeInventoryItem(r.data.Items[0]);
-		// 				this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-		// 			}
-		// 		}
-		// 	);
-		// }
+	purchaseLand(landDetail: LandDetail, maybeDiscountPrice: number, currencyType: string) {
+		PlayFabClient.PurchaseItem(
+			{ ItemId: landDetail.ItemId, Price: maybeDiscountPrice, VirtualCurrency: currencyType },
+			(e, r) => {
+				if (e !== null) {
+					currencyType === "SB"
+						? this.showToast("Not enough snowballs", true)
+						: this.showToast("Not enough icicles", true);
+				} else {
+					currencyType === "SB"
+						? (this.totalSnowballs -= maybeDiscountPrice)
+						: (this.totalIcicles -= maybeDiscountPrice);
+					this.showToast(`${landDetail.DisplayName} successfully purchased`, false);
+					this.scene.start("Game");
+				}
+			}
+		);
 	}
 
 	update() {
