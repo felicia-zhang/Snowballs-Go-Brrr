@@ -79,9 +79,9 @@ class MapScene extends AScene {
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
 		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const buttonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const buttonText = this.add.text(0, 100, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
+			.existing(new RoundRectangle(this, 0, 100, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
 		const details = this.add.container(140, 0, [lightBg, title, button, buttonText]);
 		const popup = this.add.container(400, 300, [bg, image, details]).setDepth(30).setAlpha(0);
@@ -113,21 +113,25 @@ class MapScene extends AScene {
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
 		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
-		const snowballButtonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const snowballButtonText = this.add.text(0, 50, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballButton = this.add
-			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
+			.existing(new RoundRectangle(this, 0, 50, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
-		const icicleButtonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const snowballIcon = this.add.image(0, 50, "snowball").setScale(0.15);
+		const icicleButtonText = this.add.text(0, 100, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const icicleButton = this.add
-			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
+			.existing(new RoundRectangle(this, 0, 100, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
+		const icicleIcon = this.add.image(0, 100, "icicle").setScale(0.15);
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,
 			snowballButton,
 			snowballButtonText,
+			snowballIcon,
 			icicleButton,
 			icicleButtonText,
+			icicleIcon,
 		]);
 		const popup = this.add.container(400, 300, [bg, image, details]).setDepth(30).setAlpha(0);
 		const closeButton = this.add
@@ -159,7 +163,7 @@ class MapScene extends AScene {
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
 		const buttonText = details.getAt(3) as Phaser.GameObjects.Text;
-		buttonText.setText("GO");
+		buttonText.setText("VISIT");
 		const button = details.getAt(2) as RoundRectangle;
 		button.width = buttonText.width + 16;
 		button.height = buttonText.height + 16;
@@ -183,21 +187,25 @@ class MapScene extends AScene {
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
 		const snowballButtonText = details.getAt(3) as Phaser.GameObjects.Text;
-		snowballButtonText.setText(`${landDetail.SnowballPrice}`);
+		snowballButtonText.setText(`${landDetail.SnowballPrice} x`);
 		const snowballButton = details.getAt(2) as RoundRectangle;
 		snowballButton.width = snowballButtonText.width + 16;
 		snowballButton.height = snowballButtonText.height + 16;
 		snowballButton.on("pointerup", () => {
 			console.log("snowball price");
 		});
-		const icicleButtonText = details.getAt(5) as Phaser.GameObjects.Text;
-		icicleButtonText.setText(`${landDetail.IciclePrice}`);
-		const icicleButton = details.getAt(4) as RoundRectangle;
+		const snowballIcon = details.getAt(4) as Phaser.GameObjects.Image;
+		snowballIcon.setX((snowballButtonText.width + 45) / 2);
+		const icicleButtonText = details.getAt(6) as Phaser.GameObjects.Text;
+		icicleButtonText.setText(`${landDetail.IciclePrice} x`);
+		const icicleButton = details.getAt(5) as RoundRectangle;
 		icicleButton.width = icicleButtonText.width + 16;
 		icicleButton.height = icicleButtonText.height + 16;
 		icicleButton.on("pointerup", () => {
 			console.log("icicle price");
 		});
+		const icicleIcon = details.getAt(7) as Phaser.GameObjects.Image;
+		icicleIcon.setX((icicleButtonText.width + 40) / 2);
 		const image = this.landNotOwnedContainer.getAt(1) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		this.add.tween({
