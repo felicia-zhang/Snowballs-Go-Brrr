@@ -76,17 +76,15 @@ class MapScene extends AScene {
 
 	makeLandOwnedContainer() {
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 300, 15, 0x16252e));
-		const lightBg = this.add.existing(new RoundRectangle(this, 140, 0, 200, 260, 15, 0x2e5767));
-		const title = this.add.text(120, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
-		const buttonText = this.add.text(120, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
+		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const buttonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const button = this.add
-			.existing(new RoundRectangle(this, 120, 130, 0, 0, 10, 0xc26355))
+			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
-		const popup = this.add
-			.container(400, 300, [bg, lightBg, title, button, buttonText, image])
-			.setDepth(30)
-			.setAlpha(0);
+		const details = this.add.container(140, 0, [lightBg, title, button, buttonText]);
+		const popup = this.add.container(400, 300, [bg, image, details]).setDepth(30).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -140, "close")
 			.setScale(0.35)
@@ -112,8 +110,8 @@ class MapScene extends AScene {
 
 	makeLandNotOwnedContainer() {
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 300, 15, 0x16252e));
-		const lightBg = this.add.existing(new RoundRectangle(this, 140, 0, 200, 260, 15, 0x2e5767));
-		const title = this.add.text(120, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
+		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
 		const snowballButtonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballButton = this.add
@@ -123,19 +121,15 @@ class MapScene extends AScene {
 		const icicleButton = this.add
 			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
-		const popup = this.add
-			.container(400, 300, [
-				bg,
-				lightBg,
-				title,
-				snowballButton,
-				snowballButtonText,
-				icicleButton,
-				icicleButtonText,
-				image,
-			])
-			.setDepth(30)
-			.setAlpha(0);
+		const details = this.add.container(140, 0, [
+			lightBg,
+			title,
+			snowballButton,
+			snowballButtonText,
+			icicleButton,
+			icicleButtonText,
+		]);
+		const popup = this.add.container(400, 300, [bg, image, details]).setDepth(30).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -140, "close")
 			.setScale(0.35)
@@ -161,17 +155,18 @@ class MapScene extends AScene {
 
 	showLandOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
 		const landDetail: LandDetail = this.landsMap[item.ItemId];
-		const title = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Text;
+		const details = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Container;
+		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
-		const buttonText = this.landOwnedContainer.getAt(4) as Phaser.GameObjects.Text;
+		const buttonText = details.getAt(3) as Phaser.GameObjects.Text;
 		buttonText.setText("GO");
-		const button = this.landOwnedContainer.getAt(3) as RoundRectangle;
+		const button = details.getAt(2) as RoundRectangle;
 		button.width = buttonText.width + 16;
 		button.height = buttonText.height + 16;
 		button.on("pointerup", () => {
 			this.scene.start("Game");
 		});
-		const image = this.landOwnedContainer.getAt(5) as Phaser.GameObjects.Image;
+		const image = this.landOwnedContainer.getAt(1) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		this.add.tween({
 			targets: [this.landOwnedContainer],
@@ -184,25 +179,26 @@ class MapScene extends AScene {
 
 	showLandNotOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
 		const landDetail: LandDetail = this.landsMap[item.ItemId];
-		const title = this.landNotOwnedContainer.getAt(2) as Phaser.GameObjects.Text;
+		const details = this.landNotOwnedContainer.getAt(2) as Phaser.GameObjects.Container;
+		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
-		const snowballButtonText = this.landNotOwnedContainer.getAt(4) as Phaser.GameObjects.Text;
+		const snowballButtonText = details.getAt(3) as Phaser.GameObjects.Text;
 		snowballButtonText.setText(`${landDetail.SnowballPrice}`);
-		const snowballButton = this.landNotOwnedContainer.getAt(3) as RoundRectangle;
+		const snowballButton = details.getAt(2) as RoundRectangle;
 		snowballButton.width = snowballButtonText.width + 16;
 		snowballButton.height = snowballButtonText.height + 16;
 		snowballButton.on("pointerup", () => {
 			console.log("snowball price");
 		});
-		const icicleButtonText = this.landNotOwnedContainer.getAt(6) as Phaser.GameObjects.Text;
+		const icicleButtonText = details.getAt(5) as Phaser.GameObjects.Text;
 		icicleButtonText.setText(`${landDetail.IciclePrice}`);
-		const icicleButton = this.landNotOwnedContainer.getAt(5) as RoundRectangle;
+		const icicleButton = details.getAt(4) as RoundRectangle;
 		icicleButton.width = icicleButtonText.width + 16;
 		icicleButton.height = icicleButtonText.height + 16;
 		icicleButton.on("pointerup", () => {
 			console.log("icicle price");
 		});
-		const image = this.landNotOwnedContainer.getAt(7) as Phaser.GameObjects.Image;
+		const image = this.landNotOwnedContainer.getAt(1) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		this.add.tween({
 			targets: [this.landNotOwnedContainer],
