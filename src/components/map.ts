@@ -59,18 +59,23 @@ class MapScene extends AScene {
 
 	makeLand(item: PlayFabClientModels.StoreItem) {
 		let imageKey: string;
-		let image: Phaser.GameObjects.Image;
+		let x: number;
+		let y: number;
 		if (item.ItemId === "5") {
 			imageKey = "iceCube";
-			image = this.add.image(200, 300, imageKey);
+			x = 200;
+			y = 300;
 		} else if (item.ItemId === "6") {
 			imageKey = "lavaCube";
-			image = this.add.image(400, 300, imageKey);
+			x = 400;
+			y = 300;
 		} else if (item.ItemId === "7") {
 			imageKey = "sandCube";
-			image = this.add.image(600, 300, imageKey);
+			x = 600;
+			y = 300;
 		}
-		image
+		this.add
+			.image(x, y, imageKey)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
@@ -80,6 +85,9 @@ class MapScene extends AScene {
 					this.showLandNotOwnedContainer(item, imageKey);
 				}
 			});
+		if (!this.landItems.has(item.ItemId)) {
+			this.add.image(x, y, "lock").setScale(0.5);
+		}
 	}
 
 	makeLandOwnedContainer() {
