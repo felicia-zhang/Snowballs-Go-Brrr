@@ -51,11 +51,11 @@ class GameScene extends AScene {
 				(item: PlayFabClientModels.CatalogItem, i) => {
 					this.itemsMap[item.ItemId] = {
 						ItemId: item.ItemId,
-						Price: item.VirtualCurrencyPrices.SB,
+						FullPrice: item.VirtualCurrencyPrices.SB,
 						DisplayName: item.DisplayName,
 						Description: item.Description,
 						Instances: {},
-					};
+					} as ItemDetail;
 				}
 			);
 
@@ -328,7 +328,7 @@ class GameScene extends AScene {
 	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, storeId: string) {
 		const itemDescriptionPopup = this.storeContainer.getAt(2) as Phaser.GameObjects.Text;
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
-		const itemPrice = storeItem.VirtualCurrencyPrices.SB;
+		const maybeItemDiscountPrice = storeItem.VirtualCurrencyPrices.SB;
 		const wrap = (s: string) => s.replace(/(?![^\n]{1,22}$)([^\n]{1,22})\s/g, "$1\n");
 
 		const index = this.storeItems.length;
@@ -370,7 +370,7 @@ class GameScene extends AScene {
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const priceText = this.add
-			.text(118, -170 + index * 85, `${itemPrice} x`, textStyle)
+			.text(118, -170 + index * 85, `${maybeItemDiscountPrice} x`, textStyle)
 			.setAlign("right")
 			.setOrigin(1, 0.5);
 		const priceButton = this.add
@@ -387,7 +387,7 @@ class GameScene extends AScene {
 			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.sync(() => this.purchaseItem(itemDetail, itemPrice, storeId));
+				this.sync(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId));
 			});
 		const snowballIcon = this.add.image(138, -170 + index * 85, "snowball").setScale(0.15);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
@@ -407,8 +407,8 @@ class GameScene extends AScene {
 			// 	.setOrigin(1, 0.5)
 			// 	.setAngle(-45);
 			// const banner = this.add.image(-154, -190 + index * 85, "banner").setScale(0.14);
-			const oldPriceText = this.add
-				.text(121, -192 + index * 85, `${itemDetail.Price} x`, {
+			const fullPriceText = this.add
+				.text(121, -192 + index * 85, `${itemDetail.FullPrice} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
@@ -417,9 +417,9 @@ class GameScene extends AScene {
 			const oldSnowballIcon = this.add.image(135, -191 + index * 85, "snowball").setScale(0.09);
 			const yPosition = -96 + index * 42.5;
 			const line = this.add
-				.line(75, yPosition, 75, yPosition, 110 + oldPriceText.width, yPosition, 0xffffff)
+				.line(75, yPosition, 75, yPosition, 110 + fullPriceText.width, yPosition, 0xffffff)
 				.setOrigin(1, 0.5);
-			itemList.add([oldPriceText, oldSnowballIcon, line]);
+			itemList.add([fullPriceText, oldSnowballIcon, line]);
 		}
 	}
 
@@ -464,17 +464,17 @@ class GameScene extends AScene {
 		currencyList.add([background, image, nameText, textBackground, usdText]);
 	}
 
-	purchaseItem(itemDetail: ItemDetail, price: number, storeId: string) {
+	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string) {
 		if (Object.keys(itemDetail.Instances).length === 6) {
 			this.showToast("Not enough room", true);
 		} else {
 			PlayFabClient.PurchaseItem(
-				{ ItemId: itemDetail.ItemId, Price: price, StoreId: storeId, VirtualCurrency: "SB" },
+				{ ItemId: itemDetail.ItemId, Price: maybeItemDiscountPrice, StoreId: storeId, VirtualCurrency: "SB" },
 				(e, r) => {
 					if (e !== null) {
 						this.showToast("Not enough snowballs", true);
 					} else {
-						this.totalSnowballs -= price;
+						this.totalSnowballs -= maybeItemDiscountPrice;
 						this.makeInventoryItem(r.data.Items[0]);
 						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 					}

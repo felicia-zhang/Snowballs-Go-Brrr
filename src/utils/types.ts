@@ -1,6 +1,6 @@
 export default interface ItemDetail {
 	ItemId: string;
-	Price: number;
+	FullPrice: number;
 	DisplayName: string;
 	Description: string;
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
@@ -8,7 +8,7 @@ export default interface ItemDetail {
 
 export default interface LandDetail {
 	ItemId: string;
-	SnowballPrice: number;
-	IciclePrice: number;
+	FullSnowballPrice: number;
+	FullIciclePrice: number;
 	DisplayName: string;
 }

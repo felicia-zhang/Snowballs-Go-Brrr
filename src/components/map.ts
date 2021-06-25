@@ -36,10 +36,10 @@ class MapScene extends AScene {
 				(item: PlayFabClientModels.CatalogItem) => {
 					this.landsMap[item.ItemId] = {
 						ItemId: item.ItemId,
-						SnowballPrice: item.VirtualCurrencyPrices.SB,
-						IciclePrice: item.VirtualCurrencyPrices.IC,
+						FullSnowballPrice: item.VirtualCurrencyPrices.SB,
+						FullIciclePrice: item.VirtualCurrencyPrices.IC,
 						DisplayName: item.DisplayName,
-					};
+					} as LandDetail;
 				}
 			);
 
@@ -218,26 +218,28 @@ class MapScene extends AScene {
 
 	showLandNotOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
 		const landDetail: LandDetail = this.landsMap[item.ItemId];
+		const maybeDiscountSnowballPrice = item.VirtualCurrencyPrices.SB;
+		const maybeDiscountIciclePrice = item.VirtualCurrencyPrices.IC;
 		const details = this.landNotOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
 		const snowballButtonText = details.getAt(3) as Phaser.GameObjects.Text;
-		snowballButtonText.setText(`${landDetail.SnowballPrice} x`);
+		snowballButtonText.setText(`${maybeDiscountSnowballPrice} x`);
 		const snowballButton = details.getAt(2) as RoundRectangle;
 		snowballButton.width = snowballButtonText.width + 50;
 		snowballButton.height = snowballButtonText.height + 16;
 		snowballButton.on("pointerup", () => {
-			console.log("snowball price");
+			this.purchaseLand(landDetail, maybeDiscountSnowballPrice, "SB");
 		});
 		const snowballIcon = details.getAt(4) as Phaser.GameObjects.Image;
 		snowballIcon.setX((snowballButtonText.width + 10) / 2);
 		const icicleButtonText = details.getAt(6) as Phaser.GameObjects.Text;
-		icicleButtonText.setText(`${landDetail.IciclePrice} x`);
+		icicleButtonText.setText(`${maybeDiscountIciclePrice} x`);
 		const icicleButton = details.getAt(5) as RoundRectangle;
 		icicleButton.width = icicleButtonText.width + 50;
 		icicleButton.height = icicleButtonText.height + 16;
 		icicleButton.on("pointerup", () => {
-			console.log("icicle price");
+			this.purchaseLand(landDetail, maybeDiscountIciclePrice, "IC");
 		});
 		const icicleIcon = details.getAt(7) as Phaser.GameObjects.Image;
 		icicleIcon.setX((icicleButtonText.width + 5) / 2);
@@ -250,6 +252,25 @@ class MapScene extends AScene {
 			alpha: 1,
 			callbackScope: this,
 		});
+	}
+
+	purchaseLand(landDetail: LandDetail, price: number, currencyType: string) {
+		// if (Object.keys(itemDetail.Instances).length === 6) {
+		// 	this.showToast("Not enough room", true);
+		// } else {
+		// 	PlayFabClient.PurchaseItem(
+		// 		{ ItemId: itemDetail.ItemId, Price: price, StoreId: storeId, VirtualCurrency: "SB" },
+		// 		(e, r) => {
+		// 			if (e !== null) {
+		// 				this.showToast("Not enough snowballs", true);
+		// 			} else {
+		// 				this.totalSnowballs -= price;
+		// 				this.makeInventoryItem(r.data.Items[0]);
+		// 				this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+		// 			}
+		// 		}
+		// 	);
+		// }
 	}
 
 	update() {
