@@ -7,10 +7,8 @@ import AScene from "./AScene";
 class MapScene extends AScene {
 	landsMap: { [key: number]: LandDetail };
 	landItems: Set<string>;
-	totalSnowballs: number;
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
-	totalIcicles: number;
 	icicleText: Phaser.GameObjects.Text;
 	icicleIcon: Phaser.GameObjects.Image;
 	landOwnedContainer: Phaser.GameObjects.Container;
@@ -30,37 +28,34 @@ class MapScene extends AScene {
 		this.makeLandOwnedContainer();
 		this.makeLandNotOwnedContainer();
 
-		const map = this;
-		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
-			result.data.Catalog.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass === "land").forEach(
-				(item: PlayFabClientModels.CatalogItem) => {
-					this.landsMap[item.ItemId] = {
-						ItemId: item.ItemId,
-						FullSnowballPrice: item.VirtualCurrencyPrices.SB,
-						FullIciclePrice: item.VirtualCurrencyPrices.IC,
-						DisplayName: item.DisplayName,
-					} as LandDetail;
-				}
-			);
+		this.registry
+			.get("CatalogItems")
+			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass === "land")
+			.forEach((item: PlayFabClientModels.CatalogItem) => {
+				this.landsMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					FullSnowballPrice: item.VirtualCurrencyPrices.SB,
+					FullIciclePrice: item.VirtualCurrencyPrices.IC,
+					DisplayName: item.DisplayName,
+				} as LandDetail;
+			});
 
-			PlayFabClient.GetUserInventory({}, (error, result) => {
-				map.totalSnowballs = result.data.VirtualCurrency.SB;
-				map.totalIcicles = result.data.VirtualCurrency.IC;
-				result.data.Inventory.filter(
-					(inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass === "land"
-				).forEach(inventory => this.landItems.add(inventory.ItemId));
+		this.registry
+			.get("Inventories")
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass === "land")
+			.forEach(inventory => this.landItems.add(inventory.ItemId));
 
-				PlayFabClient.GetStoreItems({ StoreId: "Land" }, (error, result) => {
-					result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-						this.makeLand(storeItem);
-					});
-				});
+		PlayFabClient.GetStoreItems({ StoreId: "Land" }, (error, result) => {
+			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
+				this.makeLand(storeItem);
 			});
 		});
 
-		this.snowballText = this.add.text(16, 16, `${this.totalSnowballs} x`, textStyle);
+		this.registry.events.on("changedata", this.updateData, this);
+
+		this.snowballText = this.add.text(16, 16, `${this.registry.get("SB")} x`, textStyle);
 		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(16, 56, `${this.totalIcicles} x`, textStyle);
+		this.icicleText = this.add.text(16, 56, `${this.registry.get("IC")} x`, textStyle);
 		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
 
 		this.interactiveMapObjects.push(
@@ -72,6 +67,18 @@ class MapScene extends AScene {
 					this.scene.start("Menu");
 				})
 		);
+	}
+
+	updateData(parent, key, data) {
+		if (this.scene.isActive()) {
+			if (key === "SB") {
+				this.snowballText.setText(`${data} x`);
+				this.snowballIcon.setX(36 + this.snowballText.width);
+			} else if (key === "IC") {
+				this.icicleText.setText(`${data} x`);
+				this.icicleIcon.setX(32 + this.icicleText.width);
+			}
+		}
 	}
 
 	makeLand(item: PlayFabClientModels.StoreItem) {
@@ -263,9 +270,12 @@ class MapScene extends AScene {
 						? this.showToast("Not enough snowballs", true)
 						: this.showToast("Not enough icicles", true);
 				} else {
-					currencyType === "SB"
-						? (this.totalSnowballs -= maybeDiscountPrice)
-						: (this.totalIcicles -= maybeDiscountPrice);
+					if (currencyType === "SB") {
+						this.registry.values.SB -= maybeDiscountPrice;
+					} else {
+						this.registry.values.IC -= maybeDiscountPrice;
+					}
+					this.registry.values.Inventories.push(...r.data.Items);
 					this.showToast(`${landDetail.DisplayName} successfully purchased`, false);
 					this.scene.start("Game");
 				}
@@ -274,14 +284,6 @@ class MapScene extends AScene {
 	}
 
 	update() {
-		const totalSnowballs = this.totalSnowballs | 0;
-		this.snowballText.setText(`${totalSnowballs} x`);
-		this.snowballIcon.setX(36 + this.snowballText.width);
-
-		const totalIcicles = this.totalIcicles | 0;
-		this.icicleText.setText(`${totalIcicles} x`);
-		this.icicleIcon.setX(32 + this.icicleText.width);
-
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}

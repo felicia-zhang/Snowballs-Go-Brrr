@@ -7,8 +7,6 @@ import ItemDetail from "../utils/types";
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
 	clickMultiplier: number;
-	totalIcicles: number;
-	totalSnowballs: number;
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
@@ -42,43 +40,39 @@ class GameScene extends AScene {
 		this.interactiveGameObjects = [];
 		this.interactiveCurrencyObjets = [];
 		this.makePenguin();
+		this.makeStoreContainer();
 		this.makeCurrencyContainer();
 		this.makePaymentContainer();
 
-		const scene = this;
-		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
-			result.data.Catalog.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "land").forEach(
-				(item: PlayFabClientModels.CatalogItem, i) => {
-					this.itemsMap[item.ItemId] = {
-						ItemId: item.ItemId,
-						FullPrice: item.VirtualCurrencyPrices.SB,
-						DisplayName: item.DisplayName,
-						Description: item.Description,
-						Instances: {},
-					} as ItemDetail;
-				}
-			);
-
-			this.makeStoreContainer();
-
-			PlayFabClient.GetUserInventory({}, (error, result) => {
-				scene.totalSnowballs = result.data.VirtualCurrency.SB;
-				scene.totalIcicles = result.data.VirtualCurrency.IC;
-				result.data.Inventory.filter(
-					(inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass !== "land"
-				).forEach(inventory => this.makeInventoryItem(inventory));
-
-				PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
-					if (result.data.Data["auto"] !== undefined) {
-						const lastUpdated = result.data.Data["auto"].Value;
-						const elapsed = new Date().valueOf() - Number(lastUpdated);
-						const elapsedSeconds = elapsed / 1000;
-						console.log("Elapsed seconds:", elapsedSeconds);
-						this.calculateAwaySnowballs(elapsedSeconds);
-					}
-				});
+		this.registry
+			.get("CatalogItems")
+			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "land")
+			.forEach((item: PlayFabClientModels.CatalogItem, i) => {
+				this.itemsMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					FullPrice: item.VirtualCurrencyPrices.SB,
+					DisplayName: item.DisplayName,
+					Description: item.Description,
+					Instances: {},
+				} as ItemDetail;
 			});
+
+		this.registry
+			.get("Inventories")
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass !== "land")
+			.forEach(inventory => this.makeInventoryItem(inventory));
+
+		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
+			if (result.data.Data["auto"] !== undefined) {
+				const lastUpdated = result.data.Data["auto"].Value;
+				const elapsed = new Date().valueOf() - Number(lastUpdated);
+				const elapsedSeconds = elapsed / 1000;
+				console.log("Elapsed seconds:", elapsedSeconds);
+				this.calculateAwaySnowballs(elapsedSeconds);
+			}
 		});
+
+		this.registry.events.on("changedata", this.updateData, this);
 
 		this.syncTimer = this.time.addEvent({
 			delay: this.syncDelay,
@@ -86,9 +80,9 @@ class GameScene extends AScene {
 			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
-		this.snowballText = this.add.text(16, 16, `${this.totalSnowballs} x`, textStyle);
+		this.snowballText = this.add.text(16, 16, `${this.registry.get("SB")} x`, textStyle);
 		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(16, 56, `${this.totalIcicles} x`, textStyle);
+		this.icicleText = this.add.text(16, 56, `${this.registry.get("IC")} x`, textStyle);
 		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
 
 		this.interactiveGameObjects.push(
@@ -145,20 +139,24 @@ class GameScene extends AScene {
 			Math.floor(elapsedSeconds) * numberOfIgloos * 10 +
 			Math.floor(elapsedSeconds) * numberOfVaults * 100;
 
-		this.totalSnowballs += sb;
+		this.registry.values.SB += sb;
 		this.totalAddedSnowballs += sb;
 		this.showToast(`${sb} snowballs added \nwhile player was away`, false);
 	}
 
+	updateData(parent, key, data) {
+		if (this.scene.isActive()) {
+			if (key === "SB") {
+				this.snowballText.setText(`${data} x`);
+				this.snowballIcon.setX(36 + this.snowballText.width);
+			} else if (key === "IC") {
+				this.icicleText.setText(`${data} x`);
+				this.icicleIcon.setX(32 + this.icicleText.width);
+			}
+		}
+	}
+
 	update() {
-		const totalSnowballs = this.totalSnowballs | 0;
-		this.snowballText.setText(`${totalSnowballs} x`);
-		this.snowballIcon.setX(36 + this.snowballText.width);
-
-		const totalIcicles = this.totalIcicles | 0;
-		this.icicleText.setText(`${totalIcicles} x`);
-		this.icicleIcon.setX(32 + this.icicleText.width);
-
 		if (!PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Signin");
 		}
@@ -308,7 +306,7 @@ class GameScene extends AScene {
 					const currentClickMultiplier = this.clickMultiplier;
 					this.totalManualPenguinClicks += 1;
 					this.totalAddedSnowballs += currentClickMultiplier;
-					this.totalSnowballs += currentClickMultiplier;
+					this.registry.values.SB += currentClickMultiplier;
 					const amountText = this.add
 						.text(pointer.x, pointer.y, currentClickMultiplier.toString(), textStyle)
 						.setAlpha(0)
@@ -474,7 +472,8 @@ class GameScene extends AScene {
 					if (e !== null) {
 						this.showToast("Not enough snowballs", true);
 					} else {
-						this.totalSnowballs -= maybeItemDiscountPrice;
+						this.registry.values.SB -= maybeItemDiscountPrice;
+						this.registry.values.Inventories.push(...r.data.Items);
 						this.makeInventoryItem(r.data.Items[0]);
 						this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 					}
@@ -543,8 +542,7 @@ class GameScene extends AScene {
 				},
 				(error, result) => {
 					PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
-						const ic = r.data.VirtualCurrency.IC;
-						this.totalIcicles += ic;
+						this.registry.values.IC += r.data.VirtualCurrency.IC;
 						this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
 					});
 				}
@@ -599,7 +597,7 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(150);
-				this.totalSnowballs += 1;
+				this.registry.values.SB += 1;
 				this.totalAddedSnowballs += 1;
 				this.showClickAnimation(amountText);
 			},
@@ -620,7 +618,7 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(250);
-				this.totalSnowballs += 1;
+				this.registry.values.SB += 1;
 				this.totalAddedSnowballs += 1;
 				this.showClickAnimation(amountText);
 			},
@@ -641,7 +639,7 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(350);
-				this.totalSnowballs += 10;
+				this.registry.values.SB += 10;
 				this.totalAddedSnowballs += 10;
 				this.showClickAnimation(amountText);
 			},
@@ -662,7 +660,7 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(450);
-				this.totalSnowballs += 100;
+				this.registry.values.SB += 100;
 				this.totalAddedSnowballs += 100;
 				this.showClickAnimation(amountText);
 			},
@@ -717,7 +715,7 @@ class GameScene extends AScene {
 						{
 							FunctionName: "updateStatistics",
 							FunctionParameter: {
-								current_snowballs: this.totalSnowballs,
+								current_snowballs: this.registry.values.SB,
 								total_added_snowballs: totalAdded,
 								total_manual_penguin_clicks: totalClicks,
 							},

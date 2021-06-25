@@ -11,27 +11,32 @@ class MenuScene extends AScene {
 		this.add.image(400, 300, "sky");
 		this.add.text(400, 16, "Menu", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 
-		this.add
-			.text(400, 200, "START", textStyle)
-			.setOrigin(0.5, 0.5)
-			.setAlign("center")
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.scene.start("Map");
+		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
+			this.registry.set("CatalogItems", result.data.Catalog);
+
+			PlayFabClient.GetUserInventory({}, (error, result) => {
+				this.registry.set("SB", result.data.VirtualCurrency.SB);
+				this.registry.set("IC", result.data.VirtualCurrency.IC);
+				this.registry.set("Inventories", result.data.Inventory);
+
+				this.add
+					.text(400, 200, "START", textStyle)
+					.setOrigin(0.5, 0.5)
+					.setAlign("center")
+					.setInteractive({ useHandCursor: true })
+					.on("pointerup", () => {
+						this.scene.start("Map");
+					});
+				this.add
+					.text(400, 250, "LEADERBOARD", textStyle)
+					.setOrigin(0.5, 0.5)
+					.setAlign("center")
+					.setInteractive({ useHandCursor: true })
+					.on("pointerup", () => {
+						this.scene.start("Leaderboard");
+					});
 			});
-		this.add
-			.text(400, 250, "LEADERBOARD", textStyle)
-			.setOrigin(0.5, 0.5)
-			.setAlign("center")
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.scene.start("Leaderboard");
-			});
-		this.add.text(400, 300, "SETTINGS", textStyle).setOrigin(0.5, 0.5).setAlign("center");
-		// TODO:
-		// .setInteractive({ useHandCursor: true }).on("pointerup", () => {
-		// 	this.scene.start("Settings");
-		// });
+		});
 	}
 
 	update() {
