@@ -35,6 +35,15 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller");
 	}
 
+	grantInitialItemToNewPlayer() {
+		PlayFabClient.ExecuteCloudScript(
+			{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
+			(error, result) => {
+				console.log("Granted initial items to new player", result.data.FunctionResult);
+			}
+		);
+	}
+
 	socialSignInCallback(error: PlayFabModule.IPlayFabError, result, name: string) {
 		if (result === null) {
 			console.log("Failed to sign in", error);
@@ -43,6 +52,7 @@ export class PhaserGame extends Phaser.Game {
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});
+				this.grantInitialItemToNewPlayer();
 			}
 			console.log("Signed in as", result.data.PlayFabId);
 		}
@@ -72,6 +82,7 @@ export class PhaserGame extends Phaser.Game {
 		} else {
 			handlePlayFab(true);
 			console.log(`Registered as ${result.data.PlayFabId}`);
+			this.grantInitialItemToNewPlayer();
 		}
 	}
 
