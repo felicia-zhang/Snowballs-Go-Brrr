@@ -1,5 +1,5 @@
 import { PlayFabClient } from "playfab-sdk";
-import { textStyle } from "../utils/font";
+import { fontFamily, smallFontSize, textStyle } from "../utils/font";
 import LandDetail from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
@@ -14,6 +14,7 @@ class MapScene extends AScene {
 	landOwnedContainer: Phaser.GameObjects.Container;
 	landNotOwnedContainer: Phaser.GameObjects.Container;
 	interactiveMapObjects: Phaser.GameObjects.GameObject[];
+	storeId: string;
 
 	constructor() {
 		super("Map");
@@ -46,6 +47,7 @@ class MapScene extends AScene {
 			.forEach(inventory => this.landItems.add(inventory.ItemId));
 
 		PlayFabClient.GetStoreItems({ StoreId: "Land" }, (error, result) => {
+			this.storeId = result.data.StoreId;
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeLand(storeItem);
 			});
@@ -119,13 +121,13 @@ class MapScene extends AScene {
 
 	makeLandOwnedContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 300, 15, 0x16252e));
+		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
-		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
-		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const buttonText = this.add.text(0, 100, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
+		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const buttonText = this.add.text(0, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 100, 0, 0, 10, 0xc26355))
+			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
 		const details = this.add.container(140, 0, [lightBg, title, button, buttonText]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
@@ -152,20 +154,20 @@ class MapScene extends AScene {
 
 	makeLandNotOwnedContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 300, 15, 0x16252e));
-		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
+		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
 		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
-		const snowballButtonText = this.add.text(-15, 50, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballButton = this.add
-			.existing(new RoundRectangle(this, 0, 50, 0, 0, 10, 0xc26355))
+			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
-		const snowballIcon = this.add.image(0, 50, "snowball").setScale(0.15);
-		const icicleButtonText = this.add.text(-15, 100, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const snowballIcon = this.add.image(0, 70, "snowball").setScale(0.15);
+		const icicleButtonText = this.add.text(-15, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const icicleButton = this.add
-			.existing(new RoundRectangle(this, 0, 100, 0, 0, 10, 0xc26355))
+			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
-		const icicleIcon = this.add.image(0, 100, "icicle").setScale(0.15);
+		const icicleIcon = this.add.image(0, 120, "icicle").setScale(0.15);
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,
@@ -175,6 +177,7 @@ class MapScene extends AScene {
 			icicleButton,
 			icicleButtonText,
 			icicleIcon,
+			this.add.container(0, 0, []),
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
 		const closeButton = this.add
@@ -191,6 +194,8 @@ class MapScene extends AScene {
 						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						snowballButton.removeAllListeners();
 						icicleButton.removeAllListeners();
+						const discounts = details.getAt(8) as Phaser.GameObjects.Container;
+						discounts.removeAll(true);
 					},
 					callbackScope: this,
 				});
@@ -259,11 +264,55 @@ class MapScene extends AScene {
 			alpha: 1,
 			callbackScope: this,
 		});
+
+		if (this.storeId === "LandWithDiscount") {
+			snowballButton.setY(55);
+			snowballButtonText.setY(55);
+			snowballIcon.setY(55);
+			const fullSnowballPriceText = this.add
+				.text(-10, 20, `${landDetail.FullSnowballPrice} x`, {
+					fontSize: smallFontSize,
+					fontFamily: fontFamily,
+				})
+				.setAlign("center")
+				.setOrigin(0.5, 0.5);
+			const fullIciclePriceText = this.add
+				.text(-10, 90, `${landDetail.FullIciclePrice} x`, {
+					fontSize: smallFontSize,
+					fontFamily: fontFamily,
+				})
+				.setAlign("center")
+				.setOrigin(0.5, 0.5);
+			const oldSnowballIcon = this.add
+				.image((fullSnowballPriceText.width + 8) / 2, 20, "snowball")
+				.setScale(0.09);
+			const oldIcicleIcon = this.add.image((fullIciclePriceText.width + 8) / 2, 90, "icicle").setScale(0.09);
+			const snowballLine = this.add
+				.line(0, 10, 0, 10, 35 + fullSnowballPriceText.width, 10, 0xffffff)
+				.setOrigin(0.5, 0.5);
+			const icicleLine = this.add
+				.line(0, 45, 0, 45, 35 + fullIciclePriceText.width, 45, 0xffffff)
+				.setOrigin(0.5, 0.5);
+			const discounts = details.getAt(8) as Phaser.GameObjects.Container;
+			discounts.add([
+				fullSnowballPriceText,
+				fullIciclePriceText,
+				oldSnowballIcon,
+				oldIcicleIcon,
+				snowballLine,
+				icicleLine,
+			]);
+		}
 	}
 
 	purchaseLand(landDetail: LandDetail, maybeDiscountPrice: number, currencyType: string) {
 		PlayFabClient.PurchaseItem(
-			{ ItemId: landDetail.ItemId, Price: maybeDiscountPrice, VirtualCurrency: currencyType },
+			{
+				ItemId: landDetail.ItemId,
+				Price: maybeDiscountPrice,
+				StoreId: this.storeId,
+				VirtualCurrency: currencyType,
+			},
 			(e, r) => {
 				if (e !== null) {
 					currencyType === "SB"
