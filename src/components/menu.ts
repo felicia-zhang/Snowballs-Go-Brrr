@@ -12,12 +12,12 @@ class MenuScene extends AScene {
 		this.add.text(400, 16, "Menu", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 
 		this.add
-			.text(400, 200, "GAME", textStyle)
+			.text(400, 200, "START", textStyle)
 			.setOrigin(0.5, 0.5)
 			.setAlign("center")
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				this.scene.start("Game");
+				this.scene.start("Map");
 			});
 		this.add
 			.text(400, 250, "LEADERBOARD", textStyle)

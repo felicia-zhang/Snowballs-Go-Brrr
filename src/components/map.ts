@@ -47,6 +47,14 @@ class MapScene extends AScene {
 				});
 			});
 		});
+
+		this.add
+			.text(16, 584, "MENU", textStyle)
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				this.scene.start("Menu");
+			});
 	}
 
 	makeLand(item: PlayFabClientModels.StoreItem) {
@@ -75,6 +83,7 @@ class MapScene extends AScene {
 	}
 
 	makeLandOwnedContainer() {
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 300, 15, 0x16252e));
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
@@ -84,7 +93,7 @@ class MapScene extends AScene {
 			.existing(new RoundRectangle(this, 0, 100, 0, 0, 10, 0xc26355))
 			.setInteractive({ useHandCursor: true });
 		const details = this.add.container(140, 0, [lightBg, title, button, buttonText]);
-		const popup = this.add.container(400, 300, [bg, image, details]).setDepth(30).setAlpha(0);
+		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(30).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -140, "close")
 			.setScale(0.35)
@@ -109,6 +118,7 @@ class MapScene extends AScene {
 	}
 
 	makeLandNotOwnedContainer() {
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 300, 15, 0x16252e));
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 260, 15, 0x2e5767));
 		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
@@ -133,7 +143,7 @@ class MapScene extends AScene {
 			icicleButtonText,
 			icicleIcon,
 		]);
-		const popup = this.add.container(400, 300, [bg, image, details]).setDepth(30).setAlpha(0);
+		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(30).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -140, "close")
 			.setScale(0.35)
@@ -159,7 +169,7 @@ class MapScene extends AScene {
 
 	showLandOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
 		const landDetail: LandDetail = this.landsMap[item.ItemId];
-		const details = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Container;
+		const details = this.landOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
 		const buttonText = details.getAt(3) as Phaser.GameObjects.Text;
@@ -170,7 +180,7 @@ class MapScene extends AScene {
 		button.on("pointerup", () => {
 			this.scene.start("Game");
 		});
-		const image = this.landOwnedContainer.getAt(1) as Phaser.GameObjects.Image;
+		const image = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		this.add.tween({
 			targets: [this.landOwnedContainer],
@@ -183,7 +193,7 @@ class MapScene extends AScene {
 
 	showLandNotOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
 		const landDetail: LandDetail = this.landsMap[item.ItemId];
-		const details = this.landNotOwnedContainer.getAt(2) as Phaser.GameObjects.Container;
+		const details = this.landNotOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
 		const snowballButtonText = details.getAt(3) as Phaser.GameObjects.Text;
@@ -206,7 +216,7 @@ class MapScene extends AScene {
 		});
 		const icicleIcon = details.getAt(7) as Phaser.GameObjects.Image;
 		icicleIcon.setX((icicleButtonText.width + 5) / 2);
-		const image = this.landNotOwnedContainer.getAt(1) as Phaser.GameObjects.Image;
+		const image = this.landNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		this.add.tween({
 			targets: [this.landNotOwnedContainer],
