@@ -65,7 +65,9 @@ class GameScene extends AScene {
 				const inventories: PlayFabClientModels.ItemInstance[] = result.data.Inventory;
 				scene.totalSnowballs = result.data.VirtualCurrency.SB;
 				scene.totalIcicles = result.data.VirtualCurrency.IC;
-				inventories.forEach(inventory => this.makeInventoryItem(inventory));
+				inventories
+					.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass !== "land")
+					.forEach(inventory => this.makeInventoryItem(inventory));
 
 				PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
 					if (result.data.Data["auto"] !== undefined) {
