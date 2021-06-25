@@ -9,6 +9,7 @@ class MapScene extends AScene {
 	landItems: Set<string>;
 	landOwnedContainer: Phaser.GameObjects.Container;
 	landNotOwnedContainer: Phaser.GameObjects.Container;
+	interactiveMapObjects: Phaser.GameObjects.GameObject[];
 
 	constructor() {
 		super("Map");
@@ -18,6 +19,7 @@ class MapScene extends AScene {
 		this.add.image(400, 300, "sky");
 		this.landsMap = {};
 		this.landItems = new Set();
+		this.interactiveMapObjects = [];
 		this.add.text(400, 16, "Map", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 		this.makeLandOwnedContainer();
 		this.makeLandNotOwnedContainer();
@@ -48,13 +50,15 @@ class MapScene extends AScene {
 			});
 		});
 
-		this.add
-			.text(16, 584, "MENU", textStyle)
-			.setOrigin(0, 1)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.scene.start("Menu");
-			});
+		this.interactiveMapObjects.push(
+			this.add
+				.text(16, 584, "MENU", textStyle)
+				.setOrigin(0, 1)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerup", () => {
+					this.scene.start("Menu");
+				})
+		);
 	}
 
 	makeLand(item: PlayFabClientModels.StoreItem) {
@@ -74,17 +78,20 @@ class MapScene extends AScene {
 			x = 600;
 			y = 300;
 		}
-		this.add
-			.image(x, y, imageKey)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				if (this.landItems.has(item.ItemId)) {
-					this.showLandOwnedContainer(item, imageKey);
-				} else {
-					this.showLandNotOwnedContainer(item, imageKey);
-				}
-			});
+		this.interactiveMapObjects.push(
+			this.add
+				.image(x, y, imageKey)
+				.setScale(0.5)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerup", () => {
+					this.interactiveMapObjects.forEach(object => object.disableInteractive());
+					if (this.landItems.has(item.ItemId)) {
+						this.showLandOwnedContainer(item, imageKey);
+					} else {
+						this.showLandNotOwnedContainer(item, imageKey);
+					}
+				})
+		);
 		if (!this.landItems.has(item.ItemId)) {
 			this.add.image(x, y, "lock").setScale(0.5);
 		}
@@ -113,9 +120,7 @@ class MapScene extends AScene {
 					duration: 100,
 					alpha: 0,
 					onComplete: () => {
-						// this.interactiveCurrencyObjets.forEach(object =>
-						// 	object.setInteractive({ useHandCursor: true })
-						// );
+						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						// button.removeAllListeners();
 					},
 					callbackScope: this,
@@ -163,9 +168,7 @@ class MapScene extends AScene {
 					duration: 100,
 					alpha: 0,
 					onComplete: () => {
-						// this.interactiveCurrencyObjets.forEach(object =>
-						// 	object.setInteractive({ useHandCursor: true })
-						// );
+						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						// button.removeAllListeners();
 					},
 					callbackScope: this,
