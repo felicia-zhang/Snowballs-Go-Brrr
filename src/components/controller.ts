@@ -19,9 +19,14 @@ import lock from "../assets/lock.png";
 import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
 import penguin3 from "../assets/penguin3.png";
-import banner from "../assets/banner.png";
+import iceCube from "../assets/icecube.png";
+import honeyCube from "../assets/honeycube.png";
+import magmaCube from "../assets/magmacube.png";
+import oceanCube from "../assets/oceancube.png";
+import rainCube from "../assets/raincube.png";
 import MenuScene from "./menu";
 import AScene from "./AScene";
+import MapScene from "./map";
 
 class Controller extends AScene {
 	constructor() {
@@ -46,7 +51,11 @@ class Controller extends AScene {
 		this.load.image("penguin1", penguin1);
 		this.load.image("penguin2", penguin2);
 		this.load.image("penguin3", penguin3);
-		this.load.image("banner", banner);
+		this.load.image("iceCube", iceCube);
+		this.load.image("honeyCube", honeyCube);
+		this.load.image("magmaCube", magmaCube);
+		this.load.image("oceanCube", oceanCube);
+		this.load.image("rainCube", rainCube);
 	}
 
 	create() {
@@ -55,6 +64,7 @@ class Controller extends AScene {
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Menu", MenuScene);
 		this.scene.add("Game", GameScene);
+		this.scene.add("Map", MapScene);
 
 		if (PlayFabClient.IsClientLoggedIn()) {
 			this.scene.start("Menu");
