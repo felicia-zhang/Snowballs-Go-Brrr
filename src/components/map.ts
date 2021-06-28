@@ -235,18 +235,14 @@ class MapScene extends AScene {
 		});
 		const image = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
-		const counter = {};
+		const counter = { Mittens: 0, Bonfire: 0, Snowman: 0, "Igloo Factory": 0, "Arctic Vault": 0 };
 		this.registry
 			.get("Inventories")
 			.filter(
 				(inventory: PlayFabClientModels.ItemInstance) =>
 					inventory.CustomData !== undefined && inventory.CustomData.CubeId === landDetail.ItemId
 			)
-			.forEach((inventory: PlayFabClientModels.ItemInstance) =>
-				inventory.DisplayName in counter
-					? (counter[inventory.DisplayName] += 1)
-					: (counter[inventory.DisplayName] = 1)
-			);
+			.forEach((inventory: PlayFabClientModels.ItemInstance) => (counter[inventory.DisplayName] += 1));
 		const counterText = details.getAt(4) as Phaser.GameObjects.Container;
 		Object.keys(counter).forEach((name: string, i: number) => {
 			const text = this.add
