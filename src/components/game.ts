@@ -67,9 +67,9 @@ class GameScene extends AScene {
 			)
 			.forEach(inventory => this.makeInventoryItem(inventory));
 
-		PlayFabClient.GetUserData({ Keys: ["auto"] }, (error, result) => {
-			if (result.data.Data["auto"] !== undefined) {
-				const lastUpdated = result.data.Data["auto"].Value;
+		PlayFabClient.GetUserData({ Keys: [this.biomeDetail.ItemId] }, (error, result) => {
+			if (result.data.Data[this.biomeDetail.ItemId] !== undefined) {
+				const lastUpdated = result.data.Data[this.biomeDetail.ItemId].Value;
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
 				console.log("Elapsed seconds:", elapsedSeconds);
@@ -695,7 +695,10 @@ class GameScene extends AScene {
 	}
 
 	sync(func: () => any) {
-		PlayFabClient.UpdateUserData({ Data: { auto: new Date().valueOf().toString() } }, () => {});
+		PlayFabClient.UpdateUserData(
+			{ Data: { [this.biomeDetail.ItemId]: new Date().valueOf().toString() } },
+			() => {}
+		);
 
 		const totalAdded = this.totalAddedSnowballs;
 		const totalClicks = this.totalManualPenguinClicks;
