@@ -11,6 +11,7 @@ interface BiomeDetail {
 	FullSnowballPrice: number;
 	FullIciclePrice: number;
 	DisplayName: string;
+	Description: string;
 }
 
 interface ItemCounter {

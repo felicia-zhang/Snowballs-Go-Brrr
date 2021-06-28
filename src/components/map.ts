@@ -4,6 +4,8 @@ import { BiomeDetail, ItemCounter } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 
+const wrap = (s: string) => s.replace(/(?![^\n]{1,21}$)([^\n]{1,21})\s/g, "$1\n");
+
 class MapScene extends AScene {
 	biomeMap: { [key: number]: BiomeDetail };
 	biomeItems: { [key: number]: ItemCounter };
@@ -38,6 +40,7 @@ class MapScene extends AScene {
 					FullSnowballPrice: item.VirtualCurrencyPrices.SB,
 					FullIciclePrice: item.VirtualCurrencyPrices.IC,
 					DisplayName: item.DisplayName,
+					Description: item.Description,
 				} as BiomeDetail;
 			});
 
@@ -140,6 +143,7 @@ class MapScene extends AScene {
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
 		const buttonText = this.add.text(0, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const button = this.add
 			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xc26355))
@@ -149,7 +153,8 @@ class MapScene extends AScene {
 			title,
 			button,
 			buttonText,
-			this.add.container(0, -100, []),
+			this.add.container(-84, -15, []),
+			description,
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
 		const closeButton = this.add
@@ -180,6 +185,7 @@ class MapScene extends AScene {
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
 		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballButton = this.add
@@ -201,6 +207,7 @@ class MapScene extends AScene {
 			icicleButtonText,
 			icicleIcon,
 			this.add.container(0, 0, []),
+			description,
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
 		const closeButton = this.add
@@ -242,12 +249,14 @@ class MapScene extends AScene {
 		});
 		const image = this.biomeOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
+		const descriptionText = details.getAt(5) as Phaser.GameObjects.Text;
+		descriptionText.setText(wrap(biomeDetail.Description));
 		const counterText = details.getAt(4) as Phaser.GameObjects.Container;
 		Object.keys(this.biomeItems[biome.ItemId]).forEach((name: string, i: number) => {
 			const text = this.add
-				.text(0, 30 * i, `${name}: ${this.biomeItems[biome.ItemId][name]}`, textStyle)
+				.text(0, 20 * i, `${name}: ${this.biomeItems[biome.ItemId][name]}`, textStyle)
 				.setAlign("left")
-				.setOrigin(0.5, 0);
+				.setOrigin(0, 0);
 			counterText.add(text);
 		});
 		this.add.tween({
@@ -288,6 +297,8 @@ class MapScene extends AScene {
 		icicleIcon.setX((icicleButtonText.width + 5) / 2);
 		const image = this.biomeNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
+		const descriptionText = details.getAt(9) as Phaser.GameObjects.Text;
+		descriptionText.setText(wrap(biomeDetail.Description));
 		this.add.tween({
 			targets: [this.biomeNotOwnedContainer],
 			ease: "Sine.easeIn",
