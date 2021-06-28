@@ -19,11 +19,11 @@ import lock from "../assets/lock.png";
 import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
 import penguin3 from "../assets/penguin3.png";
-import iceCube from "../assets/icecube.png";
-import honeyCube from "../assets/honeycube.png";
-import magmaCube from "../assets/magmacube.png";
-import oceanCube from "../assets/oceancube.png";
-import rainCube from "../assets/raincube.png";
+import icebiome from "../assets/icebiome.png";
+import savannabiome from "../assets/savannabiome.png";
+import magmabiome from "../assets/magmabiome.png";
+import marinebiome from "../assets/marinebiome.png";
+import tropicalbiome from "../assets/tropicalbiome.png";
 import MenuScene from "./menu";
 import AScene from "./AScene";
 import MapScene from "./map";
@@ -51,11 +51,11 @@ class Controller extends AScene {
 		this.load.image("penguin1", penguin1);
 		this.load.image("penguin2", penguin2);
 		this.load.image("penguin3", penguin3);
-		this.load.image("iceCube", iceCube);
-		this.load.image("honeyCube", honeyCube);
-		this.load.image("magmaCube", magmaCube);
-		this.load.image("oceanCube", oceanCube);
-		this.load.image("rainCube", rainCube);
+		this.load.image("icebiome", icebiome);
+		this.load.image("savannabiome", savannabiome);
+		this.load.image("magmabiome", magmabiome);
+		this.load.image("marinebiome", marinebiome);
+		this.load.image("tropicalbiome", tropicalbiome);
 	}
 
 	create() {

@@ -1,18 +1,18 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily, smallFontSize, textStyle } from "../utils/font";
-import LandDetail from "../utils/types";
+import BiomeDetail from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 
 class MapScene extends AScene {
-	landsMap: { [key: number]: LandDetail };
-	landItems: Set<string>;
+	biomeMap: { [key: number]: BiomeDetail };
+	biomeItems: { [key: number]: { Mittens: 0; Bonfire: 0; Snowman: 0; "Igloo Factory": 0; "Arctic Vault": 0 } };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
 	icicleText: Phaser.GameObjects.Text;
 	icicleIcon: Phaser.GameObjects.Image;
-	landOwnedContainer: Phaser.GameObjects.Container;
-	landNotOwnedContainer: Phaser.GameObjects.Container;
+	biomeOwnedContainer: Phaser.GameObjects.Container;
+	biomeNotOwnedContainer: Phaser.GameObjects.Container;
 	interactiveMapObjects: Phaser.GameObjects.GameObject[];
 	storeId: string;
 
@@ -22,34 +22,49 @@ class MapScene extends AScene {
 
 	create() {
 		this.add.image(400, 300, "sky");
-		this.landsMap = {};
-		this.landItems = new Set();
+		this.biomeMap = {};
+		this.biomeItems = {};
 		this.interactiveMapObjects = [];
 		this.add.text(400, 16, "Map", textStyle).setOrigin(0.5, 0.5).setAlign("center");
-		this.makeLandOwnedContainer();
-		this.makeLandNotOwnedContainer();
+		this.makeBiomeOwnedContainer();
+		this.makeBiomeNotOwnedContainer();
 
 		this.registry
 			.get("CatalogItems")
-			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass === "land")
+			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass === "biome")
 			.forEach((item: PlayFabClientModels.CatalogItem) => {
-				this.landsMap[item.ItemId] = {
+				this.biomeMap[item.ItemId] = {
 					ItemId: item.ItemId,
 					FullSnowballPrice: item.VirtualCurrencyPrices.SB,
 					FullIciclePrice: item.VirtualCurrencyPrices.IC,
 					DisplayName: item.DisplayName,
-				} as LandDetail;
+				} as BiomeDetail;
 			});
 
-		this.registry
-			.get("Inventories")
-			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass === "land")
-			.forEach(inventory => this.landItems.add(inventory.ItemId));
+		const inventories: PlayFabClientModels.ItemInstance[] = this.registry.get("Inventories");
+		inventories
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass === "biome")
+			.forEach(
+				biome =>
+					(this.biomeItems[biome.ItemId] = {
+						Mittens: 0,
+						Bonfire: 0,
+						Snowman: 0,
+						"Igloo Factory": 0,
+						"Arctic Vault": 0,
+					})
+			);
+		inventories
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.CustomData !== undefined)
+			.forEach(
+				(inventory: PlayFabClientModels.ItemInstance) =>
+					(this.biomeItems[inventory.CustomData.BiomeId][inventory.DisplayName] += 1)
+			);
 
-		PlayFabClient.GetStoreItems({ StoreId: "Land" }, (error, result) => {
+		PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
 			this.storeId = result.data.StoreId;
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeLand(storeItem);
+				this.makeBiome(storeItem);
 			});
 		});
 
@@ -83,28 +98,28 @@ class MapScene extends AScene {
 		}
 	}
 
-	makeLand(item: PlayFabClientModels.StoreItem) {
+	makeBiome(biome: PlayFabClientModels.StoreItem) {
 		let imageKey: string;
 		let x: number;
 		let y: number;
-		if (item.ItemId === "5") {
-			imageKey = "iceCube";
+		if (biome.ItemId === "5") {
+			imageKey = "icebiome";
 			x = 200;
 			y = 200;
-		} else if (item.ItemId === "6") {
-			imageKey = "magmaCube";
+		} else if (biome.ItemId === "6") {
+			imageKey = "magmabiome";
 			x = 400;
 			y = 200;
-		} else if (item.ItemId === "7") {
-			imageKey = "honeyCube";
+		} else if (biome.ItemId === "7") {
+			imageKey = "savannabiome";
 			x = 600;
 			y = 200;
-		} else if (item.ItemId === "8") {
-			imageKey = "oceanCube";
+		} else if (biome.ItemId === "8") {
+			imageKey = "marinebiome";
 			x = 200;
 			y = 400;
-		} else if (item.ItemId === "9") {
-			imageKey = "rainCube";
+		} else if (biome.ItemId === "9") {
+			imageKey = "tropicalbiome";
 			x = 400;
 			y = 400;
 		}
@@ -115,22 +130,22 @@ class MapScene extends AScene {
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.interactiveMapObjects.forEach(object => object.disableInteractive());
-					if (this.landItems.has(item.ItemId)) {
-						this.showLandOwnedContainer(item, imageKey);
+					if (biome.ItemId in this.biomeItems) {
+						this.showBiomeOwnedContainer(biome, imageKey);
 					} else {
-						this.showLandNotOwnedContainer(item, imageKey);
+						this.showBiomeNotOwnedContainer(biome, imageKey);
 					}
 				})
 		);
-		if (!this.landItems.has(item.ItemId)) {
+		if (!(biome.ItemId in this.biomeItems)) {
 			this.add.image(x, y, "lock").setScale(0.5);
 		}
 	}
 
-	makeLandOwnedContainer() {
+	makeBiomeOwnedContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
-		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
+		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const buttonText = this.add.text(0, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
@@ -151,7 +166,7 @@ class MapScene extends AScene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.add.tween({
-					targets: [this.landOwnedContainer],
+					targets: [this.biomeOwnedContainer],
 					ease: "Sine.easeIn",
 					duration: 100,
 					alpha: 0,
@@ -165,15 +180,15 @@ class MapScene extends AScene {
 				});
 			});
 		popup.add(closeButton);
-		this.landOwnedContainer = popup;
+		this.biomeOwnedContainer = popup;
 	}
 
-	makeLandNotOwnedContainer() {
+	makeBiomeNotOwnedContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
+		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
 		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballButton = this.add
 			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, 0xc26355))
@@ -202,7 +217,7 @@ class MapScene extends AScene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				this.add.tween({
-					targets: [this.landNotOwnedContainer],
+					targets: [this.biomeNotOwnedContainer],
 					ease: "Sine.easeIn",
 					duration: 100,
 					alpha: 0,
@@ -217,42 +232,34 @@ class MapScene extends AScene {
 				});
 			});
 		popup.add(closeButton);
-		this.landNotOwnedContainer = popup;
+		this.biomeNotOwnedContainer = popup;
 	}
 
-	showLandOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
-		const landDetail: LandDetail = this.landsMap[item.ItemId];
-		const details = this.landOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
+	showBiomeOwnedContainer(biome: PlayFabClientModels.StoreItem, imageKey: string) {
+		const biomeDetail: BiomeDetail = this.biomeMap[biome.ItemId];
+		const details = this.biomeOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
-		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
+		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const buttonText = details.getAt(3) as Phaser.GameObjects.Text;
 		buttonText.setText("VISIT");
 		const button = details.getAt(2) as RoundRectangle;
 		button.width = buttonText.width + 16;
 		button.height = buttonText.height + 16;
 		button.on("pointerup", () => {
-			this.scene.start("Game", { landDetail: landDetail });
+			this.scene.start("Game", { biomeDetail: biomeDetail });
 		});
-		const image = this.landOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
+		const image = this.biomeOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
-		const counter = { Mittens: 0, Bonfire: 0, Snowman: 0, "Igloo Factory": 0, "Arctic Vault": 0 };
-		this.registry
-			.get("Inventories")
-			.filter(
-				(inventory: PlayFabClientModels.ItemInstance) =>
-					inventory.CustomData !== undefined && inventory.CustomData.CubeId === landDetail.ItemId
-			)
-			.forEach((inventory: PlayFabClientModels.ItemInstance) => (counter[inventory.DisplayName] += 1));
 		const counterText = details.getAt(4) as Phaser.GameObjects.Container;
-		Object.keys(counter).forEach((name: string, i: number) => {
+		Object.keys(this.biomeItems[biome.ItemId]).forEach((name: string, i: number) => {
 			const text = this.add
-				.text(0, 30 * i, `${name}: ${counter[name]}`, textStyle)
+				.text(0, 30 * i, `${name}: ${this.biomeItems[biome.ItemId][name]}`, textStyle)
 				.setAlign("left")
 				.setOrigin(0.5, 0);
 			counterText.add(text);
 		});
 		this.add.tween({
-			targets: [this.landOwnedContainer],
+			targets: [this.biomeOwnedContainer],
 			ease: "Sine.easeIn",
 			duration: 500,
 			alpha: 1,
@@ -260,20 +267,20 @@ class MapScene extends AScene {
 		});
 	}
 
-	showLandNotOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
-		const landDetail: LandDetail = this.landsMap[item.ItemId];
+	showBiomeNotOwnedContainer(item: PlayFabClientModels.StoreItem, imageKey: string) {
+		const biomeDetail: BiomeDetail = this.biomeMap[item.ItemId];
 		const maybeDiscountSnowballPrice = item.VirtualCurrencyPrices.SB;
 		const maybeDiscountIciclePrice = item.VirtualCurrencyPrices.IC;
-		const details = this.landNotOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
+		const details = this.biomeNotOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
-		title.setText(`${landDetail.DisplayName.toUpperCase()}`);
+		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const snowballButtonText = details.getAt(3) as Phaser.GameObjects.Text;
 		snowballButtonText.setText(`${maybeDiscountSnowballPrice} x`);
 		const snowballButton = details.getAt(2) as RoundRectangle;
 		snowballButton.width = snowballButtonText.width + 50;
 		snowballButton.height = snowballButtonText.height + 16;
 		snowballButton.on("pointerup", () => {
-			this.purchaseLand(landDetail, maybeDiscountSnowballPrice, "SB");
+			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB");
 		});
 		const snowballIcon = details.getAt(4) as Phaser.GameObjects.Image;
 		snowballIcon.setX((snowballButtonText.width + 10) / 2);
@@ -283,33 +290,33 @@ class MapScene extends AScene {
 		icicleButton.width = icicleButtonText.width + 50;
 		icicleButton.height = icicleButtonText.height + 16;
 		icicleButton.on("pointerup", () => {
-			this.purchaseLand(landDetail, maybeDiscountIciclePrice, "IC");
+			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC");
 		});
 		const icicleIcon = details.getAt(7) as Phaser.GameObjects.Image;
 		icicleIcon.setX((icicleButtonText.width + 5) / 2);
-		const image = this.landNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
+		const image = this.biomeNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		this.add.tween({
-			targets: [this.landNotOwnedContainer],
+			targets: [this.biomeNotOwnedContainer],
 			ease: "Sine.easeIn",
 			duration: 500,
 			alpha: 1,
 			callbackScope: this,
 		});
 
-		if (this.storeId === "LandWithDiscount") {
+		if (this.storeId === "BiomeWithDiscount") {
 			snowballButton.setY(55);
 			snowballButtonText.setY(55);
 			snowballIcon.setY(55);
 			const fullSnowballPriceText = this.add
-				.text(-10, 20, `${landDetail.FullSnowballPrice} x`, {
+				.text(-10, 20, `${biomeDetail.FullSnowballPrice} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
 				.setAlign("center")
 				.setOrigin(0.5, 0.5);
 			const fullIciclePriceText = this.add
-				.text(-10, 90, `${landDetail.FullIciclePrice} x`, {
+				.text(-10, 90, `${biomeDetail.FullIciclePrice} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
@@ -337,10 +344,10 @@ class MapScene extends AScene {
 		}
 	}
 
-	purchaseLand(landDetail: LandDetail, maybeDiscountPrice: number, currencyType: string) {
+	purchaseBiome(biomeDetail: BiomeDetail, maybeDiscountPrice: number, currencyType: string) {
 		PlayFabClient.PurchaseItem(
 			{
-				ItemId: landDetail.ItemId,
+				ItemId: biomeDetail.ItemId,
 				Price: maybeDiscountPrice,
 				StoreId: this.storeId,
 				VirtualCurrency: currencyType,
@@ -355,8 +362,8 @@ class MapScene extends AScene {
 						? (this.registry.values.SB -= maybeDiscountPrice)
 						: (this.registry.values.IC -= maybeDiscountPrice);
 					this.registry.values.Inventories.push(...r.data.Items);
-					this.showToast(`${landDetail.DisplayName} successfully purchased`, false);
-					this.scene.start("Game", { landDetail: landDetail });
+					this.showToast(`${biomeDetail.DisplayName} successfully purchased`, false);
+					this.scene.start("Game", { biomeDetail: biomeDetail });
 				}
 			}
 		);

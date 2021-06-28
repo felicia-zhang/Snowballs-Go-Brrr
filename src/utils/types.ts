@@ -6,7 +6,7 @@ export default interface ItemDetail {
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
 }
 
-export default interface LandDetail {
+export default interface BiomeDetail {
 	ItemId: string;
 	FullSnowballPrice: number;
 	FullIciclePrice: number;

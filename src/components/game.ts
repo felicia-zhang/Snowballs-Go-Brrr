@@ -3,11 +3,11 @@ import { fontFamily, smallFontSize, textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import ItemDetail from "../utils/types";
-import LandDetail from "../utils/types";
+import BiomeDetail from "../utils/types";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
-	landDetail: LandDetail;
+	biomeDetail: BiomeDetail;
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
@@ -30,9 +30,9 @@ class GameScene extends AScene {
 		super("Game");
 	}
 
-	create({ landDetail }) {
+	create({ biomeDetail }) {
 		this.add.image(400, 300, "sky");
-		this.landDetail = landDetail;
+		this.biomeDetail = biomeDetail;
 		this.clickMultiplier = 1;
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
@@ -49,7 +49,7 @@ class GameScene extends AScene {
 
 		this.registry
 			.get("CatalogItems")
-			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "land")
+			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "biome")
 			.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
@@ -64,7 +64,7 @@ class GameScene extends AScene {
 			.get("Inventories")
 			.filter(
 				(inventory: PlayFabClientModels.ItemInstance) =>
-					inventory.CustomData !== undefined && inventory.CustomData.CubeId === this.landDetail.ItemId
+					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeDetail.ItemId
 			)
 			.forEach(inventory => this.makeInventoryItem(inventory));
 
@@ -91,7 +91,7 @@ class GameScene extends AScene {
 		this.icicleText = this.add.text(16, 56, `${this.registry.get("IC")} x`, textStyle);
 		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
 
-		this.add.text(400, 16, this.landDetail.DisplayName, textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		this.add.text(400, 16, this.biomeDetail.DisplayName, textStyle).setAlign("center").setOrigin(0.5, 0.5);
 
 		this.interactiveGameObjects.push(
 			this.add
@@ -476,7 +476,7 @@ class GameScene extends AScene {
 								FunctionName: "updateCustomData",
 								FunctionParameter: {
 									instanceId: r.data.Items[0].ItemInstanceId,
-									cubeId: this.landDetail.ItemId,
+									biomeId: this.biomeDetail.ItemId,
 								},
 							},
 							(error, result) => {
