@@ -31,7 +31,7 @@ class App extends React.PureComponent<any, IState> {
 	componentDidMount() {
 		this.setState({
 			game: new PhaserGame(),
-			isSignedIn: PlayFabClient.IsClientLoggedIn(),
+			isSignedIn: false,
 		});
 	}
 
@@ -39,11 +39,11 @@ class App extends React.PureComponent<any, IState> {
 		this.state.game.destroy(true);
 	}
 
-	finishSignIn = (success: boolean) => {
+	finishSignIn = () => {
 		this.setState({
-			isSignedIn: success,
+			isSignedIn: true,
 		});
-		this.state.game.registry.set("FinishedSignIn", success);
+		this.state.game.registry.set("FinishedSignIn", true);
 	};
 
 	signInWithPlayFab = () => {

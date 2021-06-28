@@ -112,7 +112,7 @@ class GameScene extends AScene {
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.scene.start("Menu");
+					this.sync(() => this.scene.start("Menu"));
 				})
 		);
 
@@ -156,7 +156,7 @@ class GameScene extends AScene {
 	}
 
 	update() {
-		if (!PlayFabClient.IsClientLoggedIn()) {
+		if (!this.registry.has("FinishedSignIn")) {
 			this.scene.start("Signin");
 		}
 	}

@@ -11,7 +11,7 @@ class SigninScene extends AScene {
 	}
 
 	update() {
-		if (this.registry.has("FinishedSignIn") && this.registry.get("FinishedSignIn")) {
+		if (this.registry.has("FinishedSignIn")) {
 			this.scene.start("Menu");
 		}
 	}

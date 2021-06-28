@@ -373,7 +373,7 @@ class MapScene extends AScene {
 	}
 
 	update() {
-		if (!PlayFabClient.IsClientLoggedIn()) {
+		if (!this.registry.has("FinishedSignIn")) {
 			this.scene.start("Signin");
 		}
 	}

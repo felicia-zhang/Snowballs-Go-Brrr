@@ -35,22 +35,17 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller");
 	}
 
-	grantInitialItemToNewPlayer(finishSignIn: (success: boolean) => void) {
+	grantInitialItemToNewPlayer(finishSignIn: () => void) {
 		PlayFabClient.ExecuteCloudScript(
 			{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
 			(error, result) => {
 				console.log("Granted initial items to new player", result.data.FunctionResult);
-				finishSignIn(true);
+				finishSignIn();
 			}
 		);
 	}
 
-	socialSignInCallback(
-		error: PlayFabModule.IPlayFabError,
-		result,
-		name: string,
-		finishSignIn: (success: boolean) => void
-	) {
+	socialSignInCallback(error: PlayFabModule.IPlayFabError, result, name: string, finishSignIn: () => void) {
 		if (result === null) {
 			console.log("Failed to sign in", error);
 		} else {
@@ -60,13 +55,13 @@ export class PhaserGame extends Phaser.Game {
 				});
 				this.grantInitialItemToNewPlayer(finishSignIn);
 			} else {
-				finishSignIn(true);
+				finishSignIn();
 			}
 			console.log("Signed in as", result.data.PlayFabId);
 		}
 	}
 
-	playfabSignInCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: (success: boolean) => void) {
+	playfabSignInCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: () => void) {
 		if (result === null) {
 			if (this.scene.isActive("Signin")) {
 				const scene = this.scene.getScene("Signin") as SigninScene;
@@ -74,12 +69,12 @@ export class PhaserGame extends Phaser.Game {
 				scene.showToast(`${errorMessage}`, true);
 			}
 		} else {
-			finishSignIn(true);
+			finishSignIn();
 			console.log(`Signed in as ${result.data.PlayFabId}`);
 		}
 	}
 
-	playfabRegisterCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: (success: boolean) => void) {
+	playfabRegisterCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: () => void) {
 		if (result === null) {
 			console.log(error);
 			if (this.scene.isActive("Signin")) {
@@ -93,7 +88,7 @@ export class PhaserGame extends Phaser.Game {
 		}
 	}
 
-	signInWithPlayFab(username: string, password: string, finishSignIn: (success: boolean) => void) {
+	signInWithPlayFab(username: string, password: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithPlayFab(
 			{
@@ -104,7 +99,7 @@ export class PhaserGame extends Phaser.Game {
 		);
 	}
 
-	registerWithPlayFab(email: string, username: string, password: string, finishSignIn: (success: boolean) => void) {
+	registerWithPlayFab(email: string, username: string, password: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.RegisterPlayFabUser(
 			{
@@ -119,7 +114,7 @@ export class PhaserGame extends Phaser.Game {
 		);
 	}
 
-	signInWithGoogle(accessToken: string, name: string, finishSignIn: (success: boolean) => void) {
+	signInWithGoogle(accessToken: string, name: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithGoogleAccount(
 			{
@@ -130,7 +125,7 @@ export class PhaserGame extends Phaser.Game {
 		);
 	}
 
-	signInWithFacebook(accessToken: string, name: string, finishSignIn: (success: boolean) => void) {
+	signInWithFacebook(accessToken: string, name: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithFacebook(
 			{

@@ -66,7 +66,7 @@ class Controller extends AScene {
 		this.scene.add("Game", GameScene);
 		this.scene.add("Map", MapScene);
 
-		if (PlayFabClient.IsClientLoggedIn()) {
+		if (this.registry.has("FinishedSignIn")) {
 			this.scene.start("Menu");
 		} else {
 			this.scene.start("Signin");
