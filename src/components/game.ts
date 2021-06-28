@@ -73,7 +73,21 @@ class GameScene extends AScene {
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
 				console.log("Elapsed seconds:", elapsedSeconds);
-				this.calculateAwaySnowballs(elapsedSeconds);
+				const numberOfFires = Object.keys(this.itemsMap[1].Instances).length;
+				const numberOfSnowmans = Object.keys(this.itemsMap[2].Instances).length;
+				const numberOfIgloos = Object.keys(this.itemsMap[3].Instances).length;
+				const numberOfVaults = Object.keys(this.itemsMap[4].Instances).length;
+				const sb =
+					Math.floor(elapsedSeconds / 10) * numberOfFires +
+					Math.floor(elapsedSeconds) * numberOfSnowmans +
+					Math.floor(elapsedSeconds) * numberOfIgloos * 10 +
+					Math.floor(elapsedSeconds) * numberOfVaults * 100;
+
+				this.registry.values.SB += sb;
+				this.totalAddedSnowballs += sb;
+				this.showToast(`${sb} snowballs added \nwhile player was away`, false);
+			} else {
+				this.showToast(`Welcome to ${this.biomeDetail.DisplayName}`, false);
 			}
 		});
 
@@ -133,22 +147,6 @@ class GameScene extends AScene {
 					this.showStoreContainer();
 				})
 		);
-	}
-
-	calculateAwaySnowballs(elapsedSeconds: number) {
-		const numberOfFires = Object.keys(this.itemsMap[1].Instances).length;
-		const numberOfSnowmans = Object.keys(this.itemsMap[2].Instances).length;
-		const numberOfIgloos = Object.keys(this.itemsMap[3].Instances).length;
-		const numberOfVaults = Object.keys(this.itemsMap[4].Instances).length;
-		const sb =
-			Math.floor(elapsedSeconds / 10) * numberOfFires +
-			Math.floor(elapsedSeconds) * numberOfSnowmans +
-			Math.floor(elapsedSeconds) * numberOfIgloos * 10 +
-			Math.floor(elapsedSeconds) * numberOfVaults * 100;
-
-		this.registry.values.SB += sb;
-		this.totalAddedSnowballs += sb;
-		this.showToast(`${sb} snowballs added \nwhile player was away`, false);
 	}
 
 	updateData(parent, key, data) {
