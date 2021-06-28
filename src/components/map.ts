@@ -70,10 +70,10 @@ class MapScene extends AScene {
 
 		this.registry.events.on("changedata", this.updateData, this);
 
-		this.snowballText = this.add.text(16, 16, `${this.registry.get("SB")} x`, textStyle);
-		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(16, 56, `${this.registry.get("IC")} x`, textStyle);
-		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
+		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB")}`, textStyle);
+		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
+		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
+		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
 		this.interactiveMapObjects.push(
 			this.add
@@ -88,13 +88,7 @@ class MapScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			if (key === "SB") {
-				this.snowballText.setText(`${data} x`);
-				this.snowballIcon.setX(36 + this.snowballText.width);
-			} else if (key === "IC") {
-				this.icicleText.setText(`${data} x`);
-				this.icicleIcon.setX(32 + this.icicleText.width);
-			}
+			key === "SB" ? this.snowballText.setText(`: ${data}`) : this.icicleText.setText(`: ${data}`);
 		}
 	}
 
@@ -130,11 +124,9 @@ class MapScene extends AScene {
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.interactiveMapObjects.forEach(object => object.disableInteractive());
-					if (biome.ItemId in this.biomeItems) {
-						this.showBiomeOwnedContainer(biome, imageKey);
-					} else {
-						this.showBiomeNotOwnedContainer(biome, imageKey);
-					}
+					biome.ItemId in this.biomeItems
+						? this.showBiomeOwnedContainer(biome, imageKey)
+						: this.showBiomeNotOwnedContainer(biome, imageKey);
 				})
 		);
 		if (!(biome.ItemId in this.biomeItems)) {

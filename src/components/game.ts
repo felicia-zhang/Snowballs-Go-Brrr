@@ -86,10 +86,10 @@ class GameScene extends AScene {
 			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
-		this.snowballText = this.add.text(16, 16, `${this.registry.get("SB")} x`, textStyle);
-		this.snowballIcon = this.add.image(36 + this.snowballText.width, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(16, 56, `${this.registry.get("IC")} x`, textStyle);
-		this.icicleIcon = this.add.image(32 + this.icicleText.width, 65, "icicle").setScale(0.15);
+		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB")}`, textStyle);
+		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
+		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
+		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
 		this.add.text(400, 16, this.biomeDetail.DisplayName, textStyle).setAlign("center").setOrigin(0.5, 0.5);
 
@@ -115,7 +115,7 @@ class GameScene extends AScene {
 
 		this.interactiveGameObjects.push(
 			this.add
-				.text(784, 544, "CURRENCIES", textStyle)
+				.text(784, 544, "IN-APP PURCHASE EXAMPLE", textStyle)
 				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
@@ -154,13 +154,7 @@ class GameScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			if (key === "SB") {
-				this.snowballText.setText(`${data} x`);
-				this.snowballIcon.setX(36 + this.snowballText.width);
-			} else if (key === "IC") {
-				this.icicleText.setText(`${data} x`);
-				this.icicleIcon.setX(32 + this.icicleText.width);
-			}
+			key === "SB" ? this.snowballText.setText(`: ${data}`) : this.icicleText.setText(`: ${data}`);
 		}
 	}
 
@@ -444,7 +438,7 @@ class GameScene extends AScene {
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
 		const usdText = this.add
-			.text(160 * index - 240, 80, `$${usd} USD`, textStyle)
+			.text(160 * index - 240, 80, `$${usd}`, textStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
 		const textBackground = this.add
@@ -540,7 +534,7 @@ class GameScene extends AScene {
 		const title = this.paymentContainer.getAt(2) as Phaser.GameObjects.Text;
 		title.setText(`PURCHASE ${itemDetail.DisplayName.toUpperCase()}`);
 		const buttonText = this.paymentContainer.getAt(4) as Phaser.GameObjects.Text;
-		buttonText.setText(`CONFIRM $${usd} USD`);
+		buttonText.setText(`CONFIRM $${usd}`);
 		const button = this.paymentContainer.getAt(3) as RoundRectangle;
 		button.width = buttonText.width + 16;
 		button.height = buttonText.height + 16;
