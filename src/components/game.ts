@@ -18,12 +18,10 @@ class GameScene extends AScene {
 	snowballIcon: Phaser.GameObjects.Image;
 	icicleText: Phaser.GameObjects.Text;
 	icicleIcon: Phaser.GameObjects.Image;
-	paymentContainer: Phaser.GameObjects.Container;
 	currencyContainer: Phaser.GameObjects.Container;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
 	interactiveGameObjects: Phaser.GameObjects.GameObject[];
-	interactiveCurrencyObjets: Phaser.GameObjects.GameObject[];
 
 	constructor() {
 		super("Game");
@@ -40,11 +38,9 @@ class GameScene extends AScene {
 		this.itemsMap = {};
 		this.inventoryContainer = this.add.container(170, 5, []);
 		this.interactiveGameObjects = [];
-		this.interactiveCurrencyObjets = [];
 		this.makePenguin();
 		this.makeStoreContainer();
 		this.makeCurrencyContainer();
-		this.makePaymentContainer();
 
 		this.registry
 			.get("CatalogItems")
@@ -165,8 +161,17 @@ class GameScene extends AScene {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
 		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, 0x16252e));
 		const currencyList = this.add.container(0, 0, []);
+		const text = this.add
+			.text(
+				0,
+				160,
+				"*This is a mock of the payment process. \nNo real transaction will take place in the PlayFab backend.",
+				textStyle
+			)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5);
 		this.currencyContainer = this.add
-			.container(400, 300, [overlay, mainBackground, currencyList])
+			.container(400, 300, [overlay, mainBackground, currencyList, text])
 			.setAlpha(0)
 			.setDepth(20);
 		const closeButton = this.add
@@ -184,7 +189,6 @@ class GameScene extends AScene {
 						const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
 						currencyList.removeAll(true);
 						this.currencyItems = [];
-						this.interactiveCurrencyObjets = [];
 					},
 					callbackScope: this,
 				});
@@ -199,8 +203,7 @@ class GameScene extends AScene {
 			});
 			const overlay = this.currencyContainer.getAt(0) as Phaser.GameObjects.Rectangle;
 			const bg = this.currencyContainer.getAt(1) as RoundRectangle;
-			const closeButton = this.currencyContainer.getAt(3) as Phaser.GameObjects.Image;
-			this.interactiveCurrencyObjets.push(closeButton);
+			const closeButton = this.currencyContainer.getAt(4) as Phaser.GameObjects.Image;
 			if (result.data.StoreId === "CurrenciesWithDiscount") {
 				overlay.setY(-25);
 				bg.height = 305;
@@ -444,10 +447,19 @@ class GameScene extends AScene {
 			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.interactiveCurrencyObjets.forEach(object => object.disableInteractive());
-				this.showPaymentContainer(itemDetail, usd, imageKey);
+				PlayFabClient.ExecuteCloudScript(
+					{
+						FunctionName: "grantIcicleBundle",
+						FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
+					},
+					(error, result) => {
+						PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
+							this.registry.values.IC += r.data.VirtualCurrency.IC;
+							this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
+						});
+					}
+				);
 			});
-		this.interactiveCurrencyObjets.push(textBackground);
 		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
 		currencyList.add([background, image, nameText, textBackground, usdText]);
 	}
@@ -481,83 +493,6 @@ class GameScene extends AScene {
 				}
 			);
 		}
-	}
-
-	makePaymentContainer() {
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 230, 320, 15, 0x2e5767));
-		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const image = this.add.image(0, -10, "icicle1");
-		const text = this.add
-			.text(
-				0,
-				210,
-				"*This is a mock of the payment process. \nNo real transaction will take place in \nthe PlayFab backend.",
-				textStyle
-			)
-			.setAlign("center")
-			.setOrigin(0.5, 0.5);
-		const buttonText = this.add.text(0, 130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const button = this.add
-			.existing(new RoundRectangle(this, 0, 130, 0, 0, 10, 0xc26355))
-			.setInteractive({ useHandCursor: true });
-		const paymentPopup = this.add
-			.container(400, 300, [text, bg, title, button, buttonText, image])
-			.setDepth(30)
-			.setAlpha(0);
-		const closeButton = this.add
-			.image(115, -160, "close")
-			.setScale(0.35)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.add.tween({
-					targets: [this.paymentContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveCurrencyObjets.forEach(object =>
-							object.setInteractive({ useHandCursor: true })
-						);
-						button.removeAllListeners();
-					},
-					callbackScope: this,
-				});
-			});
-		paymentPopup.add(closeButton);
-		this.paymentContainer = paymentPopup;
-	}
-
-	showPaymentContainer(itemDetail: ItemDetail, usd: number, imageKey: string) {
-		const title = this.paymentContainer.getAt(2) as Phaser.GameObjects.Text;
-		title.setText(`PURCHASE ${itemDetail.DisplayName.toUpperCase()}`);
-		const buttonText = this.paymentContainer.getAt(4) as Phaser.GameObjects.Text;
-		buttonText.setText(`CONFIRM $${usd}`);
-		const button = this.paymentContainer.getAt(3) as RoundRectangle;
-		button.width = buttonText.width + 16;
-		button.height = buttonText.height + 16;
-		button.on("pointerup", () => {
-			PlayFabClient.ExecuteCloudScript(
-				{
-					FunctionName: "grantIcicleBundle",
-					FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
-				},
-				(error, result) => {
-					PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
-						this.registry.values.IC += r.data.VirtualCurrency.IC;
-						this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
-					});
-				}
-			);
-		});
-		const image = this.paymentContainer.getAt(5) as Phaser.GameObjects.Image;
-		image.setTexture(imageKey);
-		this.add.tween({
-			targets: [this.paymentContainer],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 1,
-			callbackScope: this,
-		});
 	}
 
 	makeInventoryItem(inventory: PlayFabClientModels.ItemInstance) {
