@@ -2,8 +2,7 @@ import { PlayFabClient } from "playfab-sdk";
 import { fontFamily, smallFontSize, textStyle } from "../utils/font";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
-import ItemDetail from "../utils/types";
-import BiomeDetail from "../utils/types";
+import { BiomeDetail, ItemDetail } from "../utils/types";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;

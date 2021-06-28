@@ -1,12 +1,12 @@
 import { PlayFabClient } from "playfab-sdk";
 import { fontFamily, smallFontSize, textStyle } from "../utils/font";
-import BiomeDetail from "../utils/types";
+import { BiomeDetail, ItemCounter } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 
 class MapScene extends AScene {
 	biomeMap: { [key: number]: BiomeDetail };
-	biomeItems: { [key: number]: { Mittens: 0; Bonfire: 0; Snowman: 0; "Igloo Factory": 0; "Arctic Vault": 0 } };
+	biomeItems: { [key: number]: ItemCounter };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
 	icicleText: Phaser.GameObjects.Text;
