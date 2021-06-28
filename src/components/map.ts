@@ -90,15 +90,23 @@ class MapScene extends AScene {
 		if (item.ItemId === "5") {
 			imageKey = "iceCube";
 			x = 200;
-			y = 300;
+			y = 200;
 		} else if (item.ItemId === "6") {
-			imageKey = "lavaCube";
+			imageKey = "magmaCube";
 			x = 400;
-			y = 300;
+			y = 200;
 		} else if (item.ItemId === "7") {
-			imageKey = "sandCube";
+			imageKey = "honeyCube";
 			x = 600;
-			y = 300;
+			y = 200;
+		} else if (item.ItemId === "8") {
+			imageKey = "oceanCube";
+			x = 200;
+			y = 400;
+		} else if (item.ItemId === "9") {
+			imageKey = "rainCube";
+			x = 400;
+			y = 400;
 		}
 		this.interactiveMapObjects.push(
 			this.add
@@ -164,7 +172,7 @@ class MapScene extends AScene {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
-		const title = this.add.text(0, -110, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const image = this.add.image(-115, -10, "iceCube").setScale(0.7);
 		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballButton = this.add
