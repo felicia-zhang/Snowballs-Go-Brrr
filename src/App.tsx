@@ -39,14 +39,15 @@ class App extends React.PureComponent<any, IState> {
 		this.state.game.destroy(true);
 	}
 
-	handlePlayFab = (success: boolean) => {
+	finishSignIn = (success: boolean) => {
 		this.setState({
 			isSignedIn: success,
 		});
+		this.state.game.registry.set("FinishedSignIn", success);
 	};
 
 	signInWithPlayFab = () => {
-		this.state.game.signInWithPlayFab(this.state.username, this.state.password, this.handlePlayFab);
+		this.state.game.signInWithPlayFab(this.state.username, this.state.password, this.finishSignIn);
 	};
 
 	registerWithPlayFab = () => {
@@ -54,15 +55,12 @@ class App extends React.PureComponent<any, IState> {
 			this.state.email,
 			this.state.username,
 			this.state.password,
-			this.handlePlayFab
+			this.finishSignIn
 		);
 	};
 
 	onGoogleSuccess = (response: GoogleLoginResponse) => {
-		this.setState({
-			isSignedIn: true,
-		});
-		this.state.game.signInWithGoogle(response.accessToken, response.getBasicProfile().getName());
+		this.state.game.signInWithGoogle(response.accessToken, response.getBasicProfile().getName(), this.finishSignIn);
 	};
 
 	onGoogleFailure = (error: any) => {
@@ -70,10 +68,7 @@ class App extends React.PureComponent<any, IState> {
 	};
 
 	onFacebookSignin = response => {
-		this.setState({
-			isSignedIn: true,
-		});
-		this.state.game.signInWithFacebook(response.accessToken, response.name);
+		this.state.game.signInWithFacebook(response.accessToken, response.name, this.finishSignIn);
 	};
 
 	render() {

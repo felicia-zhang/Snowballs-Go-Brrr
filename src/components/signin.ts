@@ -11,7 +11,7 @@ class SigninScene extends AScene {
 	}
 
 	update() {
-		if (PlayFabClient.IsClientLoggedIn()) {
+		if (this.registry.has("FinishedSignIn") && this.registry.get("FinishedSignIn")) {
 			this.scene.start("Menu");
 		}
 	}
