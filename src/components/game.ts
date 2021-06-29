@@ -436,7 +436,7 @@ class GameScene extends AScene {
 				if (Object.keys(itemDetail.Instances).length === 6) {
 					this.showToast("Not enough room", true);
 				} else {
-					this.toggleLoading(
+					this.setItemLoading(
 						true,
 						maybeItemDiscountPrice,
 						priceButton,
@@ -447,7 +447,7 @@ class GameScene extends AScene {
 					);
 					this.sync(() =>
 						this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, () =>
-							this.toggleLoading(
+							this.setItemLoading(
 								false,
 								maybeItemDiscountPrice,
 								priceButton,
@@ -500,10 +500,9 @@ class GameScene extends AScene {
 		const usd = storeItem.VirtualCurrencyPrices.RM;
 
 		const index = this.currencyItems.length;
+		const x = 160 * index - 240;
 		this.currencyItems.push(storeItem);
-		const background = this.add.existing(
-			new RoundRectangle(this, 160 * index - 240, 0, 140, 220, 15, lightBackgroundColor)
-		);
+		const background = this.add.existing(new RoundRectangle(this, x, 0, 140, 220, 15, lightBackgroundColor));
 
 		let imageKey: string;
 		if (storeItem.ItemId === "100") {
@@ -515,32 +514,17 @@ class GameScene extends AScene {
 		} else if (storeItem.ItemId === "103") {
 			imageKey = "icicle4";
 		}
-		const image = this.add.image(160 * index - 240, -10, imageKey).setScale(0.7);
+		const image = this.add.image(x, -10, imageKey).setScale(0.7);
 		const nameText = this.add
-			.text(160 * index - 240, -90, itemDetail.DisplayName.toUpperCase(), textStyle)
+			.text(x, -90, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
-		const usdText = this.add
-			.text(160 * index - 240, 80, `$${usd}`, textStyle)
-			.setAlign("center")
-			.setOrigin(0.5, 0.5);
+		const usdText = this.add.text(x, 80, `$ ${usd}.00`, textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const highlight = this.add
-			.existing(
-				new RoundRectangle(this, 160 * index - 240, 80, usdText.width + 16, usdText.height + 16, 10, 0xffffff)
-			)
+			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, 0xffffff))
 			.setAlpha(0);
 		const usdButton = this.add
-			.existing(
-				new RoundRectangle(
-					this,
-					160 * index - 240,
-					80,
-					usdText.width + 16,
-					usdText.height + 16,
-					10,
-					buttonNormal
-				)
-			)
+			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, buttonNormal))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
 				usdButton.setFillStyle(buttonHover, 1);
@@ -574,6 +558,7 @@ class GameScene extends AScene {
 				});
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				this.setCurrencyLoading(true, usd, usdButton, usdText, highlight);
 				PlayFabClient.ExecuteCloudScript(
 					{
 						FunctionName: "grantIcicleBundle",
@@ -581,6 +566,7 @@ class GameScene extends AScene {
 					},
 					(error, result) => {
 						PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
+							this.setCurrencyLoading(false, usd, usdButton, usdText, highlight);
 							this.registry.values.IC += r.data.VirtualCurrency.IC;
 							this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
 						});
@@ -600,7 +586,7 @@ class GameScene extends AScene {
 		currencyList.add([background, image, nameText, highlight, usdButton, usdText]);
 	}
 
-	toggleLoading(
+	setItemLoading(
 		isLoading: boolean,
 		price: number,
 		button: RoundRectangle,
@@ -631,6 +617,35 @@ class GameScene extends AScene {
 				});
 			highlight.setAlpha(0);
 			icon.setAlpha(1);
+		}
+	}
+
+	setCurrencyLoading(
+		isLoading: boolean,
+		usd: number,
+		button: RoundRectangle,
+		text: Phaser.GameObjects.Text,
+		highlight: RoundRectangle
+	) {
+		if (isLoading) {
+			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
+				fontFamily: fontFamily,
+				fontSize: "32px",
+				stroke: "#ffffff",
+				strokeThickness: 3,
+			});
+			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
+		} else {
+			text.setText(`$ ${usd}.00`)
+				.setOrigin(0.5, 0.5)
+				.setStyle({ ...textStyle, strokeThickness: 0 });
+			button
+				.setFillStyle(buttonNormal, 1)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerout", () => {
+					button.setFillStyle(buttonNormal, 1);
+				});
+			highlight.setAlpha(0);
 		}
 	}
 
