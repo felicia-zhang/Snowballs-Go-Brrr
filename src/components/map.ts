@@ -216,6 +216,7 @@ class MapScene extends AScene {
 					onComplete: () => {
 						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						button.removeListener("pointerup");
+						highlight.setAlpha(0);
 						const counterText = details.getAt(5) as Phaser.GameObjects.Container;
 						counterText.removeAll(true);
 					},
@@ -336,6 +337,8 @@ class MapScene extends AScene {
 						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						snowballButton.removeListener("pointerup");
 						icicleButton.removeListener("pointerup");
+						snowballHighlight.setAlpha(0);
+						icicleHighlight.setAlpha(0);
 						const discounts = details.getAt(10) as Phaser.GameObjects.Container;
 						discounts.removeAll(true);
 					},
