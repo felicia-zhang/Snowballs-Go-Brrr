@@ -381,7 +381,7 @@ class GameScene extends AScene {
 					priceText.width + 50,
 					priceText.height + 16,
 					10,
-					0xc26355
+					0xd05c4f
 				)
 			)
 			.setInteractive({ useHandCursor: true })
@@ -440,9 +440,9 @@ class GameScene extends AScene {
 			.text(160 * index - 240, 80, `$${usd}`, textStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
-		const textBackground = this.add
+		const usdButton = this.add
 			.existing(
-				new RoundRectangle(this, 160 * index - 240, 80, usdText.width + 16, usdText.height + 16, 10, 0xc26355)
+				new RoundRectangle(this, 160 * index - 240, 80, usdText.width + 16, usdText.height + 16, 10, 0xd05c4f)
 			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
@@ -460,7 +460,7 @@ class GameScene extends AScene {
 				);
 			});
 		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-		currencyList.add([background, image, nameText, textBackground, usdText]);
+		currencyList.add([background, image, nameText, usdButton, usdText]);
 	}
 
 	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string) {
