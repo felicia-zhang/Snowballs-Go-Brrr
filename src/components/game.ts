@@ -1,5 +1,14 @@
 import { PlayFabClient } from "playfab-sdk";
-import { fontFamily, smallFontSize, textStyle } from "../utils/font";
+import {
+	darkBackgroundColor,
+	buttonClick,
+	buttonHover,
+	buttonNormal,
+	fontFamily,
+	smallFontSize,
+	textStyle,
+	lightBackgroundColor,
+} from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import { BiomeDetail, ItemDetail } from "../utils/types";
@@ -169,7 +178,7 @@ class GameScene extends AScene {
 
 	makeCurrencyContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, 0x16252e));
+		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, darkBackgroundColor));
 		const currencyList = this.add.container(0, 0, []);
 		const text = this.add
 			.text(
@@ -250,7 +259,7 @@ class GameScene extends AScene {
 
 	makeStoreContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, 0x16252e));
+		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, darkBackgroundColor));
 		const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
 		const itemList = this.add.container(0, 0, []);
 		this.storeContainer = this.add
@@ -344,7 +353,7 @@ class GameScene extends AScene {
 		const index = this.storeItems.length;
 		this.storeItems.push(storeItem);
 		const background = this.add
-			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, 0x2e5767))
+			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, lightBackgroundColor))
 			.setInteractive()
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) => {
 				this.add.tween({
@@ -405,18 +414,18 @@ class GameScene extends AScene {
 					priceText.width + 50,
 					priceText.height + 16,
 					10,
-					0xd05c4f
+					buttonNormal
 				)
 			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				priceButton.setFillStyle(0xc15349, 1);
+				priceButton.setFillStyle(buttonHover, 1);
 			})
 			.on("pointerout", () => {
-				priceButton.setFillStyle(0xd05c4f, 1);
+				priceButton.setFillStyle(buttonNormal, 1);
 			})
 			.on("pointerdown", () => {
-				priceButton.setFillStyle(0xb94e46, 1);
+				priceButton.setFillStyle(buttonClick, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -442,7 +451,7 @@ class GameScene extends AScene {
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				this.sync(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId));
-				priceButton.setFillStyle(0xd05c4f, 1);
+				priceButton.setFillStyle(buttonNormal, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -485,7 +494,9 @@ class GameScene extends AScene {
 
 		const index = this.currencyItems.length;
 		this.currencyItems.push(storeItem);
-		const background = this.add.existing(new RoundRectangle(this, 160 * index - 240, 0, 140, 220, 15, 0x2e5767));
+		const background = this.add.existing(
+			new RoundRectangle(this, 160 * index - 240, 0, 140, 220, 15, lightBackgroundColor)
+		);
 
 		let imageKey: string;
 		if (storeItem.ItemId === "100") {
@@ -513,17 +524,25 @@ class GameScene extends AScene {
 			.setAlpha(0);
 		const usdButton = this.add
 			.existing(
-				new RoundRectangle(this, 160 * index - 240, 80, usdText.width + 16, usdText.height + 16, 10, 0xd05c4f)
+				new RoundRectangle(
+					this,
+					160 * index - 240,
+					80,
+					usdText.width + 16,
+					usdText.height + 16,
+					10,
+					buttonNormal
+				)
 			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				usdButton.setFillStyle(0xc15349, 1);
+				usdButton.setFillStyle(buttonHover, 1);
 			})
 			.on("pointerout", () => {
-				usdButton.setFillStyle(0xd05c4f, 1);
+				usdButton.setFillStyle(buttonNormal, 1);
 			})
 			.on("pointerdown", () => {
-				usdButton.setFillStyle(0xb94e46, 1);
+				usdButton.setFillStyle(buttonClick, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -560,7 +579,7 @@ class GameScene extends AScene {
 						});
 					}
 				);
-				usdButton.setFillStyle(0xd05c4f, 1);
+				usdButton.setFillStyle(buttonNormal, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",

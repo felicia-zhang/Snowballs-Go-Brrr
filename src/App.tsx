@@ -3,7 +3,7 @@ import React from "react";
 import { GoogleLoginResponse } from "react-google-login";
 import { Button, ChakraProvider, Divider, Flex, Input, Link, Spacer, VStack } from "@chakra-ui/react";
 import { PlayFabClient } from "playfab-sdk";
-import { fontFamily, normalFontSize } from "./utils/font";
+import { fontFamily, normalFontSize } from "./utils/constants";
 import { SocialSignins } from "./SocialSignins";
 
 interface IState {

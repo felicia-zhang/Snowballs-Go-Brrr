@@ -1,5 +1,5 @@
 import { PlayFabClient } from "playfab-sdk";
-import { textStyle } from "../utils/font";
+import { textStyle } from "../utils/constants";
 import AScene from "./AScene";
 
 class MenuScene extends AScene {

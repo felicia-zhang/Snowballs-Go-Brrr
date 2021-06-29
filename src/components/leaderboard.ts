@@ -1,5 +1,5 @@
 import { PlayFabClient } from "playfab-sdk";
-import { textStyle } from "../utils/font";
+import { darkBackgroundColor, lightBackgroundColor, textStyle } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 
@@ -13,10 +13,10 @@ class LeaderboardScene extends AScene {
 	create() {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
-		this.add.existing(new RoundRectangle(this, 400, 330, 480, 400, 15, 0x16252e));
+		this.add.existing(new RoundRectangle(this, 400, 330, 480, 400, 15, darkBackgroundColor));
 		this.list = this.add.container(230, 180, []);
 		this.add.text(400, 16, "Leaderboard", textStyle).setOrigin(0.5, 0.5).setAlign("center");
-		this.tabSelector = this.add.existing(new RoundRectangle(this, 240, 110, 160, 95, 15, 0x16252e));
+		this.tabSelector = this.add.existing(new RoundRectangle(this, 240, 110, 160, 95, 15, darkBackgroundColor));
 		this.add
 			.text(172, 100, "Current Snowballs", textStyle)
 			.setOrigin(0, 0.5)
@@ -70,7 +70,9 @@ class LeaderboardScene extends AScene {
 		PlayFabClient.GetLeaderboard({ StatisticName: stat, StartPosition: 0 }, (error, result) => {
 			const players = result.data.Leaderboard;
 			players.forEach((player, i) => {
-				const bg = this.add.existing(new RoundRectangle(this, 170, i * 80 + 8, 390, 50, 15, 0x2e5767));
+				const bg = this.add.existing(
+					new RoundRectangle(this, 170, i * 80 + 8, 390, 50, 15, lightBackgroundColor)
+				);
 				const rankText = this.add.text(0, i * 80, `#${(i + 1).toString()}`, textStyle);
 				const playerText = this.add.text(50, i * 80, player.DisplayName, textStyle);
 				const statText = this.add

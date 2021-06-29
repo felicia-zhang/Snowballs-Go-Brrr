@@ -1,4 +1,4 @@
-import { textStyle } from "../utils/font";
+import { errorHex, textStyle } from "../utils/constants";
 
 abstract class AScene extends Phaser.Scene {
 	toast: Phaser.GameObjects.Text;
@@ -18,7 +18,7 @@ abstract class AScene extends Phaser.Scene {
 	showToast(message: string, isError: boolean) {
 		this.toast.setText(message);
 		if (isError) {
-			this.toast.setColor("#ff7360");
+			this.toast.setColor(errorHex);
 		} else {
 			this.toast.setColor("#ffffff");
 		}

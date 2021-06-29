@@ -1,5 +1,14 @@
 import { PlayFabClient } from "playfab-sdk";
-import { fontFamily, smallFontSize, textStyle } from "../utils/font";
+import {
+	darkBackgroundColor,
+	buttonClick,
+	buttonHover,
+	buttonNormal,
+	fontFamily,
+	smallFontSize,
+	textStyle,
+	lightBackgroundColor,
+} from "../utils/constants";
 import { BiomeDetail, ItemCounter } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
@@ -143,24 +152,24 @@ class MapScene extends AScene {
 
 	makeBiomeOwnedContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
+		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, darkBackgroundColor));
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
-		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, lightBackgroundColor));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
 		const buttonText = this.add.text(0, 120, "VISIT", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const highlight = this.add.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, 0xffffff)).setAlpha(0);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, 0xd05c4f))
+			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, buttonNormal))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				button.setFillStyle(0xc15349, 1);
+				button.setFillStyle(buttonHover, 1);
 			})
 			.on("pointerout", () => {
-				button.setFillStyle(0xd05c4f, 1);
+				button.setFillStyle(buttonNormal, 1);
 			})
 			.on("pointerdown", () => {
-				button.setFillStyle(0xb94e46, 1);
+				button.setFillStyle(buttonClick, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -219,24 +228,24 @@ class MapScene extends AScene {
 
 	makeBiomeNotOwnedContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, 0x16252e));
-		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, 0x2e5767));
+		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, darkBackgroundColor));
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, lightBackgroundColor));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
 		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballHighlight = this.add.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, 0xffffff)).setAlpha(0);
 		const snowballButton = this.add
-			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, 0xd05c4f))
+			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, buttonNormal))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				snowballButton.setFillStyle(0xc15349, 1);
+				snowballButton.setFillStyle(buttonHover, 1);
 			})
 			.on("pointerout", () => {
-				snowballButton.setFillStyle(0xd05c4f, 1);
+				snowballButton.setFillStyle(buttonNormal, 1);
 			})
 			.on("pointerdown", () => {
-				snowballButton.setFillStyle(0xb94e46, 1);
+				snowballButton.setFillStyle(buttonClick, 1);
 				this.add.tween({
 					targets: [snowballHighlight],
 					ease: "Sine.easeIn",
@@ -264,16 +273,16 @@ class MapScene extends AScene {
 		const icicleButtonText = this.add.text(-15, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const icicleHighlight = this.add.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xffffff)).setAlpha(0);
 		const icicleButton = this.add
-			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xd05c4f))
+			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, buttonNormal))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				icicleButton.setFillStyle(0xc15349, 1);
+				icicleButton.setFillStyle(buttonHover, 1);
 			})
 			.on("pointerout", () => {
-				icicleButton.setFillStyle(0xd05c4f, 1);
+				icicleButton.setFillStyle(buttonNormal, 1);
 			})
 			.on("pointerdown", () => {
-				icicleButton.setFillStyle(0xb94e46, 1);
+				icicleButton.setFillStyle(buttonClick, 1);
 				this.add.tween({
 					targets: [icicleHighlight],
 					ease: "Sine.easeIn",
@@ -344,7 +353,7 @@ class MapScene extends AScene {
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const button = details.getAt(3) as RoundRectangle;
 		button.on("pointerup", () => {
-			button.setFillStyle(0xd05c4f, 1);
+			button.setFillStyle(buttonNormal, 1);
 			this.add.tween({
 				targets: [details.getAt(2) as RoundRectangle],
 				ease: "Sine.easeIn",
@@ -394,7 +403,7 @@ class MapScene extends AScene {
 		const snowballHighlight = details.getAt(2) as RoundRectangle;
 		snowballButton.on("pointerup", () => {
 			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB");
-			snowballButton.setFillStyle(0xd05c4f, 1);
+			snowballButton.setFillStyle(buttonNormal, 1);
 			this.add.tween({
 				targets: [snowballHighlight],
 				ease: "Sine.easeIn",
@@ -414,7 +423,7 @@ class MapScene extends AScene {
 		const icicleHighlight = details.getAt(6) as RoundRectangle;
 		icicleButton.on("pointerup", () => {
 			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC");
-			icicleButton.setFillStyle(0xd05c4f, 1);
+			icicleButton.setFillStyle(buttonNormal, 1);
 			this.add.tween({
 				targets: [icicleHighlight],
 				ease: "Sine.easeIn",
