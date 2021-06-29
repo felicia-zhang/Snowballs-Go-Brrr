@@ -446,15 +446,16 @@ class GameScene extends AScene {
 						x
 					);
 					this.sync(() =>
-						this.purchaseItem(
-							itemDetail,
-							maybeItemDiscountPrice,
-							storeId,
-							priceButton,
-							priceText,
-							snowballIcon,
-							highlight,
-							x
+						this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, () =>
+							this.toggleLoading(
+								false,
+								maybeItemDiscountPrice,
+								priceButton,
+								priceText,
+								snowballIcon,
+								highlight,
+								x
+							)
 						)
 					);
 				}
@@ -633,16 +634,7 @@ class GameScene extends AScene {
 		}
 	}
 
-	purchaseItem(
-		itemDetail: ItemDetail,
-		maybeItemDiscountPrice: number,
-		storeId: string,
-		priceButton: RoundRectangle,
-		priceText: Phaser.GameObjects.Text,
-		snowballIcon: Phaser.GameObjects.Image,
-		highlight: RoundRectangle,
-		x: number
-	) {
+	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, toggleLoadingToFalse) {
 		const delay = this.time.addEvent({ delay: 500 });
 		PlayFabClient.PurchaseItem(
 			{ ItemId: itemDetail.ItemId, Price: maybeItemDiscountPrice, StoreId: storeId, VirtualCurrency: "SB" },
@@ -653,28 +645,12 @@ class GameScene extends AScene {
 						this.time.addEvent({
 							delay: remaining,
 							callback: () => {
-								this.toggleLoading(
-									false,
-									maybeItemDiscountPrice,
-									priceButton,
-									priceText,
-									snowballIcon,
-									highlight,
-									x
-								);
+								toggleLoadingToFalse();
 								this.showToast("Not enough snowballs", true);
 							},
 						});
 					} else {
-						this.toggleLoading(
-							false,
-							maybeItemDiscountPrice,
-							priceButton,
-							priceText,
-							snowballIcon,
-							highlight,
-							x
-						);
+						toggleLoadingToFalse();
 						this.showToast("Not enough snowballs", true);
 					}
 				} else {
@@ -688,20 +664,11 @@ class GameScene extends AScene {
 						},
 						(error, result) => {
 							const remaining = delay.getRemaining();
-							console.log(remaining);
 							if (remaining > 0) {
 								this.time.addEvent({
 									delay: remaining,
 									callback: () => {
-										this.toggleLoading(
-											false,
-											maybeItemDiscountPrice,
-											priceButton,
-											priceText,
-											snowballIcon,
-											highlight,
-											x
-										);
+										toggleLoadingToFalse();
 										this.registry.values.SB -= maybeItemDiscountPrice;
 										this.registry.values.Inventories.push(result.data.FunctionResult); // mutating the array will not fire registry changedata event
 										this.makeInventoryItem(result.data.FunctionResult);
@@ -709,15 +676,7 @@ class GameScene extends AScene {
 									},
 								});
 							} else {
-								this.toggleLoading(
-									false,
-									maybeItemDiscountPrice,
-									priceButton,
-									priceText,
-									snowballIcon,
-									highlight,
-									x
-								);
+								toggleLoadingToFalse();
 								this.registry.values.SB -= maybeItemDiscountPrice;
 								this.registry.values.Inventories.push(result.data.FunctionResult);
 								this.makeInventoryItem(result.data.FunctionResult);
