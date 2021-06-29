@@ -351,9 +351,10 @@ class GameScene extends AScene {
 		const wrap = (s: string) => s.replace(/(?![^\n]{1,22}$)([^\n]{1,22})\s/g, "$1\n");
 
 		const index = this.storeItems.length;
+		const y = -170 + index * 85;
 		this.storeItems.push(storeItem);
 		const background = this.add
-			.existing(new RoundRectangle(this, 0, -170 + index * 85, 340, 70, 15, lightBackgroundColor))
+			.existing(new RoundRectangle(this, 0, y, 340, 70, 15, lightBackgroundColor))
 			.setInteractive()
 			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) => {
 				this.add.tween({
@@ -374,49 +375,31 @@ class GameScene extends AScene {
 
 		let image: Phaser.GameObjects.Image;
 		if (storeItem.ItemId === "0") {
-			image = this.add.image(-135, -170 + index * 85, "mittens").setScale(0.25);
+			image = this.add.image(-135, y, "mittens").setScale(0.25);
 		} else if (storeItem.ItemId === "1") {
-			image = this.add.image(-135, -170 + index * 85, "fire").setScale(0.25);
+			image = this.add.image(-135, y, "fire").setScale(0.25);
 		} else if (storeItem.ItemId === "2") {
-			image = this.add.image(-135, -170 + index * 85, "snowman").setScale(0.25);
+			image = this.add.image(-135, y, "snowman").setScale(0.25);
 		} else if (storeItem.ItemId === "3") {
-			image = this.add.image(-135, -170 + index * 85, "igloo").setScale(0.25);
+			image = this.add.image(-135, y, "igloo").setScale(0.25);
 		} else if (storeItem.ItemId === "4") {
-			image = this.add.image(-135, -170 + index * 85, "vault").setScale(0.25);
+			image = this.add.image(-135, y, "vault").setScale(0.25);
 		}
 		const nameText = this.add
-			.text(-100, -170 + index * 85, itemDetail.DisplayName.toUpperCase(), textStyle)
+			.text(-100, y, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const priceText = this.add
-			.text(118, -170 + index * 85, `${maybeItemDiscountPrice} x`, textStyle)
+			.text(118, y, `${maybeItemDiscountPrice} x`, textStyle)
 			.setAlign("right")
 			.setOrigin(1, 0.5);
+		const w = priceText.width + 50;
+		const x = 160 - w / 2;
 		const highlight = this.add
-			.existing(
-				new RoundRectangle(
-					this,
-					160 - (priceText.width + 50) / 2,
-					-170 + index * 85,
-					priceText.width + 50,
-					priceText.height + 16,
-					10,
-					0xffffff
-				)
-			)
+			.existing(new RoundRectangle(this, x, y, w, priceText.height + 16, 10, 0xffffff))
 			.setAlpha(0);
 		const priceButton = this.add
-			.existing(
-				new RoundRectangle(
-					this,
-					160 - (priceText.width + 50) / 2,
-					-170 + index * 85,
-					priceText.width + 50,
-					priceText.height + 16,
-					10,
-					buttonNormal
-				)
-			)
+			.existing(new RoundRectangle(this, x, y, w, priceText.height + 16, 10, buttonNormal))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
 				priceButton.setFillStyle(buttonHover, 1);
@@ -450,8 +433,31 @@ class GameScene extends AScene {
 				});
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.sync(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId));
-				priceButton.setFillStyle(buttonNormal, 1);
+				if (Object.keys(itemDetail.Instances).length === 6) {
+					this.showToast("Not enough room", true);
+				} else {
+					this.toggleLoading(
+						true,
+						maybeItemDiscountPrice,
+						priceButton,
+						priceText,
+						snowballIcon,
+						highlight,
+						x
+					);
+					this.sync(() =>
+						this.purchaseItem(
+							itemDetail,
+							maybeItemDiscountPrice,
+							storeId,
+							priceButton,
+							priceText,
+							snowballIcon,
+							highlight,
+							x
+						)
+					);
+				}
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -461,7 +467,7 @@ class GameScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		const snowballIcon = this.add.image(138, -170 + index * 85, "snowball").setScale(0.15);
+		const snowballIcon = this.add.image(138, y, "snowball").setScale(0.15);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
 		itemList.add([background, image, nameText, highlight, priceButton, priceText, snowballIcon]);
 
@@ -593,35 +599,135 @@ class GameScene extends AScene {
 		currencyList.add([background, image, nameText, highlight, usdButton, usdText]);
 	}
 
-	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string) {
-		if (Object.keys(itemDetail.Instances).length === 6) {
-			this.showToast("Not enough room", true);
+	toggleLoading(
+		isLoading: boolean,
+		price: number,
+		button: RoundRectangle,
+		text: Phaser.GameObjects.Text,
+		icon: Phaser.GameObjects.Image,
+		highlight: RoundRectangle,
+		x: number
+	) {
+		if (isLoading) {
+			text.setText(". . .")
+				.setX(x)
+				.setAlign("center")
+				.setOrigin(0.5, 0.725)
+				.setStyle({ fontFamily: fontFamily, fontSize: "32px", stroke: "#ffffff", strokeThickness: 3 });
+			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
+			icon.setAlpha(0);
 		} else {
-			PlayFabClient.PurchaseItem(
-				{ ItemId: itemDetail.ItemId, Price: maybeItemDiscountPrice, StoreId: storeId, VirtualCurrency: "SB" },
-				(e, r) => {
-					if (e !== null) {
-						this.showToast("Not enough snowballs", true);
-					} else {
-						PlayFabClient.ExecuteCloudScript(
-							{
-								FunctionName: "updateCustomData",
-								FunctionParameter: {
-									instanceId: r.data.Items[0].ItemInstanceId,
-									biomeId: this.biomeDetail.ItemId,
-								},
+			text.setText(`${price} x`)
+				.setX(118)
+				.setAlign("right")
+				.setOrigin(1, 0.5)
+				.setStyle({ ...textStyle, strokeThickness: 0 });
+			button
+				.setFillStyle(buttonNormal, 1)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerout", () => {
+					button.setFillStyle(buttonNormal, 1);
+				});
+			highlight.setAlpha(0);
+			icon.setAlpha(1);
+		}
+	}
+
+	purchaseItem(
+		itemDetail: ItemDetail,
+		maybeItemDiscountPrice: number,
+		storeId: string,
+		priceButton: RoundRectangle,
+		priceText: Phaser.GameObjects.Text,
+		snowballIcon: Phaser.GameObjects.Image,
+		highlight: RoundRectangle,
+		x: number
+	) {
+		const delay = this.time.addEvent({ delay: 500 });
+		PlayFabClient.PurchaseItem(
+			{ ItemId: itemDetail.ItemId, Price: maybeItemDiscountPrice, StoreId: storeId, VirtualCurrency: "SB" },
+			(e, r) => {
+				if (e !== null) {
+					const remaining = delay.getRemaining();
+					if (remaining > 0) {
+						this.time.addEvent({
+							delay: remaining,
+							callback: () => {
+								this.toggleLoading(
+									false,
+									maybeItemDiscountPrice,
+									priceButton,
+									priceText,
+									snowballIcon,
+									highlight,
+									x
+								);
+								this.showToast("Not enough snowballs", true);
 							},
-							(error, result) => {
+						});
+					} else {
+						this.toggleLoading(
+							false,
+							maybeItemDiscountPrice,
+							priceButton,
+							priceText,
+							snowballIcon,
+							highlight,
+							x
+						);
+						this.showToast("Not enough snowballs", true);
+					}
+				} else {
+					PlayFabClient.ExecuteCloudScript(
+						{
+							FunctionName: "updateCustomData",
+							FunctionParameter: {
+								instanceId: r.data.Items[0].ItemInstanceId,
+								biomeId: this.biomeDetail.ItemId,
+							},
+						},
+						(error, result) => {
+							const remaining = delay.getRemaining();
+							console.log(remaining);
+							if (remaining > 0) {
+								this.time.addEvent({
+									delay: remaining,
+									callback: () => {
+										this.toggleLoading(
+											false,
+											maybeItemDiscountPrice,
+											priceButton,
+											priceText,
+											snowballIcon,
+											highlight,
+											x
+										);
+										this.registry.values.SB -= maybeItemDiscountPrice;
+										this.registry.values.Inventories.push(result.data.FunctionResult); // mutating the array will not fire registry changedata event
+										this.makeInventoryItem(result.data.FunctionResult);
+										this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+									},
+								});
+							} else {
+								this.toggleLoading(
+									false,
+									maybeItemDiscountPrice,
+									priceButton,
+									priceText,
+									snowballIcon,
+									highlight,
+									x
+								);
 								this.registry.values.SB -= maybeItemDiscountPrice;
-								this.registry.values.Inventories.push(result.data.FunctionResult); // mutating the array will not fire registry changedata event
+								this.registry.values.Inventories.push(result.data.FunctionResult);
 								this.makeInventoryItem(result.data.FunctionResult);
 								this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 							}
-						);
-					}
+						}
+					);
 				}
-			);
-		}
+			}
+		);
 	}
 
 	makeInventoryItem(inventory: PlayFabClientModels.ItemInstance) {
