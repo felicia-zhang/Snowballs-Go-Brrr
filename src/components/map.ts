@@ -104,7 +104,7 @@ class MapScene extends AScene {
 			x = 200;
 			y = 200;
 		} else if (biome.ItemId === "6") {
-			imageKey = "magmabiome";
+			imageKey = "marinebiome";
 			x = 400;
 			y = 200;
 		} else if (biome.ItemId === "7") {
@@ -112,11 +112,11 @@ class MapScene extends AScene {
 			x = 600;
 			y = 200;
 		} else if (biome.ItemId === "8") {
-			imageKey = "marinebiome";
+			imageKey = "tropicalbiome";
 			x = 200;
 			y = 400;
 		} else if (biome.ItemId === "9") {
-			imageKey = "tropicalbiome";
+			imageKey = "magmabiome";
 			x = 400;
 			y = 400;
 		}

@@ -48,7 +48,6 @@ class GameScene extends AScene {
 			.forEach((item: PlayFabClientModels.CatalogItem, i) => {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
-					FullPrice: item.VirtualCurrencyPrices.SB,
 					DisplayName: item.DisplayName,
 					Description: item.Description,
 					Instances: {},
@@ -270,7 +269,7 @@ class GameScene extends AScene {
 	}
 
 	showStoreContainer() {
-		PlayFabClient.GetStoreItems({ StoreId: "Items" }, (error, result) => {
+		PlayFabClient.GetStoreItems({ StoreId: this.biomeDetail.ItemId }, (error, result) => {
 			const storeId = result.data.StoreId;
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeStoreItem(storeItem, storeId);
@@ -393,13 +392,13 @@ class GameScene extends AScene {
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
 		itemList.add([background, image, nameText, priceButton, priceText, snowballIcon]);
 
-		if (storeId === "ItemsWithDiscount") {
+		if (storeId === `${this.biomeDetail.ItemId}WithDiscount`) {
 			priceText.setY(-160 + index * 85);
 			priceButton.y = -160 + index * 85;
 			snowballIcon.setY(-160 + index * 85);
 
 			const fullPriceText = this.add
-				.text(121, -192 + index * 85, `${itemDetail.FullPrice} x`, {
+				.text(121, -192 + index * 85, `${storeItem.CustomData.FullPrice} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
@@ -500,15 +499,15 @@ class GameScene extends AScene {
 		const index = Object.keys(itemType.Instances).length;
 		itemType.Instances[inventory.ItemInstanceId] = inventory;
 		let sprite: Phaser.GameObjects.Sprite;
-		if (inventory.DisplayName === "Igloo Factory") {
-			sprite = this.makeIgloo(index);
-		} else if (inventory.DisplayName === "Bonfire") {
-			sprite = this.makeFire(index);
-		} else if (inventory.DisplayName === "Snowman") {
-			sprite = this.makeSnowman(index);
-		} else if (inventory.DisplayName === "Mittens") {
+		if (inventory.ItemId === "0") {
 			sprite = this.makeMittens(index);
-		} else if (inventory.DisplayName === "Arctic Vault") {
+		} else if (inventory.ItemId === "1") {
+			sprite = this.makeFire(index);
+		} else if (inventory.ItemId === "2") {
+			sprite = this.makeSnowman(index);
+		} else if (inventory.ItemId === "3") {
+			sprite = this.makeIgloo(index);
+		} else if (inventory.ItemId === "4") {
 			sprite = this.makeVault(index);
 		}
 		sprite.setOrigin(0, 0).setScale(0.5);

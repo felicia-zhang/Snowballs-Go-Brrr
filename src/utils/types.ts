@@ -1,6 +1,5 @@
 interface ItemDetail {
 	ItemId: string;
-	FullPrice: number;
 	DisplayName: string;
 	Description: string;
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
