@@ -23,6 +23,7 @@ class MapScene extends AScene {
 	}
 
 	create() {
+		this.cameras.main.fadeIn(500, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.biomeMap = {};
 		this.biomeItems = {};
@@ -84,7 +85,10 @@ class MapScene extends AScene {
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.scene.start("Menu");
+					this.cameras.main.fadeOut(500, 0, 0, 0);
+					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+						this.scene.start("Menu");
+					});
 				})
 		);
 	}
@@ -347,10 +351,11 @@ class MapScene extends AScene {
 				duration: 300,
 				alpha: 0,
 				delay: 300,
-				onComplete: () => {
-					this.scene.start("Game", { biomeDetail: biomeDetail });
-				},
 				callbackScope: this,
+			});
+			this.cameras.main.fadeOut(500, 0, 0, 0);
+			this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+				this.scene.start("Game", { biomeDetail: biomeDetail });
 			});
 		});
 		const image = this.biomeOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
@@ -388,6 +393,7 @@ class MapScene extends AScene {
 		snowballButton.height = snowballButtonText.height + 16;
 		const snowballHighlight = details.getAt(2) as RoundRectangle;
 		snowballButton.on("pointerup", () => {
+			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB");
 			snowballButton.setFillStyle(0xd05c4f, 1);
 			this.add.tween({
 				targets: [snowballHighlight],
@@ -395,9 +401,6 @@ class MapScene extends AScene {
 				duration: 300,
 				alpha: 0,
 				delay: 300,
-				onComplete: () => {
-					this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB");
-				},
 				callbackScope: this,
 			});
 		});
@@ -410,6 +413,7 @@ class MapScene extends AScene {
 		icicleButton.height = icicleButtonText.height + 16;
 		const icicleHighlight = details.getAt(6) as RoundRectangle;
 		icicleButton.on("pointerup", () => {
+			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC");
 			icicleButton.setFillStyle(0xd05c4f, 1);
 			this.add.tween({
 				targets: [icicleHighlight],
@@ -417,9 +421,6 @@ class MapScene extends AScene {
 				duration: 300,
 				alpha: 0,
 				delay: 300,
-				onComplete: () => {
-					this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC");
-				},
 				callbackScope: this,
 			});
 		});
@@ -496,8 +497,10 @@ class MapScene extends AScene {
 						? (this.registry.values.SB -= maybeDiscountPrice)
 						: (this.registry.values.IC -= maybeDiscountPrice);
 					this.registry.values.Inventories.push(...r.data.Items);
-					this.showToast(`${biomeDetail.DisplayName} successfully purchased`, false);
-					this.scene.start("Game", { biomeDetail: biomeDetail });
+					this.cameras.main.fadeOut(500, 0, 0, 0);
+					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+						this.scene.start("Game", { biomeDetail: biomeDetail });
+					});
 				}
 			}
 		);

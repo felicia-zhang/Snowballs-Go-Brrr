@@ -28,6 +28,7 @@ class GameScene extends AScene {
 	}
 
 	create({ biomeDetail }) {
+		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.biomeDetail = biomeDetail;
 		this.clickMultiplier = 1;
@@ -107,7 +108,12 @@ class GameScene extends AScene {
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.sync(() => this.scene.start("Menu"));
+					this.sync(() => {
+						this.cameras.main.fadeOut(500, 0, 0, 0);
+						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+							this.scene.start("Menu");
+						});
+					});
 				})
 		);
 
@@ -117,7 +123,12 @@ class GameScene extends AScene {
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.sync(() => this.scene.start("Map"));
+					this.sync(() => {
+						this.cameras.main.fadeOut(500, 0, 0, 0);
+						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+							this.scene.start("Map");
+						});
+					});
 				})
 		);
 
@@ -430,6 +441,7 @@ class GameScene extends AScene {
 				});
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				this.sync(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId));
 				priceButton.setFillStyle(0xd05c4f, 1);
 				this.add.tween({
 					targets: [highlight],
@@ -437,9 +449,6 @@ class GameScene extends AScene {
 					duration: 300,
 					alpha: 0,
 					delay: 300,
-					onComplete: () => {
-						this.sync(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId));
-					},
 					callbackScope: this,
 				});
 			});
@@ -539,6 +548,18 @@ class GameScene extends AScene {
 				});
 			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				PlayFabClient.ExecuteCloudScript(
+					{
+						FunctionName: "grantIcicleBundle",
+						FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
+					},
+					(error, result) => {
+						PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
+							this.registry.values.IC += r.data.VirtualCurrency.IC;
+							this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
+						});
+					}
+				);
 				usdButton.setFillStyle(0xd05c4f, 1);
 				this.add.tween({
 					targets: [highlight],
@@ -546,20 +567,6 @@ class GameScene extends AScene {
 					duration: 300,
 					alpha: 0,
 					delay: 300,
-					onComplete: () => {
-						PlayFabClient.ExecuteCloudScript(
-							{
-								FunctionName: "grantIcicleBundle",
-								FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
-							},
-							(error, result) => {
-								PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
-									this.registry.values.IC += r.data.VirtualCurrency.IC;
-									this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
-								});
-							}
-						);
-					},
 					callbackScope: this,
 				});
 			});

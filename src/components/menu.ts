@@ -8,6 +8,7 @@ class MenuScene extends AScene {
 	}
 
 	create() {
+		this.cameras.main.fadeIn(500, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.add.text(400, 16, "Menu", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 
@@ -25,7 +26,10 @@ class MenuScene extends AScene {
 					.setAlign("center")
 					.setInteractive({ useHandCursor: true })
 					.on("pointerup", () => {
-						this.scene.start("Map");
+						this.cameras.main.fadeOut(500, 0, 0, 0);
+						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+							this.scene.start("Map");
+						});
 					});
 				this.add
 					.text(400, 250, "LEADERBOARD", textStyle)
@@ -33,7 +37,10 @@ class MenuScene extends AScene {
 					.setAlign("center")
 					.setInteractive({ useHandCursor: true })
 					.on("pointerup", () => {
-						this.scene.start("Leaderboard");
+						this.cameras.main.fadeOut(500, 0, 0, 0);
+						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+							this.scene.start("Leaderboard");
+						});
 					});
 			});
 		});

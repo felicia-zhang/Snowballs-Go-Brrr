@@ -11,6 +11,7 @@ class LeaderboardScene extends AScene {
 	}
 
 	create() {
+		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.add.existing(new RoundRectangle(this, 400, 330, 480, 400, 15, 0x16252e));
 		this.list = this.add.container(230, 180, []);
@@ -41,7 +42,10 @@ class LeaderboardScene extends AScene {
 			.setOrigin(1, 1)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
-				this.scene.start("Menu");
+				this.cameras.main.fadeOut(500, 0, 0, 0);
+				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+					this.scene.start("Menu");
+				});
 			});
 	}
 
