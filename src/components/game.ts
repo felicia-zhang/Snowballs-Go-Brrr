@@ -372,6 +372,19 @@ class GameScene extends AScene {
 			.text(118, -170 + index * 85, `${maybeItemDiscountPrice} x`, textStyle)
 			.setAlign("right")
 			.setOrigin(1, 0.5);
+		const highlight = this.add
+			.existing(
+				new RoundRectangle(
+					this,
+					160 - (priceText.width + 50) / 2,
+					-170 + index * 85,
+					priceText.width + 50,
+					priceText.height + 16,
+					10,
+					0xffffff
+				)
+			)
+			.setAlpha(0);
 		const priceButton = this.add
 			.existing(
 				new RoundRectangle(
@@ -385,17 +398,61 @@ class GameScene extends AScene {
 				)
 			)
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				priceButton.setFillStyle(0xc15349, 1);
+			})
+			.on("pointerout", () => {
+				priceButton.setFillStyle(0xd05c4f, 1);
+			})
+			.on("pointerdown", () => {
+				priceButton.setFillStyle(0xb94e46, 1);
+				this.add.tween({
+					targets: [highlight],
+					ease: "Sine.easeIn",
+					props: {
+						width: {
+							value: priceText.width + 55,
+							duration: 150,
+							ease: "Sine.easeIn",
+						},
+						height: {
+							value: priceText.height + 21,
+							duration: 150,
+							ease: "Sine.easeIn",
+						},
+						alpha: {
+							value: 0.3,
+							duration: 150,
+							ease: "Sine.easeIn",
+						},
+					},
+					callbackScope: this,
+				});
+			})
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.sync(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId));
+				priceButton.setFillStyle(0xd05c4f, 1);
+				this.add.tween({
+					targets: [highlight],
+					ease: "Sine.easeIn",
+					duration: 300,
+					alpha: 0,
+					delay: 300,
+					onComplete: () => {
+						this.sync(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId));
+					},
+					callbackScope: this,
+				});
 			});
 		const snowballIcon = this.add.image(138, -170 + index * 85, "snowball").setScale(0.15);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
-		itemList.add([background, image, nameText, priceButton, priceText, snowballIcon]);
+		itemList.add([background, image, nameText, highlight, priceButton, priceText, snowballIcon]);
 
 		if (storeId === `${this.biomeDetail.ItemId}WithDiscount`) {
-			priceText.setY(-160 + index * 85);
-			priceButton.y = -160 + index * 85;
-			snowballIcon.setY(-160 + index * 85);
+			const newY = -160 + index * 85;
+			highlight.y = newY;
+			priceText.setY(newY);
+			priceButton.y = newY;
+			snowballIcon.setY(newY);
 
 			const fullPriceText = this.add
 				.text(121, -192 + index * 85, `${storeItem.CustomData.FullPrice} x`, {
@@ -440,27 +497,74 @@ class GameScene extends AScene {
 			.text(160 * index - 240, 80, `$${usd}`, textStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
+		const highlight = this.add
+			.existing(
+				new RoundRectangle(this, 160 * index - 240, 80, usdText.width + 16, usdText.height + 16, 10, 0xffffff)
+			)
+			.setAlpha(0);
 		const usdButton = this.add
 			.existing(
 				new RoundRectangle(this, 160 * index - 240, 80, usdText.width + 16, usdText.height + 16, 10, 0xd05c4f)
 			)
 			.setInteractive({ useHandCursor: true })
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				PlayFabClient.ExecuteCloudScript(
-					{
-						FunctionName: "grantIcicleBundle",
-						FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
+			.on("pointerover", () => {
+				usdButton.setFillStyle(0xc15349, 1);
+			})
+			.on("pointerout", () => {
+				usdButton.setFillStyle(0xd05c4f, 1);
+			})
+			.on("pointerdown", () => {
+				usdButton.setFillStyle(0xb94e46, 1);
+				this.add.tween({
+					targets: [highlight],
+					ease: "Sine.easeIn",
+					props: {
+						width: {
+							value: usdText.width + 21,
+							duration: 150,
+							ease: "Sine.easeIn",
+						},
+						height: {
+							value: usdText.height + 21,
+							duration: 150,
+							ease: "Sine.easeIn",
+						},
+						alpha: {
+							value: 0.3,
+							duration: 150,
+							ease: "Sine.easeIn",
+						},
 					},
-					(error, result) => {
-						PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
-							this.registry.values.IC += r.data.VirtualCurrency.IC;
-							this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
-						});
-					}
-				);
+					callbackScope: this,
+				});
+			})
+			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				usdButton.setFillStyle(0xd05c4f, 1);
+				this.add.tween({
+					targets: [highlight],
+					ease: "Sine.easeIn",
+					duration: 300,
+					alpha: 0,
+					delay: 300,
+					onComplete: () => {
+						PlayFabClient.ExecuteCloudScript(
+							{
+								FunctionName: "grantIcicleBundle",
+								FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
+							},
+							(error, result) => {
+								PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
+									this.registry.values.IC += r.data.VirtualCurrency.IC;
+									this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
+								});
+							}
+						);
+					},
+					callbackScope: this,
+				});
 			});
 		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-		currencyList.add([background, image, nameText, usdButton, usdText]);
+		currencyList.add([background, image, nameText, highlight, usdButton, usdText]);
 	}
 
 	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string) {
