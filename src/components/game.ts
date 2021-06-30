@@ -11,6 +11,10 @@ import {
 	overlayDepth,
 	popupDepth,
 	clickAnimationDepth,
+	closeButtonFill,
+	outlineNormal,
+	outlineHover,
+	outlineClick,
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
@@ -206,19 +210,21 @@ class GameScene extends AScene {
 			.setAlpha(0)
 			.setDepth(popupDepth);
 		const closeButton = this.add
-			.existing(new RoundRectangle(this, 175, -215, 35, 35, 5, 0xbadff2).setStrokeStyle(6, 0x6b94a5, 1))
+			.existing(
+				new RoundRectangle(this, 175, -215, 35, 35, 5, closeButtonFill).setStrokeStyle(6, outlineNormal, 1)
+			)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, 0x497282, 1);
+				closeButton.setStrokeStyle(6, outlineHover, 1);
 			})
 			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
+				closeButton.setStrokeStyle(6, outlineNormal, 1);
 			})
 			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, 0x2e5768, 1);
+				closeButton.setStrokeStyle(6, outlineClick, 1);
 			})
 			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
+				closeButton.setStrokeStyle(6, outlineNormal, 1);
 				this.add.tween({
 					targets: [this.storeContainer],
 					ease: "Sine.easeIn",
@@ -233,8 +239,8 @@ class GameScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		const line1 = this.add.line(0, 0, 175, -197.5, 192, -214.5, 0x2e5768).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 175, -214.5, 192, -197.5, 0x2e5768).setLineWidth(3, 3);
+		const line1 = this.add.line(0, 0, 175, -197.5, 192, -214.5, outlineClick).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 175, -214.5, 192, -197.5, outlineClick).setLineWidth(3, 3);
 		this.storeContainer.add([closeButton, line1, line2]);
 	}
 

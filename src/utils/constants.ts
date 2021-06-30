@@ -14,6 +14,14 @@ const buttonHover = 0xb94e46;
 
 const buttonClick = 0xa63e39;
 
+const closeButtonFill = 0xbadff2;
+
+const outlineNormal = 0x6b94a5;
+
+const outlineHover = 0x497282;
+
+const outlineClick = 0x2e5768;
+
 const darkBackgroundColor = 0x16252e;
 
 const lightBackgroundColor = 0x2e5767;
@@ -35,6 +43,10 @@ export {
 	buttonNormal,
 	buttonHover,
 	buttonClick,
+	closeButtonFill,
+	outlineNormal,
+	outlineHover,
+	outlineClick,
 	darkBackgroundColor,
 	lightBackgroundColor,
 	clickAnimationDepth,
