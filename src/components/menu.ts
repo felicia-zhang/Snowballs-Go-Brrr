@@ -157,10 +157,6 @@ class MenuScene extends AScene {
 			highlight.x = 100;
 			buttonText.setText("YES").setX(100);
 			button.setX(100).on("pointerup", () => {
-				// PlayFabClient.UpdateUserData({ KeysToRemove: ["5", "6", "7", "8", "9"] }, (e, r) => {
-				// 	console.log(e, r);
-				// 	console.log("removed LastUpdated data");
-				// });
 				// PlayFabClient.ExecuteCloudScript(
 				// 	{
 				// 		FunctionName: "updateResetStatistics",
@@ -173,29 +169,8 @@ class MenuScene extends AScene {
 				// 		console.log("update reset statistics", this.registry.get("SB"));
 				// 	}
 				// );
-				const inventoriesToRevoke: { [key: number]: string[] } = {};
-				this.registry
-					.get("Inventories")
-					.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
-					.forEach((inventory: PlayFabClientModels.ItemInstance, i) => {
-						const group = Math.floor(i / 25);
-						if (group in inventoriesToRevoke) {
-							inventoriesToRevoke[group].push(inventory.ItemInstanceId);
-						} else {
-							inventoriesToRevoke[group] = [inventory.ItemInstanceId];
-						}
-					});
-				Object.values(inventoriesToRevoke).forEach((ids: string[]) => {
-					PlayFabClient.ExecuteCloudScript(
-						{
-							FunctionName: "revokeInventoryItems",
-							FunctionParameter: { itemInstanceIds: ids },
-						},
-						(e, r) => {
-							console.log(e, r);
-						}
-					);
-				});
+				this.clearBiomesLastUpdatedData();
+				this.revokeInventoryItems();
 			});
 		} else {
 			highlight.x = -100;
@@ -215,6 +190,41 @@ class MenuScene extends AScene {
 			});
 		}
 		this.resetConfirmationContainer.add([highlight, button, buttonText]);
+	}
+
+	clearBiomesLastUpdatedData() {
+		PlayFabClient.UpdateUserData(
+			{ KeysToRemove: ["5LastUpdated", "6LastUpdated", "7LastUpdated", "8LastUpdated", "9LastUpdated"] },
+			(e, r) => {
+				console.log("Cleared biomes LastUpdated data");
+			}
+		);
+	}
+
+	revokeInventoryItems() {
+		const inventoriesToRevoke: { [key: number]: string[] } = {};
+		this.registry
+			.get("Inventories")
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
+			.forEach((inventory: PlayFabClientModels.ItemInstance, i) => {
+				const group = Math.floor(i / 25);
+				if (group in inventoriesToRevoke) {
+					inventoriesToRevoke[group].push(inventory.ItemInstanceId);
+				} else {
+					inventoriesToRevoke[group] = [inventory.ItemInstanceId];
+				}
+			});
+		Object.values(inventoriesToRevoke).forEach((ids: string[]) => {
+			PlayFabClient.ExecuteCloudScript(
+				{
+					FunctionName: "revokeInventoryItems",
+					FunctionParameter: { itemInstanceIds: ids },
+				},
+				(e, r) => {
+					console.log(e, r);
+				}
+			);
+		});
 	}
 
 	update() {
