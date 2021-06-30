@@ -17,30 +17,73 @@ class LeaderboardScene extends AScene {
 		this.list = this.add.container(230, 180, []);
 		this.add.text(400, 16, "LEADERBOARD", textStyle).setAlign("center").setOrigin(0.5, 0);
 		this.tabSelector = this.add.existing(new RoundRectangle(this, 240, 110, 160, 95, 15, darkBackgroundColor));
-		this.add
+
+		const button1Underline = this.add.line(172, 100, 172, 100, 172, 100, 0xffffff).setAlpha(0);
+		const button1 = this.add
 			.text(172, 100, "Current Snowballs", textStyle)
 			.setOrigin(0, 0.5)
 			.setAlign("left")
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				button1Underline
+					.setTo(0, 0, button1.width, 0)
+					.setPosition(172, 100 + button1.height / 2)
+					.setAlpha(1);
+			})
+			.on("pointerout", () => {
+				button1Underline.setAlpha(0);
+			})
 			.on("pointerup", () => this.showLeaderboard("5", 240, 160));
-		this.add
+
+		const button2Underline = this.add.line(400, 100, 400, 100, 400, 100, 0xffffff).setAlpha(0);
+		const button2 = this.add
 			.text(400, 100, "Total Snowballs", textStyle)
 			.setOrigin(0.5, 0.5)
 			.setAlign("center")
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				button2Underline
+					.setTo(0, 0, button2.width, 0)
+					.setPosition(400 - button2.width / 2, 100 + button2.height / 2)
+					.setAlpha(1);
+			})
+			.on("pointerout", () => {
+				button2Underline.setAlpha(0);
+			})
 			.on("pointerup", () => this.showLeaderboard("6", 400, 150));
-		this.add
+
+		const button3Underline = this.add.line(627, 100, 627, 100, 627, 100, 0xffffff).setAlpha(0);
+		const button3 = this.add
 			.text(627, 100, "Manual Clicks", textStyle)
 			.setOrigin(1, 0.5)
 			.setAlign("right")
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				button3Underline
+					.setTo(0, 0, button3.width, 0)
+					.setPosition(627 - button3.width, 100 + button3.height / 2)
+					.setAlpha(1);
+			})
+			.on("pointerout", () => {
+				button3Underline.setAlpha(0);
+			})
 			.on("pointerup", () => this.showLeaderboard("7", 573, 135));
 		this.showLeaderboard("5", 240, 160);
 
-		this.add
+		const menuButtonUnderline = this.add.line(784, 584, 784, 584, 784, 584, 0xffffff).setAlpha(0);
+		const menuButton = this.add
 			.text(784, 584, "MENU", textStyle)
 			.setOrigin(1, 1)
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				menuButtonUnderline
+					.setTo(0, 0, menuButton.width, 0)
+					.setPosition(784 - menuButton.width, 584)
+					.setAlpha(1);
+			})
+			.on("pointerout", () => {
+				menuButtonUnderline.setAlpha(0);
+			})
 			.on("pointerup", () => {
 				this.cameras.main.fadeOut(500, 0, 0, 0);
 				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
