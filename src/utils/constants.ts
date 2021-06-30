@@ -10,9 +10,9 @@ const errorHex = "#ff7360";
 
 const buttonNormal = 0xd05c4f;
 
-const buttonHover = 0xc15349;
+const buttonHover = 0xb94e46;
 
-const buttonClick = 0xb94e46;
+const buttonClick = 0xa63e39;
 
 const darkBackgroundColor = 0x16252e;
 

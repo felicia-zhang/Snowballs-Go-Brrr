@@ -572,7 +572,6 @@ class GameScene extends AScene {
 						});
 					}
 				);
-				usdButton.setFillStyle(buttonNormal, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
