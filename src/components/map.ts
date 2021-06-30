@@ -94,29 +94,41 @@ class MapScene extends AScene {
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
-		this.interactiveObjects.push(
-			this.add
-				.text(16, 544, "MENU", textStyle)
-				.setOrigin(0, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
-					this.cameras.main.fadeOut(500, 0, 0, 0);
-					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-						this.scene.start("Menu");
-					});
-				})
-		);
+		const menuButtonUnderline = this.add.line(16, 544, 16, 544, 16, 544, 0xffffff).setAlpha(0);
+		const menuButton = this.add
+			.text(16, 544, "MENU", textStyle)
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				menuButtonUnderline.setTo(0, 0, menuButton.width, 0).setPosition(16, 544).setAlpha(1);
+			})
+			.on("pointerout", () => {
+				menuButtonUnderline.setAlpha(0);
+			})
+			.on("pointerup", () => {
+				this.cameras.main.fadeOut(500, 0, 0, 0);
+				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+					this.scene.start("Menu");
+				});
+			});
+		this.interactiveObjects.push(menuButton);
 
-		this.interactiveObjects.push(
-			this.add
-				.text(16, 584, "IN-APP PURCHASE EXAMPLE", textStyle)
-				.setOrigin(0, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
-					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showCurrencyContainer();
-				})
-		);
+		const iapButtonUnderline = this.add.line(16, 584, 16, 584, 16, 584, 0xffffff).setAlpha(0);
+		const iapButton = this.add
+			.text(16, 584, "IN-APP PURCHASE EXAMPLE", textStyle)
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				iapButtonUnderline.setTo(0, 0, iapButton.width, 0).setPosition(16, 584).setAlpha(1);
+			})
+			.on("pointerout", () => {
+				iapButtonUnderline.setAlpha(0);
+			})
+			.on("pointerup", () => {
+				this.interactiveObjects.forEach(object => object.disableInteractive());
+				this.showCurrencyContainer();
+			});
+		this.interactiveObjects.push(iapButton);
 	}
 
 	updateData(parent, key, data) {
