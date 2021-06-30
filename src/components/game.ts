@@ -683,8 +683,8 @@ class GameScene extends AScene {
 		} else {
 			PlayFabClient.ExecuteCloudScript(
 				{
-					FunctionName: "addUserVirtualCurrency",
-					FunctionParameter: { amount: totalAdded, virtualCurrency: "SB" },
+					FunctionName: "addSnowballs",
+					FunctionParameter: { amount: totalAdded },
 				},
 				(error, result) => {
 					console.log("Amount of snowballs added:", totalAdded);

@@ -1,4 +1,4 @@
-import { PlayFabClient } from "playfab-sdk";
+import { PlayFab, PlayFabClient, PlayFabServer } from "playfab-sdk";
 import {
 	buttonClick,
 	buttonHover,
@@ -170,6 +170,7 @@ class MenuScene extends AScene {
 				// 	}
 				// );
 				this.clearBiomesLastUpdatedData();
+				this.subtractSnowballs();
 				this.revokeInventoryItems();
 			});
 		} else {
@@ -197,6 +198,19 @@ class MenuScene extends AScene {
 			{ KeysToRemove: ["5LastUpdated", "6LastUpdated", "7LastUpdated", "8LastUpdated", "9LastUpdated"] },
 			(e, r) => {
 				console.log("Cleared biomes LastUpdated data");
+			}
+		);
+	}
+
+	subtractSnowballs() {
+		PlayFabClient.ExecuteCloudScript(
+			{
+				FunctionName: "subtractSnowballs",
+				FunctionParameter: { amount: this.registry.get("SB") },
+			},
+			(e, r) => {
+				console.log(e, r);
+				console.log("subtracted snowballs");
 			}
 		);
 	}
