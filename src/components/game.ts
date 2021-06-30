@@ -107,57 +107,81 @@ class GameScene extends AScene {
 			.setAlign("center")
 			.setOrigin(0.5, 0);
 
-		this.interactiveObjects.push(
-			this.add
-				.text(16, 544, "MENU", textStyle)
-				.setOrigin(0, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
-					this.sync(() => {
-						this.cameras.main.fadeOut(500, 0, 0, 0);
-						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-							this.scene.start("Menu");
-						});
+		const storeButtonUnderline = this.add.line(16, 464, 16, 464, 16, 464, 0xffffff).setAlpha(0);
+		const storeButton = this.add
+			.text(16, 464, "STORE", textStyle)
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				storeButtonUnderline.setTo(0, 0, storeButton.width, 0).setPosition(16, 464).setAlpha(1);
+			})
+			.on("pointerout", () => {
+				storeButtonUnderline.setAlpha(0);
+			})
+			.on("pointerup", () => {
+				this.interactiveObjects.forEach(object => object.disableInteractive());
+				this.showStoreContainer();
+			});
+		this.interactiveObjects.push(storeButton);
+
+		const mapButtonUnderline = this.add.line(16, 504, 16, 504, 16, 504, 0xffffff).setAlpha(0);
+		const mapButton = this.add
+			.text(16, 504, "MAP", textStyle)
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				mapButtonUnderline.setTo(0, 0, mapButton.width, 0).setPosition(16, 504).setAlpha(1);
+			})
+			.on("pointerout", () => {
+				mapButtonUnderline.setAlpha(0);
+			})
+			.on("pointerup", () => {
+				this.sync(() => {
+					this.cameras.main.fadeOut(500, 0, 0, 0);
+					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+						this.scene.start("Map");
 					});
-				})
-		);
+				});
+			});
+		this.interactiveObjects.push(mapButton);
 
-		this.interactiveObjects.push(
-			this.add
-				.text(16, 504, "MAP", textStyle)
-				.setOrigin(0, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
-					this.sync(() => {
-						this.cameras.main.fadeOut(500, 0, 0, 0);
-						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-							this.scene.start("Map");
-						});
+		const menuButtonUnderline = this.add.line(16, 544, 16, 544, 16, 544, 0xffffff).setAlpha(0);
+		const menuButton = this.add
+			.text(16, 544, "MENU", textStyle)
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				menuButtonUnderline.setTo(0, 0, menuButton.width, 0).setPosition(16, 544).setAlpha(1);
+			})
+			.on("pointerout", () => {
+				menuButtonUnderline.setAlpha(0);
+			})
+			.on("pointerup", () => {
+				this.sync(() => {
+					this.cameras.main.fadeOut(500, 0, 0, 0);
+					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+						this.scene.start("Menu");
 					});
-				})
-		);
+				});
+			});
+		this.interactiveObjects.push(menuButton);
 
-		this.interactiveObjects.push(
-			this.add
-				.text(16, 584, "IN-APP PURCHASE EXAMPLE", textStyle)
-				.setOrigin(0, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
-					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showCurrencyContainer();
-				})
-		);
-
-		this.interactiveObjects.push(
-			this.add
-				.text(16, 464, "STORE", textStyle)
-				.setOrigin(0, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
-					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showStoreContainer();
-				})
-		);
+		const iapButtonUnderline = this.add.line(16, 584, 16, 584, 16, 584, 0xffffff).setAlpha(0);
+		const iapButton = this.add
+			.text(16, 584, "IN-APP PURCHASE EXAMPLE", textStyle)
+			.setOrigin(0, 1)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				iapButtonUnderline.setTo(0, 0, iapButton.width, 0).setPosition(16, 584).setAlpha(1);
+			})
+			.on("pointerout", () => {
+				iapButtonUnderline.setAlpha(0);
+			})
+			.on("pointerup", () => {
+				this.interactiveObjects.forEach(object => object.disableInteractive());
+				this.showCurrencyContainer();
+			});
+		this.interactiveObjects.push(iapButton);
 	}
 
 	updateData(parent, key, data) {
