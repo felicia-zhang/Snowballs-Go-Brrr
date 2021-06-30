@@ -20,17 +20,13 @@ class GameScene extends AScene {
 	totalAddedSnowballs: number;
 	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	currencyItems: PlayFabClientModels.StoreItem[];
 	storeItems: PlayFabClientModels.StoreItem[];
-	itemsMap: { [key: number]: ItemDetail };
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
 	icicleText: Phaser.GameObjects.Text;
 	icicleIcon: Phaser.GameObjects.Image;
-	currencyContainer: Phaser.GameObjects.Container;
 	storeContainer: Phaser.GameObjects.Container;
 	inventoryContainer: Phaser.GameObjects.Container;
-	interactiveGameObjects: Phaser.GameObjects.GameObject[];
 
 	constructor() {
 		super("Game");
@@ -43,14 +39,10 @@ class GameScene extends AScene {
 		this.clickMultiplier = 1;
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
-		this.currencyItems = [];
 		this.storeItems = [];
-		this.itemsMap = {};
 		this.inventoryContainer = this.add.container(170, 5, []);
-		this.interactiveGameObjects = [];
 		this.makePenguin();
 		this.makeStoreContainer();
-		this.makeCurrencyContainer();
 
 		this.registry
 			.get("CatalogItems")
@@ -111,7 +103,7 @@ class GameScene extends AScene {
 
 		this.add.text(400, 16, this.biomeDetail.DisplayName, textStyle).setAlign("center").setOrigin(0.5, 0.5);
 
-		this.interactiveGameObjects.push(
+		this.interactiveObjects.push(
 			this.add
 				.text(16, 584, "MENU", textStyle)
 				.setOrigin(0, 1)
@@ -126,7 +118,7 @@ class GameScene extends AScene {
 				})
 		);
 
-		this.interactiveGameObjects.push(
+		this.interactiveObjects.push(
 			this.add
 				.text(16, 544, "MAP", textStyle)
 				.setOrigin(0, 1)
@@ -141,24 +133,24 @@ class GameScene extends AScene {
 				})
 		);
 
-		this.interactiveGameObjects.push(
+		this.interactiveObjects.push(
 			this.add
 				.text(784, 544, "IN-APP PURCHASE EXAMPLE", textStyle)
 				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.interactiveGameObjects.forEach(object => object.disableInteractive());
+					this.interactiveObjects.forEach(object => object.disableInteractive());
 					this.showCurrencyContainer();
 				})
 		);
 
-		this.interactiveGameObjects.push(
+		this.interactiveObjects.push(
 			this.add
 				.text(784, 584, "STORE", textStyle)
 				.setOrigin(1, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.interactiveGameObjects.forEach(object => object.disableInteractive());
+					this.interactiveObjects.forEach(object => object.disableInteractive());
 					this.showStoreContainer();
 				})
 		);
@@ -174,87 +166,6 @@ class GameScene extends AScene {
 		if (!this.registry.has("FinishedSignIn")) {
 			this.scene.start("Signin");
 		}
-	}
-
-	makeCurrencyContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
-		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, darkBackgroundColor));
-		const currencyList = this.add.container(0, 0, []);
-		const text = this.add
-			.text(
-				0,
-				160,
-				"*This is a mock of the payment process. \nNo real transaction will take place in the PlayFab backend.",
-				textStyle
-			)
-			.setAlign("center")
-			.setOrigin(0.5, 0.5);
-		this.currencyContainer = this.add
-			.container(400, 300, [overlay, mainBackground, currencyList, text])
-			.setAlpha(0)
-			.setDepth(20);
-		const closeButton = this.add
-			.image(320, -115, "close")
-			.setScale(0.35)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				this.add.tween({
-					targets: [this.currencyContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveGameObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-						currencyList.removeAll(true);
-						this.currencyItems = [];
-					},
-					callbackScope: this,
-				});
-			});
-		this.currencyContainer.add(closeButton);
-	}
-
-	showCurrencyContainer() {
-		PlayFabClient.GetStoreItems({ StoreId: "CurrenciesWithDiscount" }, (error, result) => {
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeCurrency(storeItem);
-			});
-			const overlay = this.currencyContainer.getAt(0) as Phaser.GameObjects.Rectangle;
-			const bg = this.currencyContainer.getAt(1) as RoundRectangle;
-			const closeButton = this.currencyContainer.getAt(4) as Phaser.GameObjects.Image;
-			if (result.data.StoreId === "CurrenciesWithDiscount") {
-				overlay.setY(-25);
-				bg.height = 305;
-				bg.y = -25;
-				closeButton.setY(-165);
-				this.currencyContainer.setY(325);
-				const discountText = this.add
-					.text(
-						0,
-						-145,
-						"ONE TIME OFFER!!\nReceive 10% off ALL in-game items after your first icicle purchase!",
-						textStyle
-					)
-					.setAlign("center")
-					.setOrigin(0.5, 0.5);
-				const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-				currencyList.add(discountText);
-			} else {
-				overlay.setY(0);
-				bg.height = 255;
-				bg.y = 0;
-				closeButton.setY(-115);
-				this.currencyContainer.setY(300);
-			}
-		});
-		this.add.tween({
-			targets: [this.currencyContainer],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 1,
-			callbackScope: this,
-		});
 	}
 
 	makeStoreContainer() {
@@ -277,7 +188,7 @@ class GameScene extends AScene {
 					duration: 100,
 					alpha: 0,
 					onComplete: () => {
-						this.interactiveGameObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
 						itemList.removeAll(true);
 						this.storeItems = [];
@@ -340,7 +251,7 @@ class GameScene extends AScene {
 					}
 				}
 			});
-		this.interactiveGameObjects.push(sprite);
+		this.interactiveObjects.push(sprite);
 		return sprite;
 	}
 
@@ -495,96 +406,6 @@ class GameScene extends AScene {
 		}
 	}
 
-	makeCurrency(storeItem: PlayFabClientModels.StoreItem) {
-		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
-		const usd = storeItem.VirtualCurrencyPrices.RM;
-
-		const index = this.currencyItems.length;
-		const x = 160 * index - 240;
-		this.currencyItems.push(storeItem);
-		const background = this.add.existing(new RoundRectangle(this, x, 0, 140, 220, 15, lightBackgroundColor));
-
-		let imageKey: string;
-		if (storeItem.ItemId === "100") {
-			imageKey = "icicle1";
-		} else if (storeItem.ItemId === "101") {
-			imageKey = "icicle2";
-		} else if (storeItem.ItemId === "102") {
-			imageKey = "icicle3";
-		} else if (storeItem.ItemId === "103") {
-			imageKey = "icicle4";
-		}
-		const image = this.add.image(x, -10, imageKey).setScale(0.7);
-		const nameText = this.add
-			.text(x, -90, itemDetail.DisplayName.toUpperCase(), textStyle)
-			.setAlign("center")
-			.setOrigin(0.5, 0.5);
-		const usdText = this.add.text(x, 80, `$ ${usd}.00`, textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const highlight = this.add
-			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, 0xffffff))
-			.setAlpha(0);
-		const usdButton = this.add
-			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, buttonNormal))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				usdButton.setFillStyle(buttonHover, 1);
-			})
-			.on("pointerout", () => {
-				usdButton.setFillStyle(buttonNormal, 1);
-			})
-			.on("pointerdown", () => {
-				usdButton.setFillStyle(buttonClick, 1);
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					props: {
-						width: {
-							value: usdText.width + 21,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						height: {
-							value: usdText.height + 21,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						alpha: {
-							value: 0.3,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-					},
-					callbackScope: this,
-				});
-			})
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.setCurrencyLoading(true, usd, usdButton, usdText, highlight);
-				PlayFabClient.ExecuteCloudScript(
-					{
-						FunctionName: "grantIcicleBundle",
-						FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
-					},
-					(error, result) => {
-						PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
-							this.setCurrencyLoading(false, usd, usdButton, usdText, highlight);
-							this.registry.values.IC += r.data.VirtualCurrency.IC;
-							this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
-						});
-					}
-				);
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					duration: 300,
-					alpha: 0,
-					delay: 300,
-					callbackScope: this,
-				});
-			});
-		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-		currencyList.add([background, image, nameText, highlight, usdButton, usdText]);
-	}
-
 	setItemLoading(
 		isLoading: boolean,
 		price: number,
@@ -616,35 +437,6 @@ class GameScene extends AScene {
 				});
 			highlight.setAlpha(0);
 			icon.setAlpha(1);
-		}
-	}
-
-	setCurrencyLoading(
-		isLoading: boolean,
-		usd: number,
-		button: RoundRectangle,
-		text: Phaser.GameObjects.Text,
-		highlight: RoundRectangle
-	) {
-		if (isLoading) {
-			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
-				fontFamily: fontFamily,
-				fontSize: "32px",
-				stroke: "#ffffff",
-				strokeThickness: 3,
-			});
-			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
-		} else {
-			text.setText(`$ ${usd}.00`)
-				.setOrigin(0.5, 0.5)
-				.setStyle({ ...textStyle, strokeThickness: 0 });
-			button
-				.setFillStyle(buttonNormal, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerout", () => {
-					button.setFillStyle(buttonNormal, 1);
-				});
-			highlight.setAlpha(0);
 		}
 	}
 

@@ -9,7 +9,7 @@ import {
 	textStyle,
 	lightBackgroundColor,
 } from "../utils/constants";
-import { BiomeDetail, ItemCounter } from "../utils/types";
+import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 
@@ -24,7 +24,6 @@ class MapScene extends AScene {
 	icicleIcon: Phaser.GameObjects.Image;
 	biomeOwnedContainer: Phaser.GameObjects.Container;
 	biomeNotOwnedContainer: Phaser.GameObjects.Container;
-	interactiveMapObjects: Phaser.GameObjects.GameObject[];
 	storeId: string;
 
 	constructor() {
@@ -36,15 +35,12 @@ class MapScene extends AScene {
 		this.add.image(400, 300, "sky");
 		this.biomeMap = {};
 		this.biomeItems = {};
-		this.interactiveMapObjects = [];
 		this.add.text(400, 16, "Map", textStyle).setOrigin(0.5, 0.5).setAlign("center");
 		this.makeBiomeOwnedContainer();
 		this.makeBiomeNotOwnedContainer();
 
-		this.registry
-			.get("CatalogItems")
-			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass === "biome")
-			.forEach((item: PlayFabClientModels.CatalogItem) => {
+		this.registry.get("CatalogItems").forEach((item: PlayFabClientModels.CatalogItem) => {
+			if (item.ItemClass === "biome") {
 				this.biomeMap[item.ItemId] = {
 					ItemId: item.ItemId,
 					FullSnowballPrice: item.VirtualCurrencyPrices.SB,
@@ -52,7 +48,15 @@ class MapScene extends AScene {
 					DisplayName: item.DisplayName,
 					Description: item.Description,
 				} as BiomeDetail;
-			});
+			} else {
+				this.itemsMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					DisplayName: item.DisplayName,
+					Description: item.Description,
+					Instances: {},
+				} as ItemDetail;
+			}
+		});
 
 		const inventories: PlayFabClientModels.ItemInstance[] = this.registry.get("Inventories");
 		inventories
@@ -88,7 +92,7 @@ class MapScene extends AScene {
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
-		this.interactiveMapObjects.push(
+		this.interactiveObjects.push(
 			this.add
 				.text(16, 584, "MENU", textStyle)
 				.setOrigin(0, 1)
@@ -98,6 +102,17 @@ class MapScene extends AScene {
 					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 						this.scene.start("Menu");
 					});
+				})
+		);
+
+		this.interactiveObjects.push(
+			this.add
+				.text(784, 544, "IN-APP PURCHASE EXAMPLE", textStyle)
+				.setOrigin(1, 1)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerup", () => {
+					this.interactiveObjects.forEach(object => object.disableInteractive());
+					this.showCurrencyContainer();
 				})
 		);
 	}
@@ -133,13 +148,13 @@ class MapScene extends AScene {
 			x = 490;
 			y = 400;
 		}
-		this.interactiveMapObjects.push(
+		this.interactiveObjects.push(
 			this.add
 				.image(x, y, imageKey)
 				.setScale(0.5)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
-					this.interactiveMapObjects.forEach(object => object.disableInteractive());
+					this.interactiveObjects.forEach(object => object.disableInteractive());
 					biome.ItemId in this.biomeItems
 						? this.showBiomeOwnedContainer(biome, imageKey)
 						: this.showBiomeNotOwnedContainer(biome, imageKey);
@@ -214,7 +229,7 @@ class MapScene extends AScene {
 					duration: 100,
 					alpha: 0,
 					onComplete: () => {
-						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						button.removeListener("pointerup");
 						highlight.setAlpha(0);
 						const counterText = details.getAt(5) as Phaser.GameObjects.Container;
@@ -334,7 +349,7 @@ class MapScene extends AScene {
 					duration: 100,
 					alpha: 0,
 					onComplete: () => {
-						this.interactiveMapObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						snowballButton.removeListener("pointerup");
 						icicleButton.removeListener("pointerup");
 						snowballHighlight.setAlpha(0);
