@@ -1,4 +1,3 @@
-import { PlayFabClient } from "playfab-sdk";
 import LeaderboardScene from "./leaderboard";
 import GameScene from "./game";
 import SigninScene from "./signin";
@@ -14,7 +13,6 @@ import icicle4 from "../assets/icicle4.png";
 import snowman from "../assets/snowman.png";
 import mittens from "../assets/mittens.png";
 import vault from "../assets/vault.png";
-import close from "../assets/close.png";
 import lock from "../assets/lock.png";
 import penguin1 from "../assets/penguin1.png";
 import penguin2 from "../assets/penguin2.png";
@@ -46,7 +44,6 @@ class Controller extends AScene {
 		this.load.image("snowman", snowman);
 		this.load.image("mittens", mittens);
 		this.load.image("vault", vault);
-		this.load.image("close", close);
 		this.load.image("lock", lock);
 		this.load.image("penguin1", penguin1);
 		this.load.image("penguin2", penguin2);

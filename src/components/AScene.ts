@@ -56,10 +56,19 @@ abstract class AScene extends Phaser.Scene {
 			.setAlpha(0)
 			.setDepth(popupDepth);
 		const closeButton = this.add
-			.image(320, -115, "close")
-			.setScale(0.35)
+			.existing(new RoundRectangle(this, 320, -115, 35, 35, 5, 0xbadff2).setStrokeStyle(6, 0x6b94a5, 1))
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				closeButton.setStrokeStyle(6, 0x497282, 1);
+			})
+			.on("pointerout", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
+			})
+			.on("pointerdown", () => {
+				closeButton.setStrokeStyle(6, 0x2e5768, 1);
+			})
 			.on("pointerup", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
 				this.add.tween({
 					targets: [this.currencyContainer],
 					ease: "Sine.easeIn",
@@ -74,7 +83,9 @@ abstract class AScene extends Phaser.Scene {
 					callbackScope: this,
 				});
 			});
-		this.currencyContainer.add(closeButton);
+		const line1 = this.add.line(0, 0, 320, -97.5, 337, -114.5, 0x2e5768).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 320, -114.5, 337, -97.5, 0x2e5768).setLineWidth(3, 3);
+		this.currencyContainer.add([closeButton, line1, line2]);
 	}
 
 	showCurrencyContainer() {

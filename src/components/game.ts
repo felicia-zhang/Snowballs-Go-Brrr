@@ -206,10 +206,19 @@ class GameScene extends AScene {
 			.setAlpha(0)
 			.setDepth(popupDepth);
 		const closeButton = this.add
-			.image(175, -215, "close")
-			.setScale(0.35)
+			.existing(new RoundRectangle(this, 175, -215, 35, 35, 5, 0xbadff2).setStrokeStyle(6, 0x6b94a5, 1))
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				closeButton.setStrokeStyle(6, 0x497282, 1);
+			})
+			.on("pointerout", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
+			})
+			.on("pointerdown", () => {
+				closeButton.setStrokeStyle(6, 0x2e5768, 1);
+			})
 			.on("pointerup", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
 				this.add.tween({
 					targets: [this.storeContainer],
 					ease: "Sine.easeIn",
@@ -224,7 +233,9 @@ class GameScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		this.storeContainer.add(closeButton);
+		const line1 = this.add.line(0, 0, 175, -197.5, 192, -214.5, 0x2e5768).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 175, -214.5, 192, -197.5, 0x2e5768).setLineWidth(3, 3);
+		this.storeContainer.add([closeButton, line1, line2]);
 	}
 
 	showStoreContainer() {

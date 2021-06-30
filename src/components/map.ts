@@ -233,10 +233,19 @@ class MapScene extends AScene {
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
-			.image(245, -160, "close")
-			.setScale(0.35)
+			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, 0xbadff2).setStrokeStyle(6, 0x6b94a5, 1))
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				closeButton.setStrokeStyle(6, 0x497282, 1);
+			})
+			.on("pointerout", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
+			})
+			.on("pointerdown", () => {
+				closeButton.setStrokeStyle(6, 0x2e5768, 1);
+			})
 			.on("pointerup", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
 				this.add.tween({
 					targets: [this.biomeOwnedContainer],
 					ease: "Sine.easeIn",
@@ -252,7 +261,9 @@ class MapScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		popup.add(closeButton);
+		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, 0x2e5768).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, 0x2e5768).setLineWidth(3, 3);
+		popup.add([closeButton, line1, line2]);
 		this.biomeOwnedContainer = popup;
 	}
 
@@ -353,10 +364,19 @@ class MapScene extends AScene {
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
-			.image(245, -160, "close")
-			.setScale(0.35)
+			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, 0xbadff2).setStrokeStyle(6, 0x6b94a5, 1))
 			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				closeButton.setStrokeStyle(6, 0x497282, 1);
+			})
+			.on("pointerout", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
+			})
+			.on("pointerdown", () => {
+				closeButton.setStrokeStyle(6, 0x2e5768, 1);
+			})
 			.on("pointerup", () => {
+				closeButton.setStrokeStyle(6, 0x6b94a5, 1);
 				this.add.tween({
 					targets: [this.biomeNotOwnedContainer],
 					ease: "Sine.easeIn",
@@ -374,7 +394,9 @@ class MapScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		popup.add(closeButton);
+		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, 0x2e5768).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, 0x2e5768).setLineWidth(3, 3);
+		popup.add([closeButton, line1, line2]);
 		this.biomeNotOwnedContainer = popup;
 	}
 
