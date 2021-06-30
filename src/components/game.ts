@@ -69,9 +69,9 @@ class GameScene extends AScene {
 			)
 			.forEach(inventory => this.makeInventoryItem(inventory));
 
-		PlayFabClient.GetUserData({ Keys: [this.biomeDetail.ItemId] }, (error, result) => {
-			if (result.data.Data[this.biomeDetail.ItemId] !== undefined) {
-				const lastUpdated = result.data.Data[this.biomeDetail.ItemId].Value;
+		PlayFabClient.GetUserData({ Keys: [`${this.biomeDetail.ItemId}LastUpdated`] }, (error, result) => {
+			if (result.data.Data[`${this.biomeDetail.ItemId}LastUpdated`] !== undefined) {
+				const lastUpdated = result.data.Data[`${this.biomeDetail.ItemId}LastUpdated`].Value;
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
 				console.log("Elapsed seconds:", elapsedSeconds);
@@ -507,7 +507,7 @@ class GameScene extends AScene {
 				} else {
 					PlayFabClient.ExecuteCloudScript(
 						{
-							FunctionName: "updateCustomData",
+							FunctionName: "updateInventoryCustomData",
 							FunctionParameter: {
 								instanceId: r.data.Items[0].ItemInstanceId,
 								biomeId: this.biomeDetail.ItemId,
@@ -669,7 +669,7 @@ class GameScene extends AScene {
 
 	sync(func: () => any) {
 		PlayFabClient.UpdateUserData(
-			{ Data: { [this.biomeDetail.ItemId]: new Date().valueOf().toString() } },
+			{ Data: { [`${this.biomeDetail.ItemId}LastUpdated`]: new Date().valueOf().toString() } },
 			() => {}
 		);
 
