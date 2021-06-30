@@ -1,6 +1,6 @@
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
-import { fontFamily, normalFontSize } from "./utils/font";
+import { fontFamily, normalFontSize } from "./utils/constants";
 import { Button } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 

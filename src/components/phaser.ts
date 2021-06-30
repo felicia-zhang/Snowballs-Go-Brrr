@@ -35,16 +35,17 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller");
 	}
 
-	grantInitialItemToNewPlayer() {
+	grantInitialItemToNewPlayer(finishSignIn: () => void) {
 		PlayFabClient.ExecuteCloudScript(
 			{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
 			(error, result) => {
 				console.log("Granted initial items to new player", result.data.FunctionResult);
+				finishSignIn();
 			}
 		);
 	}
 
-	socialSignInCallback(error: PlayFabModule.IPlayFabError, result, name: string) {
+	socialSignInCallback(error: PlayFabModule.IPlayFabError, result, name: string, finishSignIn: () => void) {
 		if (result === null) {
 			console.log("Failed to sign in", error);
 		} else {
@@ -52,13 +53,15 @@ export class PhaserGame extends Phaser.Game {
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});
-				this.grantInitialItemToNewPlayer();
+				this.grantInitialItemToNewPlayer(finishSignIn);
+			} else {
+				finishSignIn();
 			}
 			console.log("Signed in as", result.data.PlayFabId);
 		}
 	}
 
-	playfabSignInCallback(error: PlayFabModule.IPlayFabError, result, handlePlayFab: (success: boolean) => void) {
+	playfabSignInCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: () => void) {
 		if (result === null) {
 			if (this.scene.isActive("Signin")) {
 				const scene = this.scene.getScene("Signin") as SigninScene;
@@ -66,12 +69,12 @@ export class PhaserGame extends Phaser.Game {
 				scene.showToast(`${errorMessage}`, true);
 			}
 		} else {
-			handlePlayFab(true);
+			finishSignIn();
 			console.log(`Signed in as ${result.data.PlayFabId}`);
 		}
 	}
 
-	playfabRegisterCallback(error: PlayFabModule.IPlayFabError, result, handlePlayFab: (success: boolean) => void) {
+	playfabRegisterCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: () => void) {
 		if (result === null) {
 			console.log(error);
 			if (this.scene.isActive("Signin")) {
@@ -80,24 +83,23 @@ export class PhaserGame extends Phaser.Game {
 				scene.showToast(`${errorMessage}`, true);
 			}
 		} else {
-			handlePlayFab(true);
 			console.log(`Registered as ${result.data.PlayFabId}`);
-			this.grantInitialItemToNewPlayer();
+			this.grantInitialItemToNewPlayer(finishSignIn);
 		}
 	}
 
-	signInWithPlayFab(username: string, password: string, handlePlayFab: (success: boolean) => void) {
+	signInWithPlayFab(username: string, password: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithPlayFab(
 			{
 				Username: username,
 				Password: password,
 			},
-			(error, result) => this.playfabSignInCallback(error, result, handlePlayFab)
+			(error, result) => this.playfabSignInCallback(error, result, finishSignIn)
 		);
 	}
 
-	registerWithPlayFab(email: string, username: string, password: string, handlePlayFab: (success: boolean) => void) {
+	registerWithPlayFab(email: string, username: string, password: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.RegisterPlayFabUser(
 			{
@@ -107,30 +109,30 @@ export class PhaserGame extends Phaser.Game {
 				Password: password,
 			},
 			(error, result) => {
-				this.playfabRegisterCallback(error, result, handlePlayFab);
+				this.playfabRegisterCallback(error, result, finishSignIn);
 			}
 		);
 	}
 
-	signInWithGoogle(accessToken: string, name: string) {
+	signInWithGoogle(accessToken: string, name: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithGoogleAccount(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			} as LoginWithGoogleAccountRequest,
-			(error, result) => this.socialSignInCallback(error, result, name)
+			(error, result) => this.socialSignInCallback(error, result, name, finishSignIn)
 		);
 	}
 
-	signInWithFacebook(accessToken: string, name: string) {
+	signInWithFacebook(accessToken: string, name: string, finishSignIn: () => void) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithFacebook(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			},
-			(error, result) => this.socialSignInCallback(error, result, name)
+			(error, result) => this.socialSignInCallback(error, result, name, finishSignIn)
 		);
 	}
 }
