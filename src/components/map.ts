@@ -35,7 +35,7 @@ class MapScene extends AScene {
 		this.add.image(400, 300, "sky");
 		this.biomeMap = {};
 		this.biomeItems = {};
-		this.add.text(400, 16, "Map", textStyle).setOrigin(0.5, 0.5).setAlign("center");
+		this.add.text(400, 16, "MAP", textStyle).setAlign("center").setOrigin(0.5, 0);
 		this.makeBiomeOwnedContainer();
 		this.makeBiomeNotOwnedContainer();
 
@@ -94,7 +94,7 @@ class MapScene extends AScene {
 
 		this.interactiveObjects.push(
 			this.add
-				.text(16, 584, "MENU", textStyle)
+				.text(16, 544, "MENU", textStyle)
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
@@ -107,8 +107,8 @@ class MapScene extends AScene {
 
 		this.interactiveObjects.push(
 			this.add
-				.text(784, 544, "IN-APP PURCHASE EXAMPLE", textStyle)
-				.setOrigin(1, 1)
+				.text(16, 584, "IN-APP PURCHASE EXAMPLE", textStyle)
+				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());

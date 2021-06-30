@@ -24,11 +24,11 @@ abstract class AScene extends Phaser.Scene {
 
 	init() {
 		this.toast = this.add
-			.text(400, 16, "", textStyle)
+			.text(400, 584, "", textStyle)
 			.setAlpha(0)
 			.setDepth(22)
 			.setAlign("center")
-			.setOrigin(0.5, 0);
+			.setOrigin(0.5, 1);
 		this.currencyItems = [];
 		this.itemsMap = {};
 		this.interactiveObjects = [];

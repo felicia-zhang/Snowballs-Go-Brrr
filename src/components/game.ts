@@ -40,7 +40,7 @@ class GameScene extends AScene {
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
-		this.inventoryContainer = this.add.container(170, 5, []);
+		this.inventoryContainer = this.add.container(170, 0, []);
 		this.makePenguin();
 		this.makeStoreContainer();
 
@@ -101,11 +101,14 @@ class GameScene extends AScene {
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
-		this.add.text(400, 16, this.biomeDetail.DisplayName, textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		this.add
+			.text(400, 16, this.biomeDetail.DisplayName.toUpperCase(), textStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
 
 		this.interactiveObjects.push(
 			this.add
-				.text(16, 584, "MENU", textStyle)
+				.text(16, 544, "MENU", textStyle)
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
@@ -120,7 +123,7 @@ class GameScene extends AScene {
 
 		this.interactiveObjects.push(
 			this.add
-				.text(16, 544, "MAP", textStyle)
+				.text(16, 504, "MAP", textStyle)
 				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
@@ -135,8 +138,8 @@ class GameScene extends AScene {
 
 		this.interactiveObjects.push(
 			this.add
-				.text(784, 544, "IN-APP PURCHASE EXAMPLE", textStyle)
-				.setOrigin(1, 1)
+				.text(16, 584, "IN-APP PURCHASE EXAMPLE", textStyle)
+				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
@@ -146,8 +149,8 @@ class GameScene extends AScene {
 
 		this.interactiveObjects.push(
 			this.add
-				.text(784, 584, "STORE", textStyle)
-				.setOrigin(1, 1)
+				.text(16, 464, "STORE", textStyle)
+				.setOrigin(0, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerup", () => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());

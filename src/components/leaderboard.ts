@@ -15,7 +15,7 @@ class LeaderboardScene extends AScene {
 		this.add.image(400, 300, "sky");
 		this.add.existing(new RoundRectangle(this, 400, 330, 480, 400, 15, darkBackgroundColor));
 		this.list = this.add.container(230, 180, []);
-		this.add.text(400, 16, "Leaderboard", textStyle).setOrigin(0.5, 0.5).setAlign("center");
+		this.add.text(400, 16, "LEADERBOARD", textStyle).setAlign("center").setOrigin(0.5, 0);
 		this.tabSelector = this.add.existing(new RoundRectangle(this, 240, 110, 160, 95, 15, darkBackgroundColor));
 		this.add
 			.text(172, 100, "Current Snowballs", textStyle)

@@ -10,7 +10,7 @@ class MenuScene extends AScene {
 	create() {
 		this.cameras.main.fadeIn(500, 0, 0, 0);
 		this.add.image(400, 300, "sky");
-		this.add.text(400, 16, "Menu", textStyle).setOrigin(0.5, 0.5).setAlign("center");
+		this.add.text(400, 16, "MENU", textStyle).setAlign("center").setOrigin(0.5, 0);
 
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			this.registry.set("CatalogItems", result.data.Catalog);
