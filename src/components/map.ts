@@ -8,6 +8,8 @@ import {
 	smallFontSize,
 	textStyle,
 	lightBackgroundColor,
+	overlayDepth,
+	popupDepth,
 } from "../utils/constants";
 import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
@@ -166,7 +168,7 @@ class MapScene extends AScene {
 	}
 
 	makeBiomeOwnedContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, darkBackgroundColor));
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, lightBackgroundColor));
@@ -217,7 +219,7 @@ class MapScene extends AScene {
 			this.add.container(-84, -15, []),
 			description,
 		]);
-		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
+		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -160, "close")
 			.setScale(0.35)
@@ -243,7 +245,7 @@ class MapScene extends AScene {
 	}
 
 	makeBiomeNotOwnedContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, darkBackgroundColor));
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, lightBackgroundColor));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
@@ -337,7 +339,7 @@ class MapScene extends AScene {
 			this.add.container(0, 0, []),
 			description,
 		]);
-		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(20).setAlpha(0);
+		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
 			.image(245, -160, "close")
 			.setScale(0.35)

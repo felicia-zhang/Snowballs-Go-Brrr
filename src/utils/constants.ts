@@ -18,6 +18,14 @@ const darkBackgroundColor = 0x16252e;
 
 const lightBackgroundColor = 0x2e5767;
 
+const clickAnimationDepth = 1;
+
+const overlayDepth = 2;
+
+const popupDepth = 3;
+
+const toastDepth = 4;
+
 export {
 	fontFamily,
 	normalFontSize,
@@ -29,4 +37,8 @@ export {
 	buttonClick,
 	darkBackgroundColor,
 	lightBackgroundColor,
+	clickAnimationDepth,
+	overlayDepth,
+	popupDepth,
+	toastDepth,
 };

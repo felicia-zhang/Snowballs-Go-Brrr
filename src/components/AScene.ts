@@ -6,7 +6,10 @@ import {
 	errorHex,
 	fontFamily,
 	lightBackgroundColor,
+	overlayDepth,
+	popupDepth,
 	textStyle,
+	toastDepth,
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
@@ -26,7 +29,7 @@ abstract class AScene extends Phaser.Scene {
 		this.toast = this.add
 			.text(400, 584, "", textStyle)
 			.setAlpha(0)
-			.setDepth(22)
+			.setDepth(toastDepth)
 			.setAlign("center")
 			.setOrigin(0.5, 1);
 		this.currencyItems = [];
@@ -36,7 +39,7 @@ abstract class AScene extends Phaser.Scene {
 	}
 
 	makeCurrencyContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
 		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 665, 255, 15, darkBackgroundColor));
 		const currencyList = this.add.container(0, 0, []);
 		const text = this.add
@@ -51,7 +54,7 @@ abstract class AScene extends Phaser.Scene {
 		this.currencyContainer = this.add
 			.container(400, 300, [overlay, mainBackground, currencyList, text])
 			.setAlpha(0)
-			.setDepth(20);
+			.setDepth(popupDepth);
 		const closeButton = this.add
 			.image(320, -115, "close")
 			.setScale(0.35)

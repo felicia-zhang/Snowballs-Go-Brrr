@@ -8,6 +8,9 @@ import {
 	smallFontSize,
 	textStyle,
 	lightBackgroundColor,
+	overlayDepth,
+	popupDepth,
+	clickAnimationDepth,
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
@@ -26,7 +29,6 @@ class GameScene extends AScene {
 	icicleText: Phaser.GameObjects.Text;
 	icicleIcon: Phaser.GameObjects.Image;
 	storeContainer: Phaser.GameObjects.Container;
-	inventoryContainer: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
@@ -40,7 +42,6 @@ class GameScene extends AScene {
 		this.totalAddedSnowballs = 0;
 		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
-		this.inventoryContainer = this.add.container(170, 0, []);
 		this.makePenguin();
 		this.makeStoreContainer();
 
@@ -172,14 +173,14 @@ class GameScene extends AScene {
 	}
 
 	makeStoreContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(19).setAlpha(0.6);
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
 		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, darkBackgroundColor));
 		const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
 		const itemList = this.add.container(0, 0, []);
 		this.storeContainer = this.add
 			.container(400, 300, [overlay, mainBackground, itemDescriptionPopup, itemList])
 			.setAlpha(0)
-			.setDepth(20);
+			.setDepth(popupDepth);
 		const closeButton = this.add
 			.image(175, -215, "close")
 			.setScale(0.35)
@@ -247,7 +248,7 @@ class GameScene extends AScene {
 						.setAlpha(0)
 						.setAlign("center")
 						.setOrigin(0.5, 0.5)
-						.setDepth(10);
+						.setDepth(clickAnimationDepth);
 					this.showClickAnimation(amountText);
 					if (!sprite.anims.isPlaying) {
 						sprite.anims.play("squish");
@@ -515,22 +516,20 @@ class GameScene extends AScene {
 			sprite = this.makeVault(index);
 		}
 		sprite.setOrigin(0, 0).setScale(0.5);
-		this.inventoryContainer.add(sprite);
 	}
 
 	makeMittens(index: number) {
 		this.clickMultiplier += 1;
-		return this.add.sprite(index * 100, 50, "mittens");
+		return this.add.sprite(170 + index * 100, 50, "mittens");
 	}
 
 	makeFire(index: number) {
 		const amountText = this.add
-			.text(50 + index * 100, 150, "+1", textStyle)
+			.text(220 + index * 100, 150, "+1", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
-			.setDepth(10);
-		this.inventoryContainer.add(amountText);
+			.setDepth(clickAnimationDepth);
 		this.time.addEvent({
 			delay: 10000,
 			loop: true,
@@ -541,17 +540,16 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add.sprite(index * 100, 150, "fire");
+		return this.add.sprite(170 + index * 100, 150, "fire");
 	}
 
 	makeSnowman(index: number) {
 		const amountText = this.add
-			.text(50 + index * 100, 250, "+1", textStyle)
+			.text(220 + index * 100, 250, "+1", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
-			.setDepth(10);
-		this.inventoryContainer.add(amountText);
+			.setDepth(clickAnimationDepth);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
@@ -562,17 +560,16 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add.sprite(index * 100, 250, "snowman");
+		return this.add.sprite(170 + index * 100, 250, "snowman");
 	}
 
 	makeIgloo(index: number) {
 		const amountText = this.add
-			.text(50 + index * 100, 350, "+10", textStyle)
+			.text(220 + index * 100, 350, "+10", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
-			.setDepth(10);
-		this.inventoryContainer.add(amountText);
+			.setDepth(clickAnimationDepth);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
@@ -583,17 +580,16 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add.sprite(index * 100, 350, "igloo");
+		return this.add.sprite(170 + index * 100, 350, "igloo");
 	}
 
 	makeVault(index: number) {
 		const amountText = this.add
-			.text(50 + index * 100, 450, "+100", textStyle)
+			.text(220 + index * 100, 450, "+100", textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
-			.setDepth(10);
-		this.inventoryContainer.add(amountText);
+			.setDepth(clickAnimationDepth);
 		this.time.addEvent({
 			delay: 1000,
 			loop: true,
@@ -604,7 +600,7 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add.sprite(index * 100, 450, "vault");
+		return this.add.sprite(170 + index * 100, 450, "vault");
 	}
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
