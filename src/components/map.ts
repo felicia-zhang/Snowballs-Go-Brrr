@@ -404,9 +404,27 @@ class MapScene extends AScene {
 		snowballButton.width = snowballButtonText.width + 50;
 		snowballButton.height = snowballButtonText.height + 16;
 		const snowballHighlight = details.getAt(2) as RoundRectangle;
+		const snowballIcon = details.getAt(5) as Phaser.GameObjects.Image;
+		snowballIcon.setX((snowballButtonText.width + 10) / 2);
 		snowballButton.on("pointerup", () => {
-			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB");
-			snowballButton.setFillStyle(buttonNormal, 1);
+			this.setLoading(
+				true,
+				maybeDiscountSnowballPrice,
+				snowballButton,
+				snowballButtonText,
+				snowballIcon,
+				snowballHighlight
+			);
+			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", () =>
+				this.setLoading(
+					false,
+					maybeDiscountSnowballPrice,
+					snowballButton,
+					snowballButtonText,
+					snowballIcon,
+					snowballHighlight
+				)
+			);
 			this.add.tween({
 				targets: [snowballHighlight],
 				ease: "Sine.easeIn",
@@ -416,17 +434,33 @@ class MapScene extends AScene {
 				callbackScope: this,
 			});
 		});
-		const snowballIcon = details.getAt(5) as Phaser.GameObjects.Image;
-		snowballIcon.setX((snowballButtonText.width + 10) / 2);
 		const icicleButtonText = details.getAt(8) as Phaser.GameObjects.Text;
 		icicleButtonText.setText(`${maybeDiscountIciclePrice} x`);
 		const icicleButton = details.getAt(7) as RoundRectangle;
 		icicleButton.width = icicleButtonText.width + 50;
 		icicleButton.height = icicleButtonText.height + 16;
 		const icicleHighlight = details.getAt(6) as RoundRectangle;
+		const icicleIcon = details.getAt(9) as Phaser.GameObjects.Image;
+		icicleIcon.setX((icicleButtonText.width + 5) / 2);
 		icicleButton.on("pointerup", () => {
-			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC");
-			icicleButton.setFillStyle(buttonNormal, 1);
+			this.setLoading(
+				true,
+				maybeDiscountIciclePrice,
+				icicleButton,
+				icicleButtonText,
+				icicleIcon,
+				icicleHighlight
+			);
+			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", () =>
+				this.setLoading(
+					false,
+					maybeDiscountIciclePrice,
+					icicleButton,
+					icicleButtonText,
+					icicleIcon,
+					icicleHighlight
+				)
+			);
 			this.add.tween({
 				targets: [icicleHighlight],
 				ease: "Sine.easeIn",
@@ -436,8 +470,6 @@ class MapScene extends AScene {
 				callbackScope: this,
 			});
 		});
-		const icicleIcon = details.getAt(9) as Phaser.GameObjects.Image;
-		icicleIcon.setX((icicleButtonText.width + 5) / 2);
 		const image = this.biomeNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		const descriptionText = details.getAt(11) as Phaser.GameObjects.Text;
@@ -491,7 +523,39 @@ class MapScene extends AScene {
 		}
 	}
 
-	purchaseBiome(biomeDetail: BiomeDetail, maybeDiscountPrice: number, currencyType: string) {
+	setLoading(
+		isLoading: boolean,
+		price: number,
+		button: RoundRectangle,
+		text: Phaser.GameObjects.Text,
+		icon: Phaser.GameObjects.Image,
+		highlight: RoundRectangle
+	) {
+		if (isLoading) {
+			text.setText(". . .")
+				.setX(0)
+				.setOrigin(0.5, 0.725)
+				.setStyle({ fontFamily: fontFamily, fontSize: "32px", stroke: "#ffffff", strokeThickness: 3 });
+			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
+			icon.setAlpha(0);
+		} else {
+			text.setText(`${price} x`)
+				.setX(-15)
+				.setOrigin(0.5, 0.5)
+				.setStyle({ ...textStyle, strokeThickness: 0 });
+			button
+				.setFillStyle(buttonNormal, 1)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerout", () => {
+					button.setFillStyle(buttonNormal, 1);
+				});
+			highlight.setAlpha(0);
+			icon.setAlpha(1);
+		}
+	}
+
+	purchaseBiome(biomeDetail: BiomeDetail, maybeDiscountPrice: number, currencyType: string, toggleLoadingToFalse) {
+		const delay = this.time.addEvent({ delay: 500 });
 		PlayFabClient.PurchaseItem(
 			{
 				ItemId: biomeDetail.ItemId,
@@ -501,18 +565,54 @@ class MapScene extends AScene {
 			},
 			(e, r) => {
 				if (e !== null) {
-					currencyType === "SB"
-						? this.showToast("Not enough snowballs", true)
-						: this.showToast("Not enough icicles", true);
+					const remaining = delay.getRemaining();
+					if (remaining > 0) {
+						this.time.addEvent({
+							delay: remaining,
+							callback: () => {
+								toggleLoadingToFalse();
+								currencyType === "SB"
+									? this.showToast("Not enough snowballs", true)
+									: this.showToast("Not enough icicles", true);
+							},
+						});
+					} else {
+						toggleLoadingToFalse();
+						currencyType === "SB"
+							? this.showToast("Not enough snowballs", true)
+							: this.showToast("Not enough icicles", true);
+					}
 				} else {
-					currencyType === "SB"
-						? (this.registry.values.SB -= maybeDiscountPrice)
-						: (this.registry.values.IC -= maybeDiscountPrice);
-					this.registry.values.Inventories.push(...r.data.Items);
-					this.cameras.main.fadeOut(500, 0, 0, 0);
-					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-						this.scene.start("Game", { biomeDetail: biomeDetail });
-					});
+					const remaining = delay.getRemaining();
+					if (remaining > 0) {
+						this.time.addEvent({
+							delay: remaining,
+							callback: () => {
+								toggleLoadingToFalse();
+								currencyType === "SB"
+									? (this.registry.values.SB -= maybeDiscountPrice)
+									: (this.registry.values.IC -= maybeDiscountPrice);
+								this.registry.values.Inventories.push(...r.data.Items);
+								this.cameras.main.fadeOut(500, 0, 0, 0);
+								this.cameras.main.once(
+									Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+									(cam, effect) => {
+										this.scene.start("Game", { biomeDetail: biomeDetail });
+									}
+								);
+							},
+						});
+					} else {
+						toggleLoadingToFalse();
+						currencyType === "SB"
+							? (this.registry.values.SB -= maybeDiscountPrice)
+							: (this.registry.values.IC -= maybeDiscountPrice);
+						this.registry.values.Inventories.push(...r.data.Items);
+						this.cameras.main.fadeOut(500, 0, 0, 0);
+						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+							this.scene.start("Game", { biomeDetail: biomeDetail });
+						});
+					}
 				}
 			}
 		);
