@@ -21,7 +21,6 @@ class MenuScene extends AScene {
 		this.cameras.main.fadeIn(500, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.add.text(400, 16, "MENU", textStyle).setAlign("center").setOrigin(0.5, 0);
-		this.makeResetConfirmationContainer();
 
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			this.registry.set("CatalogItems", result.data.Catalog);
@@ -30,6 +29,8 @@ class MenuScene extends AScene {
 				this.registry.set("SB", result.data.VirtualCurrency.SB);
 				this.registry.set("IC", result.data.VirtualCurrency.IC);
 				this.registry.set("Inventories", result.data.Inventory);
+
+				this.makeResetConfirmationContainer();
 
 				const startButtonUnderline = this.add.line(400, 200, 400, 200, 400, 200, 0xffffff).setAlpha(0);
 				const startButton = this.add
@@ -153,13 +154,53 @@ class MenuScene extends AScene {
 				});
 			});
 		if (type === "yes") {
-			highlight.x = 0;
-			buttonText.setText("YES").setX(0);
-			button.setX(0);
+			highlight.x = 100;
+			buttonText.setText("YES").setX(100);
+			button.setX(100).on("pointerup", () => {
+				// PlayFabClient.UpdateUserData({ KeysToRemove: ["5", "6", "7", "8", "9"] }, (e, r) => {
+				// 	console.log(e, r);
+				// 	console.log("removed LastUpdated data");
+				// });
+				// PlayFabClient.ExecuteCloudScript(
+				// 	{
+				// 		FunctionName: "updateResetStatistics",
+				// 		FunctionParameter: {
+				// 			snowballs: this.registry.get("SB"),
+				// 		},
+				// 	},
+				// 	(e, r) => {
+				// 		console.log(e, r);
+				// 		console.log("update reset statistics", this.registry.get("SB"));
+				// 	}
+				// );
+				const inventoriesToRevoke: { [key: number]: string[] } = {};
+				this.registry
+					.get("Inventories")
+					.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
+					.forEach((inventory: PlayFabClientModels.ItemInstance, i) => {
+						const group = Math.floor(i / 25);
+						if (group in inventoriesToRevoke) {
+							inventoriesToRevoke[group].push(inventory.ItemInstanceId);
+						} else {
+							inventoriesToRevoke[group] = [inventory.ItemInstanceId];
+						}
+					});
+				Object.values(inventoriesToRevoke).forEach((ids: string[]) => {
+					PlayFabClient.ExecuteCloudScript(
+						{
+							FunctionName: "revokeInventoryItems",
+							FunctionParameter: { itemInstanceIds: ids },
+						},
+						(e, r) => {
+							console.log(e, r);
+						}
+					);
+				});
+			});
 		} else {
-			highlight.x = 120;
-			buttonText.setText("CANCEL").setX(120);
-			button.setX(120).on("pointerup", () => {
+			highlight.x = -100;
+			buttonText.setText("CANCEL").setX(-100);
+			button.setX(-100).on("pointerup", () => {
 				this.add.tween({
 					targets: [this.resetConfirmationContainer],
 					ease: "Sine.easeIn",
