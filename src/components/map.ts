@@ -1,9 +1,9 @@
 import { PlayFabClient } from "playfab-sdk";
 import {
 	darkBackgroundColor,
-	buttonClick,
-	buttonHover,
-	buttonNormal,
+	darkRed,
+	normalRed,
+	lightRed,
 	fontFamily,
 	smallFontSize,
 	textStyle,
@@ -11,9 +11,9 @@ import {
 	overlayDepth,
 	popupDepth,
 	closeButtonFill,
-	outlineNormal,
-	outlineHover,
-	outlineClick,
+	lightBlue,
+	normalBlue,
+	darkBlue,
 } from "../utils/constants";
 import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
@@ -31,6 +31,11 @@ class MapScene extends AScene {
 	biomeOwnedContainer: Phaser.GameObjects.Container;
 	biomeNotOwnedContainer: Phaser.GameObjects.Container;
 	storeId: string;
+	icebiome: Phaser.GameObjects.Image;
+	marinebiome: Phaser.GameObjects.Image;
+	savannabiome: Phaser.GameObjects.Image;
+	tropicalbiome: Phaser.GameObjects.Image;
+	magmabiome: Phaser.GameObjects.Image;
 
 	constructor() {
 		super("Map");
@@ -42,6 +47,7 @@ class MapScene extends AScene {
 		this.biomeMap = {};
 		this.biomeItems = {};
 		this.add.text(400, 16, "MAP", textStyle).setAlign("center").setOrigin(0.5, 0);
+		this.storeId = "";
 		this.makeBiomeOwnedContainer();
 		this.makeBiomeNotOwnedContainer();
 
@@ -84,16 +90,15 @@ class MapScene extends AScene {
 					(this.biomeItems[inventory.CustomData.BiomeId][inventory.DisplayName] += 1)
 			);
 
-		PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
-			this.storeId = result.data.StoreId;
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeBiome(storeItem);
-			});
-		});
+		this.icebiome = this.makeBiomeImage(200, 200, "icebiome", "5");
+		this.marinebiome = this.makeBiomeImage(400, 200, "marinebiome", "6");
+		this.savannabiome = this.makeBiomeImage(600, 200, "savannabiome", "7");
+		this.tropicalbiome = this.makeBiomeImage(290, 400, "tropicalbiome", "8");
+		this.magmabiome = this.makeBiomeImage(490, 400, "magmabiome", "9");
 
 		this.registry.events.on("changedata", this.updateData, this);
 
-		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB")}`, textStyle);
+		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB") / 100}`, textStyle);
 		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
@@ -137,50 +142,32 @@ class MapScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			key === "SB" ? this.snowballText.setText(`: ${data}`) : this.icicleText.setText(`: ${data}`);
+			key === "SB" ? this.snowballText.setText(`: ${data / 100}`) : this.icicleText.setText(`: ${data}`);
 		}
 	}
 
-	makeBiome(biome: PlayFabClientModels.StoreItem) {
-		let imageKey: string;
-		let x: number;
-		let y: number;
-		if (biome.ItemId === "5") {
-			imageKey = "icebiome";
-			x = 200;
-			y = 200;
-		} else if (biome.ItemId === "6") {
-			imageKey = "marinebiome";
-			x = 400;
-			y = 200;
-		} else if (biome.ItemId === "7") {
-			imageKey = "savannabiome";
-			x = 600;
-			y = 200;
-		} else if (biome.ItemId === "8") {
-			imageKey = "tropicalbiome";
-			x = 290;
-			y = 400;
-		} else if (biome.ItemId === "9") {
-			imageKey = "magmabiome";
-			x = 490;
-			y = 400;
-		}
-		this.interactiveObjects.push(
-			this.add
-				.image(x, y, imageKey)
-				.setScale(0.5)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
+	makeBiomeImage(x: number, y: number, imageKey: string, biomeId: string) {
+		const image = this.add
+			.image(x, y, imageKey)
+			.setScale(0.5)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
+					this.storeId = result.data.StoreId;
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					biome.ItemId in this.biomeItems
+					const biome = result.data.Store.find(
+						(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === biomeId
+					);
+					biomeId in this.biomeItems
 						? this.showBiomeOwnedContainer(biome, imageKey)
 						: this.showBiomeNotOwnedContainer(biome, imageKey);
-				})
-		);
-		if (!(biome.ItemId in this.biomeItems)) {
+				});
+			});
+		this.interactiveObjects.push(image);
+		if (!(biomeId in this.biomeItems)) {
 			this.add.image(x, y, "lock").setScale(0.5);
 		}
+		return image;
 	}
 
 	makeBiomeOwnedContainer() {
@@ -193,16 +180,16 @@ class MapScene extends AScene {
 		const buttonText = this.add.text(0, 120, "VISIT", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const highlight = this.add.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, 0xffffff)).setAlpha(0);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, buttonNormal))
+			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, lightBlue))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				button.setFillStyle(buttonHover, 1);
+				button.setFillStyle(normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				button.setFillStyle(buttonNormal, 1);
+				button.setFillStyle(lightBlue, 1);
 			})
 			.on("pointerdown", () => {
-				button.setFillStyle(buttonClick, 1);
+				button.setFillStyle(darkBlue, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -237,21 +224,19 @@ class MapScene extends AScene {
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
-			.existing(
-				new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, outlineNormal, 1)
-			)
+			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, outlineHover, 1);
+				closeButton.setStrokeStyle(6, normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 			})
 			.on("pointerdown", () => {
 				closeButton.setStrokeStyle(6, 0x2e5768, 1);
 			})
 			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 				this.add.tween({
 					targets: [this.biomeOwnedContainer],
 					ease: "Sine.easeIn",
@@ -283,16 +268,16 @@ class MapScene extends AScene {
 		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballHighlight = this.add.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, 0xffffff)).setAlpha(0);
 		const snowballButton = this.add
-			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, buttonNormal))
+			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, lightRed))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				snowballButton.setFillStyle(buttonHover, 1);
+				snowballButton.setFillStyle(normalRed, 1);
 			})
 			.on("pointerout", () => {
-				snowballButton.setFillStyle(buttonNormal, 1);
+				snowballButton.setFillStyle(lightRed, 1);
 			})
 			.on("pointerdown", () => {
-				snowballButton.setFillStyle(buttonClick, 1);
+				snowballButton.setFillStyle(darkRed, 1);
 				this.add.tween({
 					targets: [snowballHighlight],
 					ease: "Sine.easeIn",
@@ -320,16 +305,16 @@ class MapScene extends AScene {
 		const icicleButtonText = this.add.text(-15, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const icicleHighlight = this.add.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xffffff)).setAlpha(0);
 		const icicleButton = this.add
-			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, buttonNormal))
+			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, lightRed))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				icicleButton.setFillStyle(buttonHover, 1);
+				icicleButton.setFillStyle(normalRed, 1);
 			})
 			.on("pointerout", () => {
-				icicleButton.setFillStyle(buttonNormal, 1);
+				icicleButton.setFillStyle(lightRed, 1);
 			})
 			.on("pointerdown", () => {
-				icicleButton.setFillStyle(buttonClick, 1);
+				icicleButton.setFillStyle(darkRed, 1);
 				this.add.tween({
 					targets: [icicleHighlight],
 					ease: "Sine.easeIn",
@@ -370,21 +355,19 @@ class MapScene extends AScene {
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
-			.existing(
-				new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, outlineNormal, 1)
-			)
+			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, outlineHover, 1);
+				closeButton.setStrokeStyle(6, normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 			})
 			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, outlineClick, 1);
+				closeButton.setStrokeStyle(6, darkBlue, 1);
 			})
 			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 				this.add.tween({
 					targets: [this.biomeNotOwnedContainer],
 					ease: "Sine.easeIn",
@@ -402,8 +385,8 @@ class MapScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, outlineClick).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, outlineClick).setLineWidth(3, 3);
+		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, darkBlue).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, darkBlue).setLineWidth(3, 3);
 		popup.add([closeButton, line1, line2]);
 		this.biomeNotOwnedContainer = popup;
 	}
@@ -415,7 +398,7 @@ class MapScene extends AScene {
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const button = details.getAt(3) as RoundRectangle;
 		button.on("pointerup", () => {
-			button.setFillStyle(buttonNormal, 1);
+			button.setFillStyle(lightBlue, 1);
 			this.add.tween({
 				targets: [details.getAt(2) as RoundRectangle],
 				ease: "Sine.easeIn",
@@ -458,7 +441,7 @@ class MapScene extends AScene {
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const snowballButtonText = details.getAt(4) as Phaser.GameObjects.Text;
-		snowballButtonText.setText(`${maybeDiscountSnowballPrice} x`);
+		snowballButtonText.setText(`${maybeDiscountSnowballPrice / 100} x`);
 		const snowballButton = details.getAt(3) as RoundRectangle;
 		snowballButton.width = snowballButtonText.width + 50;
 		snowballButton.height = snowballButtonText.height + 16;
@@ -468,7 +451,7 @@ class MapScene extends AScene {
 		snowballButton.on("pointerup", () => {
 			this.setLoading(
 				true,
-				maybeDiscountSnowballPrice,
+				maybeDiscountSnowballPrice / 100,
 				snowballButton,
 				snowballButtonText,
 				snowballIcon,
@@ -477,7 +460,7 @@ class MapScene extends AScene {
 			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", () =>
 				this.setLoading(
 					false,
-					maybeDiscountSnowballPrice,
+					maybeDiscountSnowballPrice / 100,
 					snowballButton,
 					snowballButtonText,
 					snowballIcon,
@@ -547,7 +530,7 @@ class MapScene extends AScene {
 			snowballButtonText.setY(55);
 			snowballIcon.setY(55);
 			const fullSnowballPriceText = this.add
-				.text(-10, 20, `${biomeDetail.FullSnowballPrice} x`, {
+				.text(-10, 20, `${biomeDetail.FullSnowballPrice / 100} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
@@ -595,7 +578,7 @@ class MapScene extends AScene {
 				.setX(0)
 				.setOrigin(0.5, 0.725)
 				.setStyle({ fontFamily: fontFamily, fontSize: "32px", stroke: "#ffffff", strokeThickness: 3 });
-			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
+			button.setFillStyle(darkRed, 1).disableInteractive().removeListener("pointerout");
 			icon.setAlpha(0);
 		} else {
 			text.setText(`${price} x`)
@@ -603,10 +586,10 @@ class MapScene extends AScene {
 				.setOrigin(0.5, 0.5)
 				.setStyle({ ...textStyle, strokeThickness: 0 });
 			button
-				.setFillStyle(buttonNormal, 1)
+				.setFillStyle(lightRed, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerout", () => {
-					button.setFillStyle(buttonNormal, 1);
+					button.setFillStyle(lightRed, 1);
 				});
 			highlight.setAlpha(0);
 			icon.setAlpha(1);

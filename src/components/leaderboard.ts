@@ -20,7 +20,7 @@ class LeaderboardScene extends AScene {
 
 		const button1Underline = this.add.line(172, 100, 172, 100, 172, 100, 0xffffff).setAlpha(0);
 		const button1 = this.add
-			.text(172, 100, "Current Snowballs", textStyle)
+			.text(172, 100, "Snowballs", textStyle)
 			.setOrigin(0, 0.5)
 			.setAlign("left")
 			.setInteractive({ useHandCursor: true })
@@ -33,42 +33,7 @@ class LeaderboardScene extends AScene {
 			.on("pointerout", () => {
 				button1Underline.setAlpha(0);
 			})
-			.on("pointerup", () => this.showLeaderboard("5", 240, 160));
-
-		const button2Underline = this.add.line(400, 100, 400, 100, 400, 100, 0xffffff).setAlpha(0);
-		const button2 = this.add
-			.text(400, 100, "Total Snowballs", textStyle)
-			.setOrigin(0.5, 0.5)
-			.setAlign("center")
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				button2Underline
-					.setTo(0, 0, button2.width, 0)
-					.setPosition(400 - button2.width / 2, 100 + button2.height / 2)
-					.setAlpha(1);
-			})
-			.on("pointerout", () => {
-				button2Underline.setAlpha(0);
-			})
-			.on("pointerup", () => this.showLeaderboard("6", 400, 150));
-
-		const button3Underline = this.add.line(627, 100, 627, 100, 627, 100, 0xffffff).setAlpha(0);
-		const button3 = this.add
-			.text(627, 100, "Manual Clicks", textStyle)
-			.setOrigin(1, 0.5)
-			.setAlign("right")
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				button3Underline
-					.setTo(0, 0, button3.width, 0)
-					.setPosition(627 - button3.width, 100 + button3.height / 2)
-					.setAlpha(1);
-			})
-			.on("pointerout", () => {
-				button3Underline.setAlpha(0);
-			})
-			.on("pointerup", () => this.showLeaderboard("7", 573, 135));
-		this.showLeaderboard("5", 240, 160);
+			.on("pointerup", () => this.showLeaderboard());
 
 		const menuButtonUnderline = this.add.line(784, 584, 784, 584, 784, 584, 0xffffff).setAlpha(0);
 		const menuButton = this.add
@@ -92,17 +57,17 @@ class LeaderboardScene extends AScene {
 			});
 	}
 
-	showLeaderboard(stat: string, position: number, width: number) {
+	showLeaderboard() {
 		this.add.tween({
 			targets: [this.tabSelector],
 			props: {
 				x: {
-					value: position,
+					value: 240,
 					ease: "Sine.easeIn",
 					duration: 600,
 				},
 				width: {
-					value: width,
+					value: 160,
 					ease: "Sine.easeIn",
 					duration: 600,
 				},
@@ -110,7 +75,7 @@ class LeaderboardScene extends AScene {
 			callbackScope: this,
 		});
 		this.list.removeAll(true);
-		PlayFabClient.GetLeaderboard({ StatisticName: stat, StartPosition: 0 }, (error, result) => {
+		PlayFabClient.GetLeaderboard({ StatisticName: "snowballs", StartPosition: 0 }, (error, result) => {
 			const players = result.data.Leaderboard;
 			players.forEach((player, i) => {
 				const bg = this.add.existing(

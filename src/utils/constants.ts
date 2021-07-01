@@ -8,19 +8,19 @@ const textStyle = { fontFamily: fontFamily, fontSize: normalFontSize };
 
 const errorHex = "#ff7360";
 
-const buttonNormal = 0xd05c4f;
+const lightRed = 0xd05c4f;
 
-const buttonHover = 0xb94e46;
+const normalRed = 0xb94e46;
 
-const buttonClick = 0xa63e39;
+const darkRed = 0xa63e39;
 
 const closeButtonFill = 0xbadff2;
 
-const outlineNormal = 0x6b94a5;
+const lightBlue = 0x6b94a5;
 
-const outlineHover = 0x497282;
+const normalBlue = 0x497282;
 
-const outlineClick = 0x2e5768;
+const darkBlue = 0x2e5768;
 
 const darkBackgroundColor = 0x16252e;
 
@@ -40,13 +40,13 @@ export {
 	smallFontSize,
 	textStyle,
 	errorHex,
-	buttonNormal,
-	buttonHover,
-	buttonClick,
+	lightRed,
+	normalRed,
+	darkRed,
 	closeButtonFill,
-	outlineNormal,
-	outlineHover,
-	outlineClick,
+	lightBlue,
+	normalBlue,
+	darkBlue,
 	darkBackgroundColor,
 	lightBackgroundColor,
 	clickAnimationDepth,
