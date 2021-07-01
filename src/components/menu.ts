@@ -29,6 +29,17 @@ class MenuScene extends AScene {
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			this.registry.set("CatalogItems", result.data.Catalog);
 
+			PlayFabClient.GetPlayerStatistics({ StatisticNames: ["reset"] }, (e, r) => {
+				const resetStat = r.data.Statistics.find(
+					(stat: PlayFabClientModels.StatisticValue) => stat.StatisticName === "reset"
+				);
+				if (resetStat !== undefined) {
+					this.registry.set("Reset", resetStat.Value);
+				} else {
+					this.registry.set("Reset", 0);
+				}
+			});
+
 			PlayFabClient.GetUserInventory({}, (error, result) => {
 				this.registry.set("SB", result.data.VirtualCurrency.SB);
 				this.registry.set("IC", result.data.VirtualCurrency.IC);
@@ -113,7 +124,7 @@ class MenuScene extends AScene {
 	}
 
 	makeResetConfirmationContainer() {
-		const snowballBalance = this.registry.get("SB");
+		const snowballBalance = this.registry.get("SB") / 100;
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
 		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 300, 340, 15, darkBackgroundColor));
 		const description = this.add
@@ -127,7 +138,10 @@ class MenuScene extends AScene {
 			)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
-		const snowballText = this.add.text(0, -100, snowballBalance, textStyle).setAlign("center").setOrigin(0.5, 0);
+		const snowballText = this.add
+			.text(0, -100, snowballBalance.toString(), textStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
 		this.resetConfirmationContainer = this.add
 			.container(400, 300, [overlay, bg, description, snowballText])
 			.setDepth(popupDepth)
@@ -254,6 +268,8 @@ class MenuScene extends AScene {
 				},
 			},
 			(e, r) => {
+				const currentReset = this.registry.get("Reset");
+				this.registry.set("Reset", currentReset + currentSnowballs);
 				console.log("Updated reset statistics", currentSnowballs);
 				PlayFabClient.UpdateUserData(
 					{ KeysToRemove: ["5LastUpdated", "6LastUpdated", "7LastUpdated", "8LastUpdated", "9LastUpdated"] },

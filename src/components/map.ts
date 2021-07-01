@@ -98,7 +98,7 @@ class MapScene extends AScene {
 
 		this.registry.events.on("changedata", this.updateData, this);
 
-		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB")}`, textStyle);
+		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB") / 100}`, textStyle);
 		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
@@ -142,7 +142,7 @@ class MapScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			key === "SB" ? this.snowballText.setText(`: ${data}`) : this.icicleText.setText(`: ${data}`);
+			key === "SB" ? this.snowballText.setText(`: ${data / 100}`) : this.icicleText.setText(`: ${data}`);
 		}
 	}
 
@@ -441,7 +441,7 @@ class MapScene extends AScene {
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const snowballButtonText = details.getAt(4) as Phaser.GameObjects.Text;
-		snowballButtonText.setText(`${maybeDiscountSnowballPrice} x`);
+		snowballButtonText.setText(`${maybeDiscountSnowballPrice / 100} x`);
 		const snowballButton = details.getAt(3) as RoundRectangle;
 		snowballButton.width = snowballButtonText.width + 50;
 		snowballButton.height = snowballButtonText.height + 16;
@@ -451,7 +451,7 @@ class MapScene extends AScene {
 		snowballButton.on("pointerup", () => {
 			this.setLoading(
 				true,
-				maybeDiscountSnowballPrice,
+				maybeDiscountSnowballPrice / 100,
 				snowballButton,
 				snowballButtonText,
 				snowballIcon,
@@ -460,7 +460,7 @@ class MapScene extends AScene {
 			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", () =>
 				this.setLoading(
 					false,
-					maybeDiscountSnowballPrice,
+					maybeDiscountSnowballPrice / 100,
 					snowballButton,
 					snowballButtonText,
 					snowballIcon,
@@ -530,7 +530,7 @@ class MapScene extends AScene {
 			snowballButtonText.setY(55);
 			snowballIcon.setY(55);
 			const fullSnowballPriceText = this.add
-				.text(-10, 20, `${biomeDetail.FullSnowballPrice} x`, {
+				.text(-10, 20, `${biomeDetail.FullSnowballPrice / 100} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})

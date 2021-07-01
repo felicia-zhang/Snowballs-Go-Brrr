@@ -22,6 +22,7 @@ import { BiomeDetail, ItemDetail } from "../utils/types";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
+	resetBonus: number;
 	biomeDetail: BiomeDetail;
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
@@ -40,8 +41,9 @@ class GameScene extends AScene {
 	create({ biomeDetail }) {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
+		this.resetBonus = this.registry.get("Reset") === 0 ? 0 : this.registry.get("Reset") / 10000;
 		this.biomeDetail = biomeDetail;
-		this.clickMultiplier = 1;
+		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
 		this.storeItems = [];
 		this.makePenguin();
@@ -78,14 +80,14 @@ class GameScene extends AScene {
 				const numberOfIgloos = Object.keys(this.itemsMap[3].Instances).length;
 				const numberOfVaults = Object.keys(this.itemsMap[4].Instances).length;
 				const sb =
-					Math.floor(elapsedSeconds / 10) * numberOfFires +
-					Math.floor(elapsedSeconds) * numberOfSnowmans +
-					Math.floor(elapsedSeconds) * numberOfIgloos * 10 +
-					Math.floor(elapsedSeconds) * numberOfVaults * 100;
+					Math.floor(elapsedSeconds / 10) * numberOfFires * 100 +
+					Math.floor(elapsedSeconds) * numberOfSnowmans * 100 +
+					Math.floor(elapsedSeconds) * numberOfIgloos * 1000 +
+					Math.floor(elapsedSeconds) * numberOfVaults * 10000;
 
 				this.registry.values.SB += sb;
 				this.totalAddedSnowballs += sb;
-				this.showToast(`${sb} snowballs added \nwhile player was away`, false);
+				this.showToast(`${sb / 100} snowballs added \nwhile player was away`, false);
 			} else {
 				this.showToast(`Welcome to ${this.biomeDetail.DisplayName}`, false);
 			}
@@ -99,7 +101,7 @@ class GameScene extends AScene {
 			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
-		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB")}`, textStyle);
+		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB") / 100}`, textStyle);
 		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
@@ -188,7 +190,7 @@ class GameScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			key === "SB" ? this.snowballText.setText(`: ${data}`) : this.icicleText.setText(`: ${data}`);
+			key === "SB" ? this.snowballText.setText(`: ${data / 100}`) : this.icicleText.setText(`: ${data}`);
 		}
 	}
 
@@ -276,11 +278,11 @@ class GameScene extends AScene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
-					const currentClickMultiplier = this.clickMultiplier;
+					const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
 					this.totalAddedSnowballs += currentClickMultiplier;
 					this.registry.values.SB += currentClickMultiplier;
 					const amountText = this.add
-						.text(pointer.x, pointer.y, currentClickMultiplier.toString(), textStyle)
+						.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), textStyle)
 						.setAlpha(0)
 						.setAlign("center")
 						.setOrigin(0.5, 0.5)
@@ -341,7 +343,7 @@ class GameScene extends AScene {
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const priceText = this.add
-			.text(118, y, `${maybeItemDiscountPrice} x`, textStyle)
+			.text(118, y, `${maybeItemDiscountPrice / 100} x`, textStyle)
 			.setAlign("right")
 			.setOrigin(1, 0.5);
 		const w = priceText.width + 50;
@@ -389,7 +391,7 @@ class GameScene extends AScene {
 				} else {
 					this.setItemLoading(
 						true,
-						maybeItemDiscountPrice,
+						maybeItemDiscountPrice / 100,
 						priceButton,
 						priceText,
 						snowballIcon,
@@ -400,7 +402,7 @@ class GameScene extends AScene {
 						this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, () =>
 							this.setItemLoading(
 								false,
-								maybeItemDiscountPrice,
+								maybeItemDiscountPrice / 100,
 								priceButton,
 								priceText,
 								snowballIcon,
@@ -431,7 +433,7 @@ class GameScene extends AScene {
 			snowballIcon.setY(newY);
 
 			const fullPriceText = this.add
-				.text(121, -192 + index * 85, `${storeItem.CustomData.FullPrice} x`, {
+				.text(121, -192 + index * 85, `${storeItem.CustomData.FullPrice / 100} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
@@ -555,13 +557,14 @@ class GameScene extends AScene {
 	}
 
 	makeMittens(index: number) {
-		this.clickMultiplier += 1;
+		this.clickMultiplier += 100;
 		return this.add.sprite(170 + index * 100, 50, "mittens");
 	}
 
 	makeFire(index: number) {
+		const snowballsToAdd = 100 + this.resetBonus;
 		const amountText = this.add
-			.text(220 + index * 100, 150, "+1", textStyle)
+			.text(220 + index * 100, 150, `+${snowballsToAdd / 100}`, textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -571,8 +574,8 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(150);
-				this.registry.values.SB += 1;
-				this.totalAddedSnowballs += 1;
+				this.registry.values.SB += snowballsToAdd;
+				this.totalAddedSnowballs += snowballsToAdd;
 				this.showClickAnimation(amountText);
 			},
 		});
@@ -580,8 +583,9 @@ class GameScene extends AScene {
 	}
 
 	makeSnowman(index: number) {
+		const snowballsToAdd = 100 + this.resetBonus;
 		const amountText = this.add
-			.text(220 + index * 100, 250, "+1", textStyle)
+			.text(220 + index * 100, 250, `+${snowballsToAdd / 100}`, textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -591,8 +595,8 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(250);
-				this.registry.values.SB += 1;
-				this.totalAddedSnowballs += 1;
+				this.registry.values.SB += snowballsToAdd;
+				this.totalAddedSnowballs += snowballsToAdd;
 				this.showClickAnimation(amountText);
 			},
 		});
@@ -600,8 +604,9 @@ class GameScene extends AScene {
 	}
 
 	makeIgloo(index: number) {
+		const snowballsToAdd = 1000 + this.resetBonus;
 		const amountText = this.add
-			.text(220 + index * 100, 350, "+10", textStyle)
+			.text(220 + index * 100, 350, `+${snowballsToAdd / 100}`, textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -611,8 +616,8 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(350);
-				this.registry.values.SB += 10;
-				this.totalAddedSnowballs += 10;
+				this.registry.values.SB += snowballsToAdd;
+				this.totalAddedSnowballs += snowballsToAdd;
 				this.showClickAnimation(amountText);
 			},
 		});
@@ -620,8 +625,9 @@ class GameScene extends AScene {
 	}
 
 	makeVault(index: number) {
+		const snowballsToAdd = 10000 + this.resetBonus;
 		const amountText = this.add
-			.text(220 + index * 100, 450, "+100", textStyle)
+			.text(220 + index * 100, 450, `+${snowballsToAdd / 100}`, textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -631,8 +637,8 @@ class GameScene extends AScene {
 			loop: true,
 			callback: () => {
 				amountText.setY(450);
-				this.registry.values.SB += 100;
-				this.totalAddedSnowballs += 100;
+				this.registry.values.SB += snowballsToAdd;
+				this.totalAddedSnowballs += snowballsToAdd;
 				this.showClickAnimation(amountText);
 			},
 		});
