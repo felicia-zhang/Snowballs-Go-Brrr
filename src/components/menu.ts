@@ -126,24 +126,20 @@ class MenuScene extends AScene {
 	makeResetConfirmationContainer() {
 		const snowballBalance = this.registry.get("SB") / 100;
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 300, 340, 15, darkBackgroundColor));
+		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 380, 340, 15, darkBackgroundColor));
 		const description = this.add
 			.text(
 				0,
 				-150,
-				`Are you sure you want to reset?\nYour current snowball balance is:\n\n\nReset will award you with:\n\n+${
+				`Reset game to generate +0.01 more snowballs\nfor every 10000 snowballs in your balance\n\nYour current snowball balance is:\n${snowballBalance}\n\nReset will award you with:\n+${
 					Math.floor(this.registry.get("SB") / 1000000) / 100
-				} gain in snowball generation\n\nReset will NOT\naffect your in-app purchase history\nor your icicle balance`,
+				} snowballs\n\n*Reset will NOT\naffect your in-app purchase history\nor your icicle balance`,
 				textStyle
 			)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
-		const snowballText = this.add
-			.text(0, -100, snowballBalance.toString(), textStyle)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
 		this.resetConfirmationContainer = this.add
-			.container(400, 300, [overlay, bg, description, snowballText])
+			.container(400, 300, [overlay, bg, description])
 			.setDepth(popupDepth)
 			.setAlpha(0);
 		this.makeButton("yes");
@@ -219,9 +215,9 @@ class MenuScene extends AScene {
 	}
 
 	setLoading(isLoading: boolean) {
-		const highlight = this.resetConfirmationContainer.getAt(4) as RoundRectangle;
-		const button = this.resetConfirmationContainer.getAt(5) as RoundRectangle;
-		const text = this.resetConfirmationContainer.getAt(6) as Phaser.GameObjects.Text;
+		const highlight = this.resetConfirmationContainer.getAt(3) as RoundRectangle;
+		const button = this.resetConfirmationContainer.getAt(4) as RoundRectangle;
+		const text = this.resetConfirmationContainer.getAt(5) as Phaser.GameObjects.Text;
 		if (isLoading) {
 			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
 				fontFamily: fontFamily,
