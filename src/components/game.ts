@@ -25,7 +25,6 @@ class GameScene extends AScene {
 	biomeDetail: BiomeDetail;
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
-	totalManualPenguinClicks: number;
 	syncTimer: Phaser.Time.TimerEvent;
 	storeItems: PlayFabClientModels.StoreItem[];
 	snowballText: Phaser.GameObjects.Text;
@@ -44,7 +43,6 @@ class GameScene extends AScene {
 		this.biomeDetail = biomeDetail;
 		this.clickMultiplier = 1;
 		this.totalAddedSnowballs = 0;
-		this.totalManualPenguinClicks = 0;
 		this.storeItems = [];
 		this.makePenguin();
 		this.makeStoreContainer();
@@ -281,7 +279,6 @@ class GameScene extends AScene {
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (pointer.leftButtonReleased()) {
 					const currentClickMultiplier = this.clickMultiplier;
-					this.totalManualPenguinClicks += 1;
 					this.totalAddedSnowballs += currentClickMultiplier;
 					this.registry.values.SB += currentClickMultiplier;
 					const amountText = this.add
@@ -674,7 +671,6 @@ class GameScene extends AScene {
 		);
 
 		const totalAdded = this.totalAddedSnowballs;
-		const totalClicks = this.totalManualPenguinClicks;
 		if (totalAdded === 0) {
 			console.log("No change to snowballs since last sync");
 			if (func !== undefined) {
@@ -689,14 +685,11 @@ class GameScene extends AScene {
 				(error, result) => {
 					console.log("Amount of snowballs added:", totalAdded);
 					this.totalAddedSnowballs -= totalAdded;
-					this.totalManualPenguinClicks -= totalClicks;
 					PlayFabClient.ExecuteCloudScript(
 						{
-							FunctionName: "updateStatistics",
+							FunctionName: "updateSnowballStatistics",
 							FunctionParameter: {
-								current_snowballs: this.registry.values.SB,
-								total_added_snowballs: totalAdded,
-								total_manual_penguin_clicks: totalClicks,
+								snowballs: this.registry.values.SB,
 							},
 						},
 						() => {
