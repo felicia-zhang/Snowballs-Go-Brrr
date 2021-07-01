@@ -178,25 +178,36 @@ class MenuScene extends AScene {
 			highlight.x = 70;
 			buttonText.setText("RESET").setX(70);
 			button.setX(70).on("pointerup", () => {
-				this.setLoading(true, button, buttonText, highlight);
-				const currentSnowballs = this.registry.get("SB");
-				this.updateResetStatistics(currentSnowballs);
-				this.clearBiomesLastUpdatedData();
-				this.subtractSnowballs();
-				this.revokeInventoryItems();
+				this.setLoading(true);
+				const inventoriesToRevoke: { [key: number]: Set<string> } = {};
+				this.registry
+					.get("Inventories")
+					.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
+					.forEach((inventory: PlayFabClientModels.ItemInstance, i) => {
+						const group = Math.floor(i / 25);
+						if (!(group in inventoriesToRevoke)) {
+							inventoriesToRevoke[group] = new Set();
+						}
+						inventoriesToRevoke[group].add(inventory.ItemInstanceId);
+					});
+				this.revokeInventoryItems(0, inventoriesToRevoke, () => this.reset());
 			});
 		} else {
 			highlight.x = -70;
 			buttonText.setText("CANCEL").setX(-70);
 			button.setX(-70).on("pointerup", () => {
 				button.setFillStyle(lightRed, 1);
-				this.closeResetConfirmationContainer(highlight);
+				highlight.setAlpha(0);
+				this.closeResetConfirmationContainer();
 			});
 		}
 		this.resetConfirmationContainer.add([highlight, button, buttonText]);
 	}
 
-	setLoading(isLoading: boolean, button: RoundRectangle, text: Phaser.GameObjects.Text, highlight: RoundRectangle) {
+	setLoading(isLoading: boolean) {
+		const highlight = this.resetConfirmationContainer.getAt(4) as RoundRectangle;
+		const button = this.resetConfirmationContainer.getAt(5) as RoundRectangle;
+		const text = this.resetConfirmationContainer.getAt(6) as Phaser.GameObjects.Text;
 		if (isLoading) {
 			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
 				fontFamily: fontFamily,
@@ -216,12 +227,11 @@ class MenuScene extends AScene {
 					button.setFillStyle(lightBlue, 1);
 				});
 			highlight.setAlpha(0);
-			this.closeResetConfirmationContainer(highlight);
-			this.showToast("Reset Game", false);
+			this.closeResetConfirmationContainer();
 		}
 	}
 
-	closeResetConfirmationContainer(highlight: RoundRectangle) {
+	closeResetConfirmationContainer() {
 		this.add.tween({
 			targets: [this.resetConfirmationContainer],
 			ease: "Sine.easeIn",
@@ -229,13 +239,13 @@ class MenuScene extends AScene {
 			alpha: 0,
 			onComplete: () => {
 				this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-				highlight.setAlpha(0);
 			},
 			callbackScope: this,
 		});
 	}
 
-	updateResetStatistics(currentSnowballs: number) {
+	reset() {
+		const currentSnowballs = this.registry.get("SB");
 		PlayFabClient.ExecuteCloudScript(
 			{
 				FunctionName: "updateResetStatistics",
@@ -244,62 +254,55 @@ class MenuScene extends AScene {
 				},
 			},
 			(e, r) => {
-				console.log(e, r);
-				console.log("update reset statistics", currentSnowballs);
+				console.log("Updated reset statistics", currentSnowballs);
+				PlayFabClient.UpdateUserData(
+					{ KeysToRemove: ["5LastUpdated", "6LastUpdated", "7LastUpdated", "8LastUpdated", "9LastUpdated"] },
+					(e, r) => {
+						console.log("Cleared biomes LastUpdated data");
+						PlayFabClient.ExecuteCloudScript(
+							{
+								FunctionName: "subtractSnowballs",
+								FunctionParameter: { amount: currentSnowballs },
+							},
+							(e, r) => {
+								console.log("Revoked all snowballs");
+								this.registry.set("SB", 0);
+								this.setLoading(false);
+								this.showToast("Reset Game", false);
+							}
+						);
+					}
+				);
 			}
 		);
 	}
 
-	clearBiomesLastUpdatedData() {
-		PlayFabClient.UpdateUserData(
-			{ KeysToRemove: ["5LastUpdated", "6LastUpdated", "7LastUpdated", "8LastUpdated", "9LastUpdated"] },
-			(e, r) => {
-				console.log("Cleared biomes LastUpdated data");
-			}
-		);
-	}
-
-	subtractSnowballs() {
-		PlayFabClient.ExecuteCloudScript(
-			{
-				FunctionName: "subtractSnowballs",
-				FunctionParameter: { amount: this.registry.get("SB") },
-			},
-			(e, r) => {
-				console.log("subtracted snowballs");
-				this.registry.set("SB", 0);
-			}
-		);
-	}
-
-	revokeInventoryItems() {
-		const inventoriesToRevoke: { [key: number]: string[] } = {};
-		this.registry
-			.get("Inventories")
-			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
-			.forEach((inventory: PlayFabClientModels.ItemInstance, i) => {
-				const group = Math.floor(i / 25);
-				if (group in inventoriesToRevoke) {
-					inventoriesToRevoke[group].push(inventory.ItemInstanceId);
-				} else {
-					inventoriesToRevoke[group] = [inventory.ItemInstanceId];
-				}
-			});
-		Object.values(inventoriesToRevoke).forEach((ids: string[]) => {
+	revokeInventoryItems(key: number, inventoriesToRevoke: { [key: number]: Set<string> }, callback) {
+		if (!(key in inventoriesToRevoke)) {
+			callback();
+		} else {
+			const idsToRevoke: Set<string> = inventoriesToRevoke[key];
 			PlayFabClient.ExecuteCloudScript(
 				{
 					FunctionName: "revokeInventoryItems",
-					FunctionParameter: { itemInstanceIds: ids },
+					FunctionParameter: { itemInstanceIds: Array.from(idsToRevoke) },
 				},
 				(e, r) => {
-					console.log(e, r);
+					console.log("Revoked items", idsToRevoke);
+					const newInventories = this.registry
+						.get("Inventories")
+						.filter(
+							(inventory: PlayFabClientModels.ItemInstance) => !idsToRevoke.has(inventory.ItemInstanceId)
+						);
+					this.registry.set("Inventories", newInventories);
+					if (key + 1 in inventoriesToRevoke) {
+						this.revokeInventoryItems(key + 1, inventoriesToRevoke, callback);
+					} else {
+						callback();
+					}
 				}
 			);
-		});
-		const icebiome = this.registry
-			.get("Inventories")
-			.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "5");
-		this.registry.set("Inventories", [icebiome]);
+		}
 	}
 
 	update() {
