@@ -132,7 +132,7 @@ class MenuScene extends AScene {
 				0,
 				-150,
 				`Are you sure you want to reset?\nYour current snowball balance is:\n\n\nReset will award you with:\n\n+${
-					snowballBalance / 100
+					Math.floor(snowballBalance) / 100
 				} gain in snowball generation\n\nReset will NOT\naffect your in-app purchase history\nor your icicle balance`,
 				textStyle
 			)
@@ -259,7 +259,7 @@ class MenuScene extends AScene {
 	}
 
 	reset() {
-		const currentSnowballs = this.registry.get("SB");
+		const currentSnowballs = Math.floor(this.registry.get("SB") / 100) * 100;
 		PlayFabClient.ExecuteCloudScript(
 			{
 				FunctionName: "updateResetStatistics",
@@ -278,7 +278,7 @@ class MenuScene extends AScene {
 						PlayFabClient.ExecuteCloudScript(
 							{
 								FunctionName: "subtractSnowballs",
-								FunctionParameter: { amount: currentSnowballs },
+								FunctionParameter: { amount: this.registry.get("SB") },
 							},
 							(e, r) => {
 								console.log("Revoked all snowballs");

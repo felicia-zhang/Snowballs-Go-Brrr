@@ -41,7 +41,7 @@ class GameScene extends AScene {
 	create({ biomeDetail }) {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
-		this.resetBonus = this.registry.get("Reset") === 0 ? 0 : this.registry.get("Reset") / 10000;
+		this.resetBonus = this.registry.get("Reset") === 0 ? 0 : this.registry.get("Reset") / 100;
 		this.biomeDetail = biomeDetail;
 		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
