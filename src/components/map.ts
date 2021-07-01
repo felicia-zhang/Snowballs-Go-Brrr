@@ -180,16 +180,16 @@ class MapScene extends AScene {
 		const buttonText = this.add.text(0, 120, "VISIT", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const highlight = this.add.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, 0xffffff)).setAlpha(0);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, buttonNormal))
+			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, outlineNormal))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				button.setFillStyle(buttonHover, 1);
+				button.setFillStyle(outlineHover, 1);
 			})
 			.on("pointerout", () => {
-				button.setFillStyle(buttonNormal, 1);
+				button.setFillStyle(outlineNormal, 1);
 			})
 			.on("pointerdown", () => {
-				button.setFillStyle(buttonClick, 1);
+				button.setFillStyle(outlineClick, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -402,7 +402,7 @@ class MapScene extends AScene {
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const button = details.getAt(3) as RoundRectangle;
 		button.on("pointerup", () => {
-			button.setFillStyle(buttonNormal, 1);
+			button.setFillStyle(outlineNormal, 1);
 			this.add.tween({
 				targets: [details.getAt(2) as RoundRectangle],
 				ease: "Sine.easeIn",

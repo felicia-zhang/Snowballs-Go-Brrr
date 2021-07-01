@@ -183,26 +183,32 @@ class MenuScene extends AScene {
 				this.clearBiomesLastUpdatedData();
 				this.subtractSnowballs();
 				this.revokeInventoryItems();
+				this.closeResetConfirmationContainer(highlight);
+				this.showToast("Reset Game", false);
 			});
 		} else {
 			highlight.x = -70;
 			buttonText.setText("CANCEL").setX(-70);
 			button.setX(-70).on("pointerup", () => {
 				button.setFillStyle(buttonNormal, 1);
-				this.add.tween({
-					targets: [this.resetConfirmationContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						highlight.setAlpha(0);
-					},
-					callbackScope: this,
-				});
+				this.closeResetConfirmationContainer(highlight);
 			});
 		}
 		this.resetConfirmationContainer.add([highlight, button, buttonText]);
+	}
+
+	closeResetConfirmationContainer(highlight: RoundRectangle) {
+		this.add.tween({
+			targets: [this.resetConfirmationContainer],
+			ease: "Sine.easeIn",
+			duration: 100,
+			alpha: 0,
+			onComplete: () => {
+				this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+				highlight.setAlpha(0);
+			},
+			callbackScope: this,
+		});
 	}
 
 	updateResetStatistics(currentSnowballs: number) {
