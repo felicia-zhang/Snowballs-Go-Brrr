@@ -157,7 +157,8 @@ class MenuScene extends AScene {
 			highlight.x = 100;
 			buttonText.setText("YES").setX(100);
 			button.setX(100).on("pointerup", () => {
-				this.updateResetStatistics();
+				const currentSnowballs = this.registry.get("SB");
+				this.updateResetStatistics(currentSnowballs);
 				this.clearBiomesLastUpdatedData();
 				this.subtractSnowballs();
 				this.revokeInventoryItems();
@@ -182,17 +183,17 @@ class MenuScene extends AScene {
 		this.resetConfirmationContainer.add([highlight, button, buttonText]);
 	}
 
-	updateResetStatistics() {
+	updateResetStatistics(currentSnowballs: number) {
 		PlayFabClient.ExecuteCloudScript(
 			{
 				FunctionName: "updateResetStatistics",
 				FunctionParameter: {
-					snowballs: this.registry.get("SB"),
+					snowballs: currentSnowballs,
 				},
 			},
 			(e, r) => {
 				console.log(e, r);
-				console.log("update reset statistics", this.registry.get("SB"));
+				console.log("update reset statistics", currentSnowballs);
 			}
 		);
 	}
