@@ -101,12 +101,16 @@ abstract class AScene extends Phaser.Scene {
 			});
 			const overlay = this.currencyContainer.getAt(0) as Phaser.GameObjects.Rectangle;
 			const bg = this.currencyContainer.getAt(1) as RoundRectangle;
-			const closeButton = this.currencyContainer.getAt(4) as Phaser.GameObjects.Image;
+			const closeButton = this.currencyContainer.getAt(4) as RoundRectangle;
+			const line1 = this.currencyContainer.getAt(5) as Phaser.GameObjects.Line;
+			const line2 = this.currencyContainer.getAt(6) as Phaser.GameObjects.Line;
 			if (result.data.StoreId === "CurrenciesWithDiscount") {
 				overlay.setY(-25);
 				bg.height = 305;
 				bg.y = -25;
 				closeButton.setY(-165);
+				line1.setPosition(0, -50);
+				line2.setPosition(0, -50);
 				this.currencyContainer.setY(325);
 				const discountText = this.add
 					.text(
@@ -124,6 +128,8 @@ abstract class AScene extends Phaser.Scene {
 				bg.height = 255;
 				bg.y = 0;
 				closeButton.setY(-115);
+				line1.setPosition(0, 0);
+				line2.setPosition(0, 0);
 				this.currencyContainer.setY(300);
 			}
 		});
