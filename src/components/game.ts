@@ -41,7 +41,7 @@ class GameScene extends AScene {
 	create({ biomeDetail }) {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
-		this.resetBonus = this.registry.get("Reset") === 0 ? 0 : this.registry.get("Reset") / 100;
+		this.resetBonus = this.registry.get("ResetBonus") === 0 ? 0 : this.registry.get("ResetBonus");
 		this.biomeDetail = biomeDetail;
 		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
@@ -80,10 +80,10 @@ class GameScene extends AScene {
 				const numberOfIgloos = Object.keys(this.itemsMap[3].Instances).length;
 				const numberOfVaults = Object.keys(this.itemsMap[4].Instances).length;
 				const sb =
-					Math.floor(elapsedSeconds / 10) * numberOfFires * 100 +
-					Math.floor(elapsedSeconds) * numberOfSnowmans * 100 +
-					Math.floor(elapsedSeconds) * numberOfIgloos * 1000 +
-					Math.floor(elapsedSeconds) * numberOfVaults * 10000;
+					Math.floor(elapsedSeconds / 10) * numberOfFires * (100 + this.resetBonus) +
+					Math.floor(elapsedSeconds) * numberOfSnowmans * (100 + this.resetBonus) +
+					Math.floor(elapsedSeconds) * numberOfIgloos * (1000 + this.resetBonus) +
+					Math.floor(elapsedSeconds) * numberOfVaults * (10000 + this.resetBonus);
 
 				this.registry.values.SB += sb;
 				this.totalAddedSnowballs += sb;

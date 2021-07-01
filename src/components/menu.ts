@@ -29,14 +29,14 @@ class MenuScene extends AScene {
 		PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 			this.registry.set("CatalogItems", result.data.Catalog);
 
-			PlayFabClient.GetPlayerStatistics({ StatisticNames: ["reset"] }, (e, r) => {
+			PlayFabClient.GetPlayerStatistics({ StatisticNames: ["resetBonus"] }, (e, r) => {
 				const resetStat = r.data.Statistics.find(
-					(stat: PlayFabClientModels.StatisticValue) => stat.StatisticName === "reset"
+					(stat: PlayFabClientModels.StatisticValue) => stat.StatisticName === "resetBonus"
 				);
 				if (resetStat !== undefined) {
-					this.registry.set("Reset", resetStat.Value);
+					this.registry.set("ResetBonus", resetStat.Value);
 				} else {
-					this.registry.set("Reset", 0);
+					this.registry.set("ResetBonus", 0);
 				}
 			});
 
@@ -132,7 +132,7 @@ class MenuScene extends AScene {
 				0,
 				-150,
 				`Are you sure you want to reset?\nYour current snowball balance is:\n\n\nReset will award you with:\n\n+${
-					Math.floor(snowballBalance) / 100
+					Math.floor(this.registry.get("SB") / 1000000) / 100
 				} gain in snowball generation\n\nReset will NOT\naffect your in-app purchase history\nor your icicle balance`,
 				textStyle
 			)
@@ -259,18 +259,18 @@ class MenuScene extends AScene {
 	}
 
 	reset() {
-		const currentSnowballs = Math.floor(this.registry.get("SB") / 100) * 100;
+		const bonus = Math.floor(this.registry.get("SB") / 1000000);
 		PlayFabClient.ExecuteCloudScript(
 			{
 				FunctionName: "updateResetStatistics",
 				FunctionParameter: {
-					snowballs: currentSnowballs,
+					bonus: bonus,
 				},
 			},
 			(e, r) => {
-				const currentReset = this.registry.get("Reset");
-				this.registry.set("Reset", currentReset + currentSnowballs);
-				console.log("Updated reset statistics", currentSnowballs);
+				const currentResetBonus = this.registry.get("ResetBonus");
+				this.registry.set("ResetBonus", currentResetBonus + bonus);
+				console.log("Added reset bonus statistics", bonus);
 				PlayFabClient.UpdateUserData(
 					{ KeysToRemove: ["5LastUpdated", "6LastUpdated", "7LastUpdated", "8LastUpdated", "9LastUpdated"] },
 					(e, r) => {
