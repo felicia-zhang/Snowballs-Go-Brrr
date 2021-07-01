@@ -31,6 +31,11 @@ class MapScene extends AScene {
 	biomeOwnedContainer: Phaser.GameObjects.Container;
 	biomeNotOwnedContainer: Phaser.GameObjects.Container;
 	storeId: string;
+	icebiome: Phaser.GameObjects.Image;
+	marinebiome: Phaser.GameObjects.Image;
+	savannabiome: Phaser.GameObjects.Image;
+	tropicalbiome: Phaser.GameObjects.Image;
+	magmabiome: Phaser.GameObjects.Image;
 
 	constructor() {
 		super("Map");
@@ -42,6 +47,7 @@ class MapScene extends AScene {
 		this.biomeMap = {};
 		this.biomeItems = {};
 		this.add.text(400, 16, "MAP", textStyle).setAlign("center").setOrigin(0.5, 0);
+		this.storeId = "";
 		this.makeBiomeOwnedContainer();
 		this.makeBiomeNotOwnedContainer();
 
@@ -84,12 +90,11 @@ class MapScene extends AScene {
 					(this.biomeItems[inventory.CustomData.BiomeId][inventory.DisplayName] += 1)
 			);
 
-		PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
-			this.storeId = result.data.StoreId;
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeBiome(storeItem);
-			});
-		});
+		this.icebiome = this.makeBiomeImage(200, 200, "icebiome", "5");
+		this.marinebiome = this.makeBiomeImage(400, 200, "marinebiome", "6");
+		this.savannabiome = this.makeBiomeImage(600, 200, "savannabiome", "7");
+		this.tropicalbiome = this.makeBiomeImage(290, 400, "tropicalbiome", "8");
+		this.magmabiome = this.makeBiomeImage(490, 400, "magmabiome", "9");
 
 		this.registry.events.on("changedata", this.updateData, this);
 
@@ -141,46 +146,28 @@ class MapScene extends AScene {
 		}
 	}
 
-	makeBiome(biome: PlayFabClientModels.StoreItem) {
-		let imageKey: string;
-		let x: number;
-		let y: number;
-		if (biome.ItemId === "5") {
-			imageKey = "icebiome";
-			x = 200;
-			y = 200;
-		} else if (biome.ItemId === "6") {
-			imageKey = "marinebiome";
-			x = 400;
-			y = 200;
-		} else if (biome.ItemId === "7") {
-			imageKey = "savannabiome";
-			x = 600;
-			y = 200;
-		} else if (biome.ItemId === "8") {
-			imageKey = "tropicalbiome";
-			x = 290;
-			y = 400;
-		} else if (biome.ItemId === "9") {
-			imageKey = "magmabiome";
-			x = 490;
-			y = 400;
-		}
-		this.interactiveObjects.push(
-			this.add
-				.image(x, y, imageKey)
-				.setScale(0.5)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerup", () => {
+	makeBiomeImage(x: number, y: number, imageKey: string, biomeId: string) {
+		const image = this.add
+			.image(x, y, imageKey)
+			.setScale(0.5)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerup", () => {
+				PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
+					this.storeId = result.data.StoreId;
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					biome.ItemId in this.biomeItems
+					const biome = result.data.Store.find(
+						(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === biomeId
+					);
+					biomeId in this.biomeItems
 						? this.showBiomeOwnedContainer(biome, imageKey)
 						: this.showBiomeNotOwnedContainer(biome, imageKey);
-				})
-		);
-		if (!(biome.ItemId in this.biomeItems)) {
+				});
+			});
+		this.interactiveObjects.push(image);
+		if (!(biomeId in this.biomeItems)) {
 			this.add.image(x, y, "lock").setScale(0.5);
 		}
+		return image;
 	}
 
 	makeBiomeOwnedContainer() {
