@@ -4,6 +4,9 @@ import {
 	buttonHover,
 	buttonNormal,
 	darkBackgroundColor,
+	outlineClick,
+	outlineHover,
+	outlineNormal,
 	overlayDepth,
 	popupDepth,
 	textStyle,
@@ -109,33 +112,50 @@ class MenuScene extends AScene {
 	}
 
 	makeResetConfirmationContainer() {
+		const snowballBalance = this.registry.get("SB");
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 520, 340, 15, darkBackgroundColor));
-		this.resetConfirmationContainer = this.add.container(400, 300, [overlay, bg]).setDepth(popupDepth).setAlpha(0);
+		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 300, 340, 15, darkBackgroundColor));
+		const description = this.add
+			.text(
+				0,
+				-150,
+				`Are you sure you want to reset?\nYour current snowball balance is:\n\n\nReset will award you with:\n\n+${
+					snowballBalance / 100
+				} gain in snowball generation\n\nReset will NOT\naffect your in-app purchase history\nor your icicle balance`,
+				textStyle
+			)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
+		const snowballText = this.add.text(0, -100, snowballBalance, textStyle).setAlign("center");
+		this.resetConfirmationContainer = this.add
+			.container(400, 300, [overlay, bg, description, snowballText])
+			.setDepth(popupDepth)
+			.setAlpha(0);
 		this.makeButton("yes");
 		this.makeButton("cancel");
 	}
 
 	makeButton(type: string) {
-		const highlight = this.add.existing(new RoundRectangle(this, 0, 0, 58, 36, 10, 0xffffff)).setAlpha(0);
-		const buttonText = this.add.text(0, 0, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const isConfirm = type === "yes";
+		const highlight = this.add.existing(new RoundRectangle(this, 0, 134, 68, 36, 10, 0xffffff)).setAlpha(0);
+		const buttonText = this.add.text(0, 134, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 0, 58, 36, 10, buttonNormal))
+			.existing(new RoundRectangle(this, 0, 134, 68, 36, 10, isConfirm ? outlineNormal : buttonNormal))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				button.setFillStyle(buttonHover, 1);
+				isConfirm ? button.setFillStyle(outlineHover, 1) : button.setFillStyle(buttonHover, 1);
 			})
 			.on("pointerout", () => {
-				button.setFillStyle(buttonNormal, 1);
+				isConfirm ? button.setFillStyle(outlineNormal, 1) : button.setFillStyle(buttonNormal, 1);
 			})
 			.on("pointerdown", () => {
-				button.setFillStyle(buttonClick, 1);
+				isConfirm ? button.setFillStyle(outlineClick, 1) : button.setFillStyle(buttonClick, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
 					props: {
 						width: {
-							value: 63,
+							value: 73,
 							duration: 150,
 							ease: "Sine.easeIn",
 						},
@@ -153,10 +173,11 @@ class MenuScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		if (type === "yes") {
-			highlight.x = 100;
-			buttonText.setText("YES").setX(100);
-			button.setX(100).on("pointerup", () => {
+		if (isConfirm) {
+			highlight.x = 70;
+			buttonText.setText("RESET").setX(70);
+			button.setX(70).on("pointerup", () => {
+				button.setFillStyle(outlineNormal, 1);
 				const currentSnowballs = this.registry.get("SB");
 				this.updateResetStatistics(currentSnowballs);
 				this.clearBiomesLastUpdatedData();
@@ -164,9 +185,10 @@ class MenuScene extends AScene {
 				this.revokeInventoryItems();
 			});
 		} else {
-			highlight.x = -100;
-			buttonText.setText("CANCEL").setX(-100);
-			button.setX(-100).on("pointerup", () => {
+			highlight.x = -70;
+			buttonText.setText("CANCEL").setX(-70);
+			button.setX(-70).on("pointerup", () => {
+				button.setFillStyle(buttonNormal, 1);
 				this.add.tween({
 					targets: [this.resetConfirmationContainer],
 					ease: "Sine.easeIn",
