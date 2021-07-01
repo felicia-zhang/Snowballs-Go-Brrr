@@ -1,15 +1,15 @@
 import {
-	buttonClick,
-	buttonHover,
-	buttonNormal,
+	darkRed,
+	normalRed,
+	lightRed,
 	closeButtonFill,
 	darkBackgroundColor,
 	errorHex,
 	fontFamily,
 	lightBackgroundColor,
-	outlineClick,
-	outlineHover,
-	outlineNormal,
+	darkBlue,
+	normalBlue,
+	lightBlue,
 	overlayDepth,
 	popupDepth,
 	textStyle,
@@ -60,21 +60,19 @@ abstract class AScene extends Phaser.Scene {
 			.setAlpha(0)
 			.setDepth(popupDepth);
 		const closeButton = this.add
-			.existing(
-				new RoundRectangle(this, 320, -115, 35, 35, 5, closeButtonFill).setStrokeStyle(6, outlineNormal, 1)
-			)
+			.existing(new RoundRectangle(this, 320, -115, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, outlineHover, 1);
+				closeButton.setStrokeStyle(6, normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 			})
 			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, outlineClick, 1);
+				closeButton.setStrokeStyle(6, darkBlue, 1);
 			})
 			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 				this.add.tween({
 					targets: [this.currencyContainer],
 					ease: "Sine.easeIn",
@@ -89,8 +87,8 @@ abstract class AScene extends Phaser.Scene {
 					callbackScope: this,
 				});
 			});
-		const line1 = this.add.line(0, 0, 320, -97.5, 337, -114.5, outlineClick).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 320, -114.5, 337, -97.5, outlineClick).setLineWidth(3, 3);
+		const line1 = this.add.line(0, 0, 320, -97.5, 337, -114.5, darkBlue).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 320, -114.5, 337, -97.5, darkBlue).setLineWidth(3, 3);
 		this.currencyContainer.add([closeButton, line1, line2]);
 	}
 
@@ -171,16 +169,16 @@ abstract class AScene extends Phaser.Scene {
 			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, 0xffffff))
 			.setAlpha(0);
 		const usdButton = this.add
-			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, buttonNormal))
+			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, lightRed))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				usdButton.setFillStyle(buttonHover, 1);
+				usdButton.setFillStyle(normalRed, 1);
 			})
 			.on("pointerout", () => {
-				usdButton.setFillStyle(buttonNormal, 1);
+				usdButton.setFillStyle(lightRed, 1);
 			})
 			.on("pointerdown", () => {
-				usdButton.setFillStyle(buttonClick, 1);
+				usdButton.setFillStyle(darkRed, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -246,16 +244,16 @@ abstract class AScene extends Phaser.Scene {
 				stroke: "#ffffff",
 				strokeThickness: 3,
 			});
-			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
+			button.setFillStyle(darkRed, 1).disableInteractive().removeListener("pointerout");
 		} else {
 			text.setText(`$ ${usd}.00`)
 				.setOrigin(0.5, 0.5)
 				.setStyle({ ...textStyle, strokeThickness: 0 });
 			button
-				.setFillStyle(buttonNormal, 1)
+				.setFillStyle(lightRed, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerout", () => {
-					button.setFillStyle(buttonNormal, 1);
+					button.setFillStyle(lightRed, 1);
 				});
 			highlight.setAlpha(0);
 		}

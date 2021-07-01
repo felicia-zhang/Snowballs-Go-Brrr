@@ -1,9 +1,9 @@
 import { PlayFabClient } from "playfab-sdk";
 import {
 	darkBackgroundColor,
-	buttonClick,
-	buttonHover,
-	buttonNormal,
+	darkRed,
+	normalRed,
+	lightRed,
 	fontFamily,
 	smallFontSize,
 	textStyle,
@@ -11,9 +11,9 @@ import {
 	overlayDepth,
 	popupDepth,
 	closeButtonFill,
-	outlineNormal,
-	outlineHover,
-	outlineClick,
+	lightBlue,
+	normalBlue,
+	darkBlue,
 } from "../utils/constants";
 import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
@@ -180,16 +180,16 @@ class MapScene extends AScene {
 		const buttonText = this.add.text(0, 120, "VISIT", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const highlight = this.add.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, 0xffffff)).setAlpha(0);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, outlineNormal))
+			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, lightBlue))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				button.setFillStyle(outlineHover, 1);
+				button.setFillStyle(normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				button.setFillStyle(outlineNormal, 1);
+				button.setFillStyle(lightBlue, 1);
 			})
 			.on("pointerdown", () => {
-				button.setFillStyle(outlineClick, 1);
+				button.setFillStyle(darkBlue, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -224,21 +224,19 @@ class MapScene extends AScene {
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
-			.existing(
-				new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, outlineNormal, 1)
-			)
+			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, outlineHover, 1);
+				closeButton.setStrokeStyle(6, normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 			})
 			.on("pointerdown", () => {
 				closeButton.setStrokeStyle(6, 0x2e5768, 1);
 			})
 			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 				this.add.tween({
 					targets: [this.biomeOwnedContainer],
 					ease: "Sine.easeIn",
@@ -270,16 +268,16 @@ class MapScene extends AScene {
 		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const snowballHighlight = this.add.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, 0xffffff)).setAlpha(0);
 		const snowballButton = this.add
-			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, buttonNormal))
+			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, lightRed))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				snowballButton.setFillStyle(buttonHover, 1);
+				snowballButton.setFillStyle(normalRed, 1);
 			})
 			.on("pointerout", () => {
-				snowballButton.setFillStyle(buttonNormal, 1);
+				snowballButton.setFillStyle(lightRed, 1);
 			})
 			.on("pointerdown", () => {
-				snowballButton.setFillStyle(buttonClick, 1);
+				snowballButton.setFillStyle(darkRed, 1);
 				this.add.tween({
 					targets: [snowballHighlight],
 					ease: "Sine.easeIn",
@@ -307,16 +305,16 @@ class MapScene extends AScene {
 		const icicleButtonText = this.add.text(-15, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const icicleHighlight = this.add.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xffffff)).setAlpha(0);
 		const icicleButton = this.add
-			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, buttonNormal))
+			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, lightRed))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				icicleButton.setFillStyle(buttonHover, 1);
+				icicleButton.setFillStyle(normalRed, 1);
 			})
 			.on("pointerout", () => {
-				icicleButton.setFillStyle(buttonNormal, 1);
+				icicleButton.setFillStyle(lightRed, 1);
 			})
 			.on("pointerdown", () => {
-				icicleButton.setFillStyle(buttonClick, 1);
+				icicleButton.setFillStyle(darkRed, 1);
 				this.add.tween({
 					targets: [icicleHighlight],
 					ease: "Sine.easeIn",
@@ -357,21 +355,19 @@ class MapScene extends AScene {
 		]);
 		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
 		const closeButton = this.add
-			.existing(
-				new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, outlineNormal, 1)
-			)
+			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, outlineHover, 1);
+				closeButton.setStrokeStyle(6, normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 			})
 			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, outlineClick, 1);
+				closeButton.setStrokeStyle(6, darkBlue, 1);
 			})
 			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 				this.add.tween({
 					targets: [this.biomeNotOwnedContainer],
 					ease: "Sine.easeIn",
@@ -389,8 +385,8 @@ class MapScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, outlineClick).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, outlineClick).setLineWidth(3, 3);
+		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, darkBlue).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, darkBlue).setLineWidth(3, 3);
 		popup.add([closeButton, line1, line2]);
 		this.biomeNotOwnedContainer = popup;
 	}
@@ -402,7 +398,7 @@ class MapScene extends AScene {
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const button = details.getAt(3) as RoundRectangle;
 		button.on("pointerup", () => {
-			button.setFillStyle(outlineNormal, 1);
+			button.setFillStyle(lightBlue, 1);
 			this.add.tween({
 				targets: [details.getAt(2) as RoundRectangle],
 				ease: "Sine.easeIn",
@@ -582,7 +578,7 @@ class MapScene extends AScene {
 				.setX(0)
 				.setOrigin(0.5, 0.725)
 				.setStyle({ fontFamily: fontFamily, fontSize: "32px", stroke: "#ffffff", strokeThickness: 3 });
-			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
+			button.setFillStyle(darkRed, 1).disableInteractive().removeListener("pointerout");
 			icon.setAlpha(0);
 		} else {
 			text.setText(`${price} x`)
@@ -590,10 +586,10 @@ class MapScene extends AScene {
 				.setOrigin(0.5, 0.5)
 				.setStyle({ ...textStyle, strokeThickness: 0 });
 			button
-				.setFillStyle(buttonNormal, 1)
+				.setFillStyle(lightRed, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerout", () => {
-					button.setFillStyle(buttonNormal, 1);
+					button.setFillStyle(lightRed, 1);
 				});
 			highlight.setAlpha(0);
 			icon.setAlpha(1);

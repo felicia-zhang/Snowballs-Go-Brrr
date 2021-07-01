@@ -1,12 +1,12 @@
 import { PlayFab, PlayFabClient, PlayFabServer } from "playfab-sdk";
 import {
-	buttonClick,
-	buttonHover,
-	buttonNormal,
+	darkRed,
+	normalRed,
+	lightRed,
 	darkBackgroundColor,
-	outlineClick,
-	outlineHover,
-	outlineNormal,
+	darkBlue,
+	normalBlue,
+	lightBlue,
 	overlayDepth,
 	popupDepth,
 	textStyle,
@@ -140,16 +140,16 @@ class MenuScene extends AScene {
 		const highlight = this.add.existing(new RoundRectangle(this, 0, 134, 68, 36, 10, 0xffffff)).setAlpha(0);
 		const buttonText = this.add.text(0, 134, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 134, 68, 36, 10, isConfirm ? outlineNormal : buttonNormal))
+			.existing(new RoundRectangle(this, 0, 134, 68, 36, 10, isConfirm ? lightBlue : lightRed))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				isConfirm ? button.setFillStyle(outlineHover, 1) : button.setFillStyle(buttonHover, 1);
+				isConfirm ? button.setFillStyle(normalBlue, 1) : button.setFillStyle(normalRed, 1);
 			})
 			.on("pointerout", () => {
-				isConfirm ? button.setFillStyle(outlineNormal, 1) : button.setFillStyle(buttonNormal, 1);
+				isConfirm ? button.setFillStyle(lightBlue, 1) : button.setFillStyle(lightRed, 1);
 			})
 			.on("pointerdown", () => {
-				isConfirm ? button.setFillStyle(outlineClick, 1) : button.setFillStyle(buttonClick, 1);
+				isConfirm ? button.setFillStyle(darkBlue, 1) : button.setFillStyle(darkRed, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -177,7 +177,7 @@ class MenuScene extends AScene {
 			highlight.x = 70;
 			buttonText.setText("RESET").setX(70);
 			button.setX(70).on("pointerup", () => {
-				button.setFillStyle(outlineNormal, 1);
+				button.setFillStyle(lightBlue, 1);
 				const currentSnowballs = this.registry.get("SB");
 				this.updateResetStatistics(currentSnowballs);
 				this.clearBiomesLastUpdatedData();
@@ -190,7 +190,7 @@ class MenuScene extends AScene {
 			highlight.x = -70;
 			buttonText.setText("CANCEL").setX(-70);
 			button.setX(-70).on("pointerup", () => {
-				button.setFillStyle(buttonNormal, 1);
+				button.setFillStyle(lightRed, 1);
 				this.closeResetConfirmationContainer(highlight);
 			});
 		}

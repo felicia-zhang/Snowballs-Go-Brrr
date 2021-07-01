@@ -1,9 +1,9 @@
 import { PlayFabClient } from "playfab-sdk";
 import {
 	darkBackgroundColor,
-	buttonClick,
-	buttonHover,
-	buttonNormal,
+	darkRed,
+	normalRed,
+	lightRed,
 	fontFamily,
 	smallFontSize,
 	textStyle,
@@ -12,9 +12,9 @@ import {
 	popupDepth,
 	clickAnimationDepth,
 	closeButtonFill,
-	outlineNormal,
-	outlineHover,
-	outlineClick,
+	lightBlue,
+	normalBlue,
+	darkBlue,
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
@@ -208,21 +208,19 @@ class GameScene extends AScene {
 			.setAlpha(0)
 			.setDepth(popupDepth);
 		const closeButton = this.add
-			.existing(
-				new RoundRectangle(this, 175, -215, 35, 35, 5, closeButtonFill).setStrokeStyle(6, outlineNormal, 1)
-			)
+			.existing(new RoundRectangle(this, 175, -215, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, outlineHover, 1);
+				closeButton.setStrokeStyle(6, normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 			})
 			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, outlineClick, 1);
+				closeButton.setStrokeStyle(6, darkBlue, 1);
 			})
 			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, outlineNormal, 1);
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 				this.add.tween({
 					targets: [this.storeContainer],
 					ease: "Sine.easeIn",
@@ -237,8 +235,8 @@ class GameScene extends AScene {
 					callbackScope: this,
 				});
 			});
-		const line1 = this.add.line(0, 0, 175, -197.5, 192, -214.5, outlineClick).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 175, -214.5, 192, -197.5, outlineClick).setLineWidth(3, 3);
+		const line1 = this.add.line(0, 0, 175, -197.5, 192, -214.5, darkBlue).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 175, -214.5, 192, -197.5, darkBlue).setLineWidth(3, 3);
 		this.storeContainer.add([closeButton, line1, line2]);
 	}
 
@@ -352,16 +350,16 @@ class GameScene extends AScene {
 			.existing(new RoundRectangle(this, x, y, w, priceText.height + 16, 10, 0xffffff))
 			.setAlpha(0);
 		const priceButton = this.add
-			.existing(new RoundRectangle(this, x, y, w, priceText.height + 16, 10, buttonNormal))
+			.existing(new RoundRectangle(this, x, y, w, priceText.height + 16, 10, lightRed))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				priceButton.setFillStyle(buttonHover, 1);
+				priceButton.setFillStyle(normalRed, 1);
 			})
 			.on("pointerout", () => {
-				priceButton.setFillStyle(buttonNormal, 1);
+				priceButton.setFillStyle(lightRed, 1);
 			})
 			.on("pointerdown", () => {
-				priceButton.setFillStyle(buttonClick, 1);
+				priceButton.setFillStyle(darkRed, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
@@ -463,7 +461,7 @@ class GameScene extends AScene {
 				.setAlign("center")
 				.setOrigin(0.5, 0.725)
 				.setStyle({ fontFamily: fontFamily, fontSize: "32px", stroke: "#ffffff", strokeThickness: 3 });
-			button.setFillStyle(buttonClick, 1).disableInteractive().removeListener("pointerout");
+			button.setFillStyle(darkRed, 1).disableInteractive().removeListener("pointerout");
 			icon.setAlpha(0);
 		} else {
 			text.setText(`${price} x`)
@@ -472,10 +470,10 @@ class GameScene extends AScene {
 				.setOrigin(1, 0.5)
 				.setStyle({ ...textStyle, strokeThickness: 0 });
 			button
-				.setFillStyle(buttonNormal, 1)
+				.setFillStyle(lightRed, 1)
 				.setInteractive({ useHandCursor: true })
 				.on("pointerout", () => {
-					button.setFillStyle(buttonNormal, 1);
+					button.setFillStyle(lightRed, 1);
 				});
 			highlight.setAlpha(0);
 			icon.setAlpha(1);
