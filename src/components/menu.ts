@@ -157,18 +157,7 @@ class MenuScene extends AScene {
 			highlight.x = 100;
 			buttonText.setText("YES").setX(100);
 			button.setX(100).on("pointerup", () => {
-				// PlayFabClient.ExecuteCloudScript(
-				// 	{
-				// 		FunctionName: "updateResetStatistics",
-				// 		FunctionParameter: {
-				// 			snowballs: this.registry.get("SB"),
-				// 		},
-				// 	},
-				// 	(e, r) => {
-				// 		console.log(e, r);
-				// 		console.log("update reset statistics", this.registry.get("SB"));
-				// 	}
-				// );
+				this.updateResetStatistics();
 				this.clearBiomesLastUpdatedData();
 				this.subtractSnowballs();
 				this.revokeInventoryItems();
@@ -191,6 +180,21 @@ class MenuScene extends AScene {
 			});
 		}
 		this.resetConfirmationContainer.add([highlight, button, buttonText]);
+	}
+
+	updateResetStatistics() {
+		PlayFabClient.ExecuteCloudScript(
+			{
+				FunctionName: "updateResetStatistics",
+				FunctionParameter: {
+					snowballs: this.registry.get("SB"),
+				},
+			},
+			(e, r) => {
+				console.log(e, r);
+				console.log("update reset statistics", this.registry.get("SB"));
+			}
+		);
 	}
 
 	clearBiomesLastUpdatedData() {
