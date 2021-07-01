@@ -213,8 +213,8 @@ class MenuScene extends AScene {
 				FunctionParameter: { amount: this.registry.get("SB") },
 			},
 			(e, r) => {
-				console.log(e, r);
 				console.log("subtracted snowballs");
+				this.registry.set("SB", 0);
 			}
 		);
 	}
@@ -243,6 +243,10 @@ class MenuScene extends AScene {
 				}
 			);
 		});
+		const icebiome = this.registry
+			.get("Inventories")
+			.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "5");
+		this.registry.set("Inventories", [icebiome]);
 	}
 
 	update() {
