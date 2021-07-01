@@ -10,6 +10,7 @@ import {
 	overlayDepth,
 	popupDepth,
 	textStyle,
+	fontFamily,
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
@@ -126,7 +127,7 @@ class MenuScene extends AScene {
 			)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
-		const snowballText = this.add.text(0, -100, snowballBalance, textStyle).setAlign("center");
+		const snowballText = this.add.text(0, -100, snowballBalance, textStyle).setAlign("center").setOrigin(0.5, 0);
 		this.resetConfirmationContainer = this.add
 			.container(400, 300, [overlay, bg, description, snowballText])
 			.setDepth(popupDepth)
@@ -177,14 +178,12 @@ class MenuScene extends AScene {
 			highlight.x = 70;
 			buttonText.setText("RESET").setX(70);
 			button.setX(70).on("pointerup", () => {
-				button.setFillStyle(lightBlue, 1);
+				this.setLoading(true, button, buttonText, highlight);
 				const currentSnowballs = this.registry.get("SB");
 				this.updateResetStatistics(currentSnowballs);
 				this.clearBiomesLastUpdatedData();
 				this.subtractSnowballs();
 				this.revokeInventoryItems();
-				this.closeResetConfirmationContainer(highlight);
-				this.showToast("Reset Game", false);
 			});
 		} else {
 			highlight.x = -70;
@@ -195,6 +194,31 @@ class MenuScene extends AScene {
 			});
 		}
 		this.resetConfirmationContainer.add([highlight, button, buttonText]);
+	}
+
+	setLoading(isLoading: boolean, button: RoundRectangle, text: Phaser.GameObjects.Text, highlight: RoundRectangle) {
+		if (isLoading) {
+			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
+				fontFamily: fontFamily,
+				fontSize: "32px",
+				stroke: "#ffffff",
+				strokeThickness: 3,
+			});
+			button.setFillStyle(darkBlue, 1).disableInteractive().removeListener("pointerout");
+		} else {
+			text.setText("RESET")
+				.setOrigin(0.5, 0.5)
+				.setStyle({ ...textStyle, strokeThickness: 0 });
+			button
+				.setFillStyle(lightBlue, 1)
+				.setInteractive({ useHandCursor: true })
+				.on("pointerout", () => {
+					button.setFillStyle(lightBlue, 1);
+				});
+			highlight.setAlpha(0);
+			this.closeResetConfirmationContainer(highlight);
+			this.showToast("Reset Game", false);
+		}
 	}
 
 	closeResetConfirmationContainer(highlight: RoundRectangle) {
