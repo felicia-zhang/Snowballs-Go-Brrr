@@ -22,6 +22,7 @@ import savannabiome from "../assets/savannabiome.png";
 import magmabiome from "../assets/magmabiome.png";
 import marinebiome from "../assets/marinebiome.png";
 import tropicalbiome from "../assets/tropicalbiome.png";
+import star from "../assets/star.png";
 import MenuScene from "./menu";
 import AScene from "./AScene";
 import MapScene from "./map";
@@ -53,6 +54,7 @@ class Controller extends AScene {
 		this.load.image("magmabiome", magmabiome);
 		this.load.image("marinebiome", marinebiome);
 		this.load.image("tropicalbiome", tropicalbiome);
+		this.load.image("star", star);
 	}
 
 	create() {

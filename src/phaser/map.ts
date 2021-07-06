@@ -103,6 +103,11 @@ class MapScene extends AScene {
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
+		if (this.registry.get("ResetBonus") !== 0) {
+			this.add.text(50, 96, `: +${this.registry.get("ResetBonus") / 100}`, textStyle);
+			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
+		}
+
 		const menuButtonUnderline = this.add.line(16, 544, 16, 544, 16, 544, 0xffffff).setAlpha(0);
 		const menuButton = this.add
 			.text(16, 544, "MENU", textStyle)

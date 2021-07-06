@@ -106,6 +106,11 @@ class GameScene extends AScene {
 		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
+		if (this.resetBonus !== 0) {
+			this.add.text(50, 96, `: +${this.resetBonus / 100}`, textStyle);
+			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
+		}
+
 		this.add
 			.text(400, 16, this.biomeDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("center")
