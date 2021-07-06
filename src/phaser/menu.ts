@@ -1,4 +1,4 @@
-import { PlayFab, PlayFabClient, PlayFabServer } from "playfab-sdk";
+import { PlayFabClient } from "playfab-sdk";
 import {
 	darkRed,
 	normalRed,

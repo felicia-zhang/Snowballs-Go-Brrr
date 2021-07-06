@@ -1,4 +1,3 @@
-import { PlayFabClient } from "playfab-sdk";
 import AScene from "./AScene";
 
 class SigninScene extends AScene {
