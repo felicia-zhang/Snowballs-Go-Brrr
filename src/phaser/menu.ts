@@ -131,15 +131,42 @@ class MenuScene extends AScene {
 			.text(
 				0,
 				-150,
-				`Reset game to generate +0.01 more snowballs\nfor every 10000 snowballs in your balance\n\nYour current snowball balance is:\n${snowballBalance}\n\nReset will award you with:\n+${
-					Math.floor(this.registry.get("SB") / 1000000) / 100
-				} snowballs\n\n*Reset will NOT\naffect your in-app purchase history\nor your icicle balance`,
+				`Reset game to earn 0.01 reset bonus\nfor every 10000 snowballs in your balance.\nThe reset bonus will be applied to\nmanual clicks and item effects.\n\nYour current snowball balance is:\n\n\nReset will award you with:`,
 				textStyle
 			)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
+		const snowballText = this.add
+			.text(0, -15, `${snowballBalance} x`, textStyle)
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const snowballIcon = this.add.image(0, -15, "snowball").setScale(0.15).setOrigin(1, 0.5);
+		const snowballX = (snowballText.width + snowballIcon.displayWidth + 6) / 2;
+		snowballText.setX(-snowballX);
+		snowballIcon.setX(snowballX);
+		const resetBonusText = this.add
+			.text(0, 45, `${Math.floor(this.registry.get("SB") / 1000000) / 100} x`, textStyle)
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const resetBonusIcon = this.add.image(0, 45, "star").setScale(0.15).setOrigin(1, 0.5);
+		const resetX = (resetBonusText.width + resetBonusIcon.displayWidth + 6) / 2;
+		resetBonusText.setX(-resetX);
+		resetBonusIcon.setX(resetX);
+		const footnote = this.add
+			.text(0, 180, "*Reset will NOT affect\nyour in-app purchase history\nor your icicle balance", textStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
 		this.resetConfirmationContainer = this.add
-			.container(400, 300, [overlay, bg, description])
+			.container(400, 300, [
+				overlay,
+				bg,
+				description,
+				snowballText,
+				snowballIcon,
+				resetBonusText,
+				resetBonusIcon,
+				footnote,
+			])
 			.setDepth(popupDepth)
 			.setAlpha(0);
 		this.makeButton("yes");
@@ -215,9 +242,9 @@ class MenuScene extends AScene {
 	}
 
 	setLoading(isLoading: boolean) {
-		const highlight = this.resetConfirmationContainer.getAt(3) as RoundRectangle;
-		const button = this.resetConfirmationContainer.getAt(4) as RoundRectangle;
-		const text = this.resetConfirmationContainer.getAt(5) as Phaser.GameObjects.Text;
+		const highlight = this.resetConfirmationContainer.getAt(8) as RoundRectangle;
+		const button = this.resetConfirmationContainer.getAt(9) as RoundRectangle;
+		const text = this.resetConfirmationContainer.getAt(10) as Phaser.GameObjects.Text;
 		if (isLoading) {
 			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
 				fontFamily: fontFamily,
