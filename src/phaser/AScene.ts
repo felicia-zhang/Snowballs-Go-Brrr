@@ -25,9 +25,6 @@ abstract class AScene extends Phaser.Scene {
 	currencyContainer: Phaser.GameObjects.Container;
 	currencyItems: PlayFabClientModels.StoreItem[];
 	interactiveObjects: Phaser.GameObjects.GameObject[];
-	constructor(key: string) {
-		super(key);
-	}
 
 	init() {
 		this.toast = this.add

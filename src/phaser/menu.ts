@@ -11,6 +11,8 @@ import {
 	popupDepth,
 	textStyle,
 	fontFamily,
+	closeButtonFill,
+	lightBackgroundColor,
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
@@ -126,7 +128,8 @@ class MenuScene extends AScene {
 	makeResetConfirmationContainer() {
 		const snowballBalance = this.registry.get("SB") / 100;
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const bg = this.add.existing(new RoundRectangle(this, 0, 0, 380, 340, 15, darkBackgroundColor));
+		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 380, 340, 15, darkBackgroundColor));
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 45, 340, 210, 15, lightBackgroundColor));
 		const description = this.add
 			.text(
 				0,
@@ -159,7 +162,8 @@ class MenuScene extends AScene {
 		this.resetConfirmationContainer = this.add
 			.container(400, 300, [
 				overlay,
-				bg,
+				darkBg,
+				lightBg,
 				description,
 				snowballText,
 				snowballIcon,
@@ -169,36 +173,33 @@ class MenuScene extends AScene {
 			])
 			.setDepth(popupDepth)
 			.setAlpha(0);
-		this.makeButton("yes");
-		this.makeButton("cancel");
-	}
 
-	makeButton(type: string) {
-		const isConfirm = type === "yes";
-		const highlight = this.add.existing(new RoundRectangle(this, 0, 134, 68, 36, 10, 0xffffff)).setAlpha(0);
-		const buttonText = this.add.text(0, 134, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const buttonText = this.add.text(0, 114, "RESET", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		const highlight = this.add
+			.existing(new RoundRectangle(this, 0, 114, buttonText.width + 16, buttonText.height + 16, 10, 0xffffff))
+			.setAlpha(0);
 		const button = this.add
-			.existing(new RoundRectangle(this, 0, 134, 68, 36, 10, isConfirm ? lightBlue : lightRed))
+			.existing(new RoundRectangle(this, 0, 114, buttonText.width + 16, buttonText.height + 16, 10, lightBlue))
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => {
-				isConfirm ? button.setFillStyle(normalBlue, 1) : button.setFillStyle(normalRed, 1);
+				button.setFillStyle(normalBlue, 1);
 			})
 			.on("pointerout", () => {
-				isConfirm ? button.setFillStyle(lightBlue, 1) : button.setFillStyle(lightRed, 1);
+				button.setFillStyle(lightBlue, 1);
 			})
 			.on("pointerdown", () => {
-				isConfirm ? button.setFillStyle(darkBlue, 1) : button.setFillStyle(darkRed, 1);
+				button.setFillStyle(darkBlue, 1);
 				this.add.tween({
 					targets: [highlight],
 					ease: "Sine.easeIn",
 					props: {
 						width: {
-							value: 73,
+							value: buttonText.width + 21,
 							duration: 150,
 							ease: "Sine.easeIn",
 						},
 						height: {
-							value: 41,
+							value: buttonText.height + 21,
 							duration: 150,
 							ease: "Sine.easeIn",
 						},
@@ -210,11 +211,8 @@ class MenuScene extends AScene {
 					},
 					callbackScope: this,
 				});
-			});
-		if (isConfirm) {
-			highlight.x = 70;
-			buttonText.setText("RESET").setX(70);
-			button.setX(70).on("pointerup", () => {
+			})
+			.on("pointerup", () => {
 				this.setLoading(true);
 				const inventoriesToRevoke: { [key: number]: Set<string> } = {};
 				this.registry
@@ -229,22 +227,38 @@ class MenuScene extends AScene {
 					});
 				this.revokeInventoryItems(0, inventoriesToRevoke, () => this.reset());
 			});
-		} else {
-			highlight.x = -70;
-			buttonText.setText("CANCEL").setX(-70);
-			button.setX(-70).on("pointerup", () => {
-				button.setFillStyle(lightRed, 1);
+		this.resetConfirmationContainer.add([highlight, button, buttonText]);
+
+		const closeButton = this.add
+			.existing(
+				new RoundRectangle(this, 177.5, -157.5, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1)
+			)
+			.setInteractive({ useHandCursor: true })
+			.on("pointerover", () => {
+				closeButton.setStrokeStyle(6, normalBlue, 1);
+			})
+			.on("pointerout", () => {
+				closeButton.setStrokeStyle(6, lightBlue, 1);
+			})
+			.on("pointerdown", () => {
+				closeButton.setStrokeStyle(6, darkBlue, 1);
+			})
+			.on("pointerup", () => {
+				closeButton.setStrokeStyle(6, lightBlue, 1);
 				highlight.setAlpha(0);
+				highlight.width = buttonText.width + 16;
+				highlight.height = buttonText.height + 16;
 				this.closeResetConfirmationContainer();
 			});
-		}
-		this.resetConfirmationContainer.add([highlight, button, buttonText]);
+		const line1 = this.add.line(0, 0, 177.5, -140.5, 194.5, -157.5, darkBlue).setLineWidth(3, 3);
+		const line2 = this.add.line(0, 0, 177.5, -157.5, 194.5, -140.5, darkBlue).setLineWidth(3, 3);
+		this.resetConfirmationContainer.add([closeButton, line1, line2]);
 	}
 
 	setLoading(isLoading: boolean) {
-		const highlight = this.resetConfirmationContainer.getAt(8) as RoundRectangle;
-		const button = this.resetConfirmationContainer.getAt(9) as RoundRectangle;
-		const text = this.resetConfirmationContainer.getAt(10) as Phaser.GameObjects.Text;
+		const highlight = this.resetConfirmationContainer.getAt(9) as RoundRectangle;
+		const button = this.resetConfirmationContainer.getAt(10) as RoundRectangle;
+		const text = this.resetConfirmationContainer.getAt(11) as Phaser.GameObjects.Text;
 		if (isLoading) {
 			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
 				fontFamily: fontFamily,
