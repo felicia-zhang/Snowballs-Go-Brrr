@@ -112,21 +112,42 @@ class MenuScene extends AScene {
 					})
 					.on("pointerup", () => {
 						this.interactiveObjects.forEach(object => object.disableInteractive());
-						this.add.tween({
-							targets: [this.resetConfirmationContainer],
-							ease: "Sine.easeIn",
-							duration: 500,
-							alpha: 1,
-							callbackScope: this,
-						});
+						this.showResetConfirmationContainer();
 					});
 				this.interactiveObjects.push(resetButton);
 			});
 		});
 	}
 
+	showResetConfirmationContainer() {
+		const snowballBalance = this.registry.get("SB");
+
+		const snowballText = this.resetConfirmationContainer.getAt(4) as Phaser.GameObjects.Text;
+		snowballText.setText(`${snowballBalance / 100} x`);
+
+		const snowballIcon = this.resetConfirmationContainer.getAt(5) as Phaser.GameObjects.Image;
+		const snowballX = (snowballText.width + snowballIcon.displayWidth + 6) / 2;
+		snowballText.setX(-snowballX);
+		snowballIcon.setX(snowballX);
+
+		const resetBonusText = this.resetConfirmationContainer.getAt(6) as Phaser.GameObjects.Text;
+		resetBonusText.setText(`${Math.floor(snowballBalance / 1000000) / 100} x`);
+
+		const resetBonusIcon = this.resetConfirmationContainer.getAt(7) as Phaser.GameObjects.Image;
+		const resetX = (resetBonusText.width + resetBonusIcon.displayWidth + 6) / 2;
+		resetBonusText.setX(-resetX);
+		resetBonusIcon.setX(resetX);
+
+		this.add.tween({
+			targets: [this.resetConfirmationContainer],
+			ease: "Sine.easeIn",
+			duration: 500,
+			alpha: 1,
+			callbackScope: this,
+		});
+	}
+
 	makeResetConfirmationContainer() {
-		const snowballBalance = this.registry.get("SB") / 100;
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
 		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 380, 340, 15, darkBackgroundColor));
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 45, 340, 210, 15, lightBackgroundColor));
@@ -139,22 +160,10 @@ class MenuScene extends AScene {
 			)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
-		const snowballText = this.add
-			.text(0, -15, `${snowballBalance} x`, textStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5);
+		const snowballText = this.add.text(0, -15, "", textStyle).setAlign("left").setOrigin(0, 0.5);
 		const snowballIcon = this.add.image(0, -15, "snowball").setScale(0.15).setOrigin(1, 0.5);
-		const snowballX = (snowballText.width + snowballIcon.displayWidth + 6) / 2;
-		snowballText.setX(-snowballX);
-		snowballIcon.setX(snowballX);
-		const resetBonusText = this.add
-			.text(0, 45, `${Math.floor(this.registry.get("SB") / 1000000) / 100} x`, textStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5);
+		const resetBonusText = this.add.text(0, 45, "", textStyle).setAlign("left").setOrigin(0, 0.5);
 		const resetBonusIcon = this.add.image(0, 45, "star").setScale(0.15).setOrigin(1, 0.5);
-		const resetX = (resetBonusText.width + resetBonusIcon.displayWidth + 6) / 2;
-		resetBonusText.setX(-resetX);
-		resetBonusIcon.setX(resetX);
 		const footnote = this.add
 			.text(0, 180, "*Reset will NOT affect\nyour in-app purchase history\nor your icicle balance", textStyle)
 			.setAlign("center")
