@@ -1,19 +1,5 @@
 import { PlayFabClient } from "playfab-sdk";
-import {
-	darkRed,
-	normalRed,
-	lightRed,
-	darkBackgroundColor,
-	darkBlue,
-	normalBlue,
-	lightBlue,
-	overlayDepth,
-	popupDepth,
-	textStyle,
-	fontFamily,
-	closeButtonFill,
-	lightBackgroundColor,
-} from "../utils/constants";
+import { darkBackgroundColor, overlayDepth, popupDepth, textStyle, lightBackgroundColor } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import Button from "../utils/button";

@@ -1,19 +1,12 @@
 import { PlayFabClient } from "playfab-sdk";
 import {
 	darkBackgroundColor,
-	darkRed,
-	normalRed,
-	lightRed,
 	fontFamily,
 	smallFontSize,
 	textStyle,
 	lightBackgroundColor,
 	overlayDepth,
 	popupDepth,
-	closeButtonFill,
-	lightBlue,
-	normalBlue,
-	darkBlue,
 } from "../utils/constants";
 import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
