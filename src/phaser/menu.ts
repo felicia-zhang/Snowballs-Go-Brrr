@@ -16,6 +16,7 @@ import {
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
+import Button from "../utils/button";
 
 class MenuScene extends AScene {
 	resetConfirmationContainer: Phaser.GameObjects.Container;
@@ -183,59 +184,8 @@ class MenuScene extends AScene {
 			.setDepth(popupDepth)
 			.setAlpha(0);
 
-		const buttonText = this.add.text(0, 114, "RESET", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const highlight = this.add
-			.existing(new RoundRectangle(this, 0, 114, buttonText.width + 16, buttonText.height + 16, 10, 0xffffff))
-			.setAlpha(0);
-		const button = this.add
-			.existing(new RoundRectangle(this, 0, 114, buttonText.width + 16, buttonText.height + 16, 10, lightBlue))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				button.setFillStyle(normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				button.setFillStyle(lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				button.setFillStyle(darkBlue, 1);
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					props: {
-						width: {
-							value: buttonText.width + 21,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						height: {
-							value: buttonText.height + 21,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						alpha: {
-							value: 0.3,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-					},
-					callbackScope: this,
-				});
-			})
-			.on("pointerup", () => {
-				this.setLoading(true);
-				const inventoryGroupsToRevoke: string[][] = [];
-				let i = 0;
-				const inventoryIds: string[] = this.registry
-					.get("Inventories")
-					.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
-					.map((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemInstanceId);
-				while (i < inventoryIds.length) {
-					inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
-					i += 25;
-				}
-				this.reset(inventoryGroupsToRevoke);
-			});
-		this.resetConfirmationContainer.add([highlight, button, buttonText]);
+		const button = new Button(this, 0, 114, "blue").setText("RESET").addCallback(() => this.reset(button));
+		this.resetConfirmationContainer.add(button);
 
 		const closeButton = this.add
 			.existing(
@@ -253,41 +203,12 @@ class MenuScene extends AScene {
 			})
 			.on("pointerup", () => {
 				closeButton.setStrokeStyle(6, lightBlue, 1);
-				highlight.setAlpha(0);
-				highlight.width = buttonText.width + 16;
-				highlight.height = buttonText.height + 16;
+				button.resetButton();
 				this.closeResetConfirmationContainer();
 			});
 		const line1 = this.add.line(0, 0, 177.5, -140.5, 194.5, -157.5, darkBlue).setLineWidth(3, 3);
 		const line2 = this.add.line(0, 0, 177.5, -157.5, 194.5, -140.5, darkBlue).setLineWidth(3, 3);
 		this.resetConfirmationContainer.add([closeButton, line1, line2]);
-	}
-
-	setLoading(isLoading: boolean) {
-		const highlight = this.resetConfirmationContainer.getAt(9) as RoundRectangle;
-		const button = this.resetConfirmationContainer.getAt(10) as RoundRectangle;
-		const text = this.resetConfirmationContainer.getAt(11) as Phaser.GameObjects.Text;
-		if (isLoading) {
-			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
-				fontFamily: fontFamily,
-				fontSize: "32px",
-				stroke: "#ffffff",
-				strokeThickness: 3,
-			});
-			button.setFillStyle(darkBlue, 1).disableInteractive().removeListener("pointerout");
-		} else {
-			text.setText("RESET")
-				.setOrigin(0.5, 0.5)
-				.setStyle({ ...textStyle, strokeThickness: 0 });
-			button
-				.setFillStyle(lightBlue, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerout", () => {
-					button.setFillStyle(lightBlue, 1);
-				});
-			highlight.setAlpha(0);
-			this.closeResetConfirmationContainer();
-		}
 	}
 
 	closeResetConfirmationContainer() {
@@ -303,7 +224,18 @@ class MenuScene extends AScene {
 		});
 	}
 
-	reset(inventoryGroupsToRevoke: string[][]) {
+	reset(button: Button) {
+		button.toggleLoading(true);
+		const inventoryGroupsToRevoke: string[][] = [];
+		let i = 0;
+		const inventoryIds: string[] = this.registry
+			.get("Inventories")
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
+			.map((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemInstanceId);
+		while (i < inventoryIds.length) {
+			inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
+			i += 25;
+		}
 		inventoryGroupsToRevoke.forEach((ids: string[]) => {
 			PlayFabClient.ExecuteCloudScript(
 				{
@@ -344,7 +276,8 @@ class MenuScene extends AScene {
 							(e, r) => {
 								console.log("Revoked all snowballs");
 								this.registry.set("SB", 0);
-								this.setLoading(false);
+								button.toggleLoading(false);
+								this.closeResetConfirmationContainer();
 								this.showToast("Reset Game", false);
 							}
 						);

@@ -18,6 +18,7 @@ import {
 import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
+import Button from "../utils/button";
 
 const wrap = (s: string) => s.replace(/(?![^\n]{1,21}$)([^\n]{1,21})\s/g, "$1\n");
 
@@ -182,52 +183,18 @@ class MapScene extends AScene {
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, lightBackgroundColor));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
-		const buttonText = this.add.text(0, 120, "VISIT", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const highlight = this.add.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, 0xffffff)).setAlpha(0);
-		const button = this.add
-			.existing(new RoundRectangle(this, 0, 120, 58, 36, 10, lightBlue))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				button.setFillStyle(normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				button.setFillStyle(lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				button.setFillStyle(darkBlue, 1);
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					props: {
-						width: {
-							value: 63,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						height: {
-							value: 41,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						alpha: {
-							value: 0.3,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-					},
-					callbackScope: this,
-				});
-			});
+		const button = new Button(this, 0, 120, "blue").setText("VISIT");
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,
-			highlight,
 			button,
-			buttonText,
 			this.add.container(-84, -15, []),
 			description,
 		]);
-		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
+		this.biomeOwnedContainer = this.add
+			.container(400, 300, [overlay, bg, image, details])
+			.setDepth(popupDepth)
+			.setAlpha(0);
 		const closeButton = this.add
 			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
@@ -250,8 +217,8 @@ class MapScene extends AScene {
 					onComplete: () => {
 						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						button.removeListener("pointerup");
-						highlight.setAlpha(0);
-						const counterText = details.getAt(5) as Phaser.GameObjects.Container;
+						button.resetButton();
+						const counterText = details.getAt(3) as Phaser.GameObjects.Container;
 						counterText.removeAll(true);
 					},
 					callbackScope: this,
@@ -259,8 +226,7 @@ class MapScene extends AScene {
 			});
 		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, 0x2e5768).setLineWidth(3, 3);
 		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, 0x2e5768).setLineWidth(3, 3);
-		popup.add([closeButton, line1, line2]);
-		this.biomeOwnedContainer = popup;
+		this.biomeOwnedContainer.add([closeButton, line1, line2]);
 	}
 
 	makeBiomeNotOwnedContainer() {
@@ -270,95 +236,20 @@ class MapScene extends AScene {
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
-		const snowballButtonText = this.add.text(-15, 70, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const snowballHighlight = this.add.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, 0xffffff)).setAlpha(0);
-		const snowballButton = this.add
-			.existing(new RoundRectangle(this, 0, 70, 0, 0, 10, lightRed))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				snowballButton.setFillStyle(normalRed, 1);
-			})
-			.on("pointerout", () => {
-				snowballButton.setFillStyle(lightRed, 1);
-			})
-			.on("pointerdown", () => {
-				snowballButton.setFillStyle(darkRed, 1);
-				this.add.tween({
-					targets: [snowballHighlight],
-					ease: "Sine.easeIn",
-					props: {
-						width: {
-							value: snowballButton.width + 5,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						height: {
-							value: snowballButton.height + 5,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						alpha: {
-							value: 0.3,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-					},
-					callbackScope: this,
-				});
-			});
-		const snowballIcon = this.add.image(0, 70, "snowball").setScale(0.15);
-		const icicleButtonText = this.add.text(-15, 120, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const icicleHighlight = this.add.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, 0xffffff)).setAlpha(0);
-		const icicleButton = this.add
-			.existing(new RoundRectangle(this, 0, 120, 0, 0, 10, lightRed))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				icicleButton.setFillStyle(normalRed, 1);
-			})
-			.on("pointerout", () => {
-				icicleButton.setFillStyle(lightRed, 1);
-			})
-			.on("pointerdown", () => {
-				icicleButton.setFillStyle(darkRed, 1);
-				this.add.tween({
-					targets: [icicleHighlight],
-					ease: "Sine.easeIn",
-					props: {
-						width: {
-							value: icicleButton.width + 5,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						height: {
-							value: icicleButton.height + 5,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						alpha: {
-							value: 0.3,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-					},
-					callbackScope: this,
-				});
-			});
-		const icicleIcon = this.add.image(0, 120, "icicle").setScale(0.15);
+		const snowballButton = new Button(this, 0, 70, "red").addIcon("snowball");
+		const icicleButton = new Button(this, 0, 120, "red").addIcon("icicle");
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,
-			snowballHighlight,
 			snowballButton,
-			snowballButtonText,
-			snowballIcon,
-			icicleHighlight,
 			icicleButton,
-			icicleButtonText,
-			icicleIcon,
 			this.add.container(0, 0, []),
 			description,
 		]);
-		const popup = this.add.container(400, 300, [overlay, bg, image, details]).setDepth(popupDepth).setAlpha(0);
+		this.biomeNotOwnedContainer = this.add
+			.container(400, 300, [overlay, bg, image, details])
+			.setDepth(popupDepth)
+			.setAlpha(0);
 		const closeButton = this.add
 			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
 			.setInteractive({ useHandCursor: true })
@@ -382,9 +273,9 @@ class MapScene extends AScene {
 						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						snowballButton.removeListener("pointerup");
 						icicleButton.removeListener("pointerup");
-						snowballHighlight.setAlpha(0);
-						icicleHighlight.setAlpha(0);
-						const discounts = details.getAt(10) as Phaser.GameObjects.Container;
+						snowballButton.resetButton();
+						icicleButton.resetButton();
+						const discounts = details.getAt(4) as Phaser.GameObjects.Container;
 						discounts.removeAll(true);
 					},
 					callbackScope: this,
@@ -392,8 +283,7 @@ class MapScene extends AScene {
 			});
 		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, darkBlue).setLineWidth(3, 3);
 		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, darkBlue).setLineWidth(3, 3);
-		popup.add([closeButton, line1, line2]);
-		this.biomeNotOwnedContainer = popup;
+		this.biomeNotOwnedContainer.add([closeButton, line1, line2]);
 	}
 
 	showBiomeOwnedContainer(biome: PlayFabClientModels.StoreItem, imageKey: string) {
@@ -401,17 +291,8 @@ class MapScene extends AScene {
 		const details = this.biomeOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
-		const button = details.getAt(3) as RoundRectangle;
-		button.on("pointerup", () => {
-			button.setFillStyle(lightBlue, 1);
-			this.add.tween({
-				targets: [details.getAt(2) as RoundRectangle],
-				ease: "Sine.easeIn",
-				duration: 300,
-				alpha: 0,
-				delay: 300,
-				callbackScope: this,
-			});
+		const button = details.getAt(2) as Button;
+		button.addCallback(() => {
 			this.cameras.main.fadeOut(500, 0, 0, 0);
 			this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 				this.scene.start("Game", { biomeDetail: biomeDetail });
@@ -419,9 +300,9 @@ class MapScene extends AScene {
 		});
 		const image = this.biomeOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
-		const descriptionText = details.getAt(6) as Phaser.GameObjects.Text;
+		const descriptionText = details.getAt(4) as Phaser.GameObjects.Text;
 		descriptionText.setText(wrap(biomeDetail.Description));
-		const counterText = details.getAt(5) as Phaser.GameObjects.Container;
+		const counterText = details.getAt(3) as Phaser.GameObjects.Container;
 		Object.keys(this.biomeItems[biome.ItemId]).forEach((name: string, i: number) => {
 			const text = this.add
 				.text(0, 20 * i, `${name}: ${this.biomeItems[biome.ItemId][name]}`, textStyle)
@@ -445,81 +326,21 @@ class MapScene extends AScene {
 		const details = this.biomeNotOwnedContainer.getAt(3) as Phaser.GameObjects.Container;
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
-		const snowballButtonText = details.getAt(4) as Phaser.GameObjects.Text;
-		snowballButtonText.setText(`${maybeDiscountSnowballPrice / 100} x`);
-		const snowballButton = details.getAt(3) as RoundRectangle;
-		snowballButton.width = snowballButtonText.width + 50;
-		snowballButton.height = snowballButtonText.height + 16;
-		const snowballHighlight = details.getAt(2) as RoundRectangle;
-		const snowballIcon = details.getAt(5) as Phaser.GameObjects.Image;
-		snowballIcon.setX((snowballButtonText.width + 10) / 2);
-		snowballButton.on("pointerup", () => {
-			this.setLoading(
-				true,
-				maybeDiscountSnowballPrice / 100,
-				snowballButton,
-				snowballButtonText,
-				snowballIcon,
-				snowballHighlight
-			);
+		const snowballButton = details.getAt(2) as Button;
+		snowballButton.setText(`${maybeDiscountSnowballPrice / 100} x`).addCallback(() => {
+			snowballButton.toggleLoading(true);
 			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", () =>
-				this.setLoading(
-					false,
-					maybeDiscountSnowballPrice / 100,
-					snowballButton,
-					snowballButtonText,
-					snowballIcon,
-					snowballHighlight
-				)
+				snowballButton.toggleLoading(false)
 			);
-			this.add.tween({
-				targets: [snowballHighlight],
-				ease: "Sine.easeIn",
-				duration: 300,
-				alpha: 0,
-				delay: 300,
-				callbackScope: this,
-			});
 		});
-		const icicleButtonText = details.getAt(8) as Phaser.GameObjects.Text;
-		icicleButtonText.setText(`${maybeDiscountIciclePrice} x`);
-		const icicleButton = details.getAt(7) as RoundRectangle;
-		icicleButton.width = icicleButtonText.width + 50;
-		icicleButton.height = icicleButtonText.height + 16;
-		const icicleHighlight = details.getAt(6) as RoundRectangle;
-		const icicleIcon = details.getAt(9) as Phaser.GameObjects.Image;
-		icicleIcon.setX((icicleButtonText.width + 5) / 2);
-		icicleButton.on("pointerup", () => {
-			this.setLoading(
-				true,
-				maybeDiscountIciclePrice,
-				icicleButton,
-				icicleButtonText,
-				icicleIcon,
-				icicleHighlight
-			);
-			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", () =>
-				this.setLoading(
-					false,
-					maybeDiscountIciclePrice,
-					icicleButton,
-					icicleButtonText,
-					icicleIcon,
-					icicleHighlight
-				)
-			);
-			this.add.tween({
-				targets: [icicleHighlight],
-				ease: "Sine.easeIn",
-				duration: 300,
-				alpha: 0,
-				delay: 300,
-				callbackScope: this,
-			});
+		const icicleButton = details.getAt(3) as Button;
+		icicleButton.setText(`${maybeDiscountIciclePrice} x`).addCallback(() => {
+			icicleButton.toggleLoading(true);
+			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", () => icicleButton.toggleLoading(false));
 		});
 		const image = this.biomeNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
-		const descriptionText = details.getAt(11) as Phaser.GameObjects.Text;
+		const descriptionText = details.getAt(5) as Phaser.GameObjects.Text;
 		descriptionText.setText(wrap(biomeDetail.Description));
 		this.add.tween({
 			targets: [this.biomeNotOwnedContainer],
@@ -530,10 +351,7 @@ class MapScene extends AScene {
 		});
 
 		if (this.storeId === "BiomeWithDiscount") {
-			snowballHighlight.y = 55;
 			snowballButton.setY(55);
-			snowballButtonText.setY(55);
-			snowballIcon.setY(55);
 			const fullSnowballPriceText = this.add
 				.text(-10, 20, `${biomeDetail.FullSnowballPrice / 100} x`, {
 					fontSize: smallFontSize,
@@ -558,7 +376,7 @@ class MapScene extends AScene {
 			const icicleLine = this.add
 				.line(0, 45, 0, 45, 35 + fullIciclePriceText.width, 45, 0xffffff)
 				.setOrigin(0.5, 0.5);
-			const discounts = details.getAt(10) as Phaser.GameObjects.Container;
+			const discounts = details.getAt(4) as Phaser.GameObjects.Container;
 			discounts.add([
 				fullSnowballPriceText,
 				fullIciclePriceText,
@@ -567,37 +385,6 @@ class MapScene extends AScene {
 				snowballLine,
 				icicleLine,
 			]);
-		}
-	}
-
-	setLoading(
-		isLoading: boolean,
-		price: number,
-		button: RoundRectangle,
-		text: Phaser.GameObjects.Text,
-		icon: Phaser.GameObjects.Image,
-		highlight: RoundRectangle
-	) {
-		if (isLoading) {
-			text.setText(". . .")
-				.setX(0)
-				.setOrigin(0.5, 0.725)
-				.setStyle({ fontFamily: fontFamily, fontSize: "32px", stroke: "#ffffff", strokeThickness: 3 });
-			button.setFillStyle(darkRed, 1).disableInteractive().removeListener("pointerout");
-			icon.setAlpha(0);
-		} else {
-			text.setText(`${price} x`)
-				.setX(-15)
-				.setOrigin(0.5, 0.5)
-				.setStyle({ ...textStyle, strokeThickness: 0 });
-			button
-				.setFillStyle(lightRed, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerout", () => {
-					button.setFillStyle(lightRed, 1);
-				});
-			highlight.setAlpha(0);
-			icon.setAlpha(1);
 		}
 	}
 

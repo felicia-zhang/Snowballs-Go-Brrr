@@ -18,6 +18,7 @@ import {
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import { ItemDetail } from "../utils/types";
+import Button from "../utils/button";
 
 abstract class AScene extends Phaser.Scene {
 	toast: Phaser.GameObjects.Text;
@@ -161,99 +162,28 @@ abstract class AScene extends Phaser.Scene {
 			.text(x, -90, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
-		const usdText = this.add.text(x, 80, `$ ${usd}.00`, textStyle).setAlign("center").setOrigin(0.5, 0.5);
-		const highlight = this.add
-			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, 0xffffff))
-			.setAlpha(0);
-		const usdButton = this.add
-			.existing(new RoundRectangle(this, x, 80, usdText.width + 16, usdText.height + 16, 10, lightRed))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				usdButton.setFillStyle(normalRed, 1);
-			})
-			.on("pointerout", () => {
-				usdButton.setFillStyle(lightRed, 1);
-			})
-			.on("pointerdown", () => {
-				usdButton.setFillStyle(darkRed, 1);
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					props: {
-						width: {
-							value: usdText.width + 21,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						height: {
-							value: usdText.height + 21,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						alpha: {
-							value: 0.3,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-					},
-					callbackScope: this,
-				});
-			})
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				this.setCurrencyLoading(true, usd, usdButton, usdText, highlight);
-				PlayFabClient.ExecuteCloudScript(
-					{
-						FunctionName: "grantIcicleBundle",
-						FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
-					},
-					(error, result) => {
-						PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
-							this.setCurrencyLoading(false, usd, usdButton, usdText, highlight);
-							this.registry.values.IC += r.data.VirtualCurrency.IC;
-							this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
-						});
-					}
-				);
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					duration: 300,
-					alpha: 0,
-					delay: 300,
-					callbackScope: this,
-				});
-			});
+		const button = new Button(this, x, 80, "red")
+			.setText(`$ ${usd}.00`)
+			.addCallback(() => this.purchaseCurrency(itemDetail, usd, button));
 		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-		currencyList.add([background, image, nameText, highlight, usdButton, usdText]);
+		currencyList.add([background, image, nameText, button]);
 	}
 
-	setCurrencyLoading(
-		isLoading: boolean,
-		usd: number,
-		button: RoundRectangle,
-		text: Phaser.GameObjects.Text,
-		highlight: RoundRectangle
-	) {
-		if (isLoading) {
-			text.setText(". . .").setOrigin(0.5, 0.725).setStyle({
-				fontFamily: fontFamily,
-				fontSize: "32px",
-				stroke: "#ffffff",
-				strokeThickness: 3,
-			});
-			button.setFillStyle(darkRed, 1).disableInteractive().removeListener("pointerout");
-		} else {
-			text.setText(`$ ${usd}.00`)
-				.setOrigin(0.5, 0.5)
-				.setStyle({ ...textStyle, strokeThickness: 0 });
-			button
-				.setFillStyle(lightRed, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerout", () => {
-					button.setFillStyle(lightRed, 1);
+	purchaseCurrency(itemDetail: ItemDetail, usd: number, button: Button) {
+		button.toggleLoading(true);
+		PlayFabClient.ExecuteCloudScript(
+			{
+				FunctionName: "grantIcicleBundle",
+				FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
+			},
+			(error, result) => {
+				PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
+					button.toggleLoading(false);
+					this.registry.values.IC += r.data.VirtualCurrency.IC;
+					this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
 				});
-			highlight.setAlpha(0);
-		}
+			}
+		);
 	}
 
 	showToast(message: string, isError: boolean) {
