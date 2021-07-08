@@ -141,9 +141,14 @@ abstract class AScene extends Phaser.Scene {
 				FunctionParameter: { itemId: bundleDetail.ItemId, usd: usd },
 			},
 			(error, result) => {
-				button.toggleLoading(false);
-				this.registry.values.IC += bundleDetail.Icicles;
-				this.showToast(`${bundleDetail.DisplayName} successfully purchased`, false);
+				this.time.addEvent({
+					delay: 200,
+					callback: () => {
+						button.toggleLoading(false);
+						this.registry.values.IC += bundleDetail.Icicles;
+						this.showToast(`${bundleDetail.DisplayName} successfully purchased`, false);
+					},
+				});
 			}
 		);
 	}
