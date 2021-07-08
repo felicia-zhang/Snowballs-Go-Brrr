@@ -328,15 +328,11 @@ class MapScene extends AScene {
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const snowballButton = details.getAt(2) as Button;
 		snowballButton.setText(`${maybeDiscountSnowballPrice / 100} x`).addCallback(() => {
-			snowballButton.toggleLoading(true);
-			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", () =>
-				snowballButton.toggleLoading(false)
-			);
+			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", snowballButton);
 		});
 		const icicleButton = details.getAt(3) as Button;
 		icicleButton.setText(`${maybeDiscountIciclePrice} x`).addCallback(() => {
-			icicleButton.toggleLoading(true);
-			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", () => icicleButton.toggleLoading(false));
+			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", icicleButton);
 		});
 		const image = this.biomeNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
@@ -388,7 +384,8 @@ class MapScene extends AScene {
 		}
 	}
 
-	purchaseBiome(biomeDetail: BiomeDetail, maybeDiscountPrice: number, currencyType: string, toggleLoadingToFalse) {
+	purchaseBiome(biomeDetail: BiomeDetail, maybeDiscountPrice: number, currencyType: string, button: Button) {
+		button.toggleLoading(true);
 		PlayFabClient.PurchaseItem(
 			{
 				ItemId: biomeDetail.ItemId,
@@ -401,7 +398,7 @@ class MapScene extends AScene {
 					this.time.addEvent({
 						delay: 400,
 						callback: () => {
-							toggleLoadingToFalse();
+							button.toggleLoading(false);
 							currencyType === "SB"
 								? this.showToast("Not enough snowballs", true)
 								: this.showToast("Not enough icicles", true);
@@ -411,7 +408,7 @@ class MapScene extends AScene {
 					this.time.addEvent({
 						delay: 400,
 						callback: () => {
-							toggleLoadingToFalse();
+							button.toggleLoading(false);
 							currencyType === "SB"
 								? (this.registry.values.SB -= maybeDiscountPrice)
 								: (this.registry.values.IC -= maybeDiscountPrice);
