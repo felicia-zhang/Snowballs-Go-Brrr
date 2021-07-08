@@ -1,9 +1,6 @@
 import { PlayFabClient } from "playfab-sdk";
 import {
 	darkBackgroundColor,
-	darkRed,
-	normalRed,
-	lightRed,
 	fontFamily,
 	smallFontSize,
 	textStyle,
@@ -11,14 +8,12 @@ import {
 	overlayDepth,
 	popupDepth,
 	clickAnimationDepth,
-	closeButtonFill,
-	lightBlue,
-	normalBlue,
-	darkBlue,
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import { BiomeDetail, ItemDetail } from "../utils/types";
+import Button from "../utils/button";
+import CloseButton from "../utils/closeButton";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
@@ -214,37 +209,12 @@ class GameScene extends AScene {
 			.container(400, 300, [overlay, mainBackground, itemDescriptionPopup, itemList])
 			.setAlpha(0)
 			.setDepth(popupDepth);
-		const closeButton = this.add
-			.existing(new RoundRectangle(this, 175, -215, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, darkBlue, 1);
-			})
-			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-				this.add.tween({
-					targets: [this.storeContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
-						itemList.removeAll(true);
-						this.storeItems = [];
-					},
-					callbackScope: this,
-				});
-			});
-		const line1 = this.add.line(0, 0, 175, -197.5, 192, -214.5, darkBlue).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 175, -214.5, 192, -197.5, darkBlue).setLineWidth(3, 3);
-		this.storeContainer.add([closeButton, line1, line2]);
+		const closeButton = new CloseButton(this, 177.5, -212.5).addCallback(this.storeContainer, () => {
+			const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
+			itemList.removeAll(true);
+			this.storeItems = [];
+		});
+		this.storeContainer.add(closeButton);
 	}
 
 	showStoreContainer() {
@@ -282,20 +252,18 @@ class GameScene extends AScene {
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (pointer.leftButtonReleased()) {
-					const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
-					this.totalAddedSnowballs += currentClickMultiplier;
-					this.registry.values.SB += currentClickMultiplier;
-					const amountText = this.add
-						.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), textStyle)
-						.setAlpha(0)
-						.setAlign("center")
-						.setOrigin(0.5, 0.5)
-						.setDepth(clickAnimationDepth);
-					this.showClickAnimation(amountText);
-					if (!sprite.anims.isPlaying) {
-						sprite.anims.play("squish");
-					}
+				const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
+				this.totalAddedSnowballs += currentClickMultiplier;
+				this.registry.values.SB += currentClickMultiplier;
+				const amountText = this.add
+					.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), textStyle)
+					.setAlpha(0)
+					.setAlign("center")
+					.setOrigin(0.5, 0.5)
+					.setDepth(clickAnimationDepth);
+				this.showClickAnimation(amountText);
+				if (!sprite.anims.isPlaying) {
+					sprite.anims.play("squish");
 				}
 			});
 		this.interactiveObjects.push(sprite);
@@ -347,95 +315,16 @@ class GameScene extends AScene {
 			.text(-100, y, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
-		const priceText = this.add
-			.text(118, y, `${maybeItemDiscountPrice / 100} x`, textStyle)
-			.setAlign("right")
-			.setOrigin(1, 0.5);
-		const w = priceText.width + 50;
-		const x = 160 - w / 2;
-		const highlight = this.add
-			.existing(new RoundRectangle(this, x, y, w, priceText.height + 16, 10, 0xffffff))
-			.setAlpha(0);
-		const priceButton = this.add
-			.existing(new RoundRectangle(this, x, y, w, priceText.height + 16, 10, lightRed))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				priceButton.setFillStyle(normalRed, 1);
-			})
-			.on("pointerout", () => {
-				priceButton.setFillStyle(lightRed, 1);
-			})
-			.on("pointerdown", () => {
-				priceButton.setFillStyle(darkRed, 1);
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					props: {
-						width: {
-							value: priceText.width + 55,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						height: {
-							value: priceText.height + 21,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-						alpha: {
-							value: 0.3,
-							duration: 150,
-							ease: "Sine.easeIn",
-						},
-					},
-					callbackScope: this,
-				});
-			})
-			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (Object.keys(itemDetail.Instances).length === 6) {
-					this.showToast("Not enough room", true);
-				} else {
-					this.setItemLoading(
-						true,
-						maybeItemDiscountPrice / 100,
-						priceButton,
-						priceText,
-						snowballIcon,
-						highlight,
-						x
-					);
-					this.sync(() =>
-						this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, () =>
-							this.setItemLoading(
-								false,
-								maybeItemDiscountPrice / 100,
-								priceButton,
-								priceText,
-								snowballIcon,
-								highlight,
-								x
-							)
-						)
-					);
-				}
-				this.add.tween({
-					targets: [highlight],
-					ease: "Sine.easeIn",
-					duration: 300,
-					alpha: 0,
-					delay: 300,
-					callbackScope: this,
-				});
-			});
-		const snowballIcon = this.add.image(138, y, "snowball").setScale(0.15);
+		const button = new Button(this, 150, y, "red")
+			.addIcon("snowball")
+			.setText(`${maybeItemDiscountPrice / 100} x`)
+			.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button));
+		button.setX(160 - button.background.width / 2);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
-		itemList.add([background, image, nameText, highlight, priceButton, priceText, snowballIcon]);
+		itemList.add([background, image, nameText, button]);
 
 		if (storeId === `${this.biomeDetail.ItemId}WithDiscount`) {
-			const newY = -160 + index * 85;
-			highlight.y = newY;
-			priceText.setY(newY);
-			priceButton.y = newY;
-			snowballIcon.setY(newY);
+			button.setY(-160 + index * 85);
 
 			const fullPriceText = this.add
 				.text(121, -192 + index * 85, `${storeItem.CustomData.FullPrice / 100} x`, {
@@ -453,72 +342,50 @@ class GameScene extends AScene {
 		}
 	}
 
-	setItemLoading(
-		isLoading: boolean,
-		price: number,
-		button: RoundRectangle,
-		text: Phaser.GameObjects.Text,
-		icon: Phaser.GameObjects.Image,
-		highlight: RoundRectangle,
-		x: number
-	) {
-		if (isLoading) {
-			text.setText(". . .")
-				.setX(x)
-				.setAlign("center")
-				.setOrigin(0.5, 0.725)
-				.setStyle({ fontFamily: fontFamily, fontSize: "32px", stroke: "#ffffff", strokeThickness: 3 });
-			button.setFillStyle(darkRed, 1).disableInteractive().removeListener("pointerout");
-			icon.setAlpha(0);
+	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, button: Button) {
+		if (Object.keys(itemDetail.Instances).length === 6) {
+			this.showToast("Not enough room", true);
 		} else {
-			text.setText(`${price} x`)
-				.setX(118)
-				.setAlign("right")
-				.setOrigin(1, 0.5)
-				.setStyle({ ...textStyle, strokeThickness: 0 });
-			button
-				.setFillStyle(lightRed, 1)
-				.setInteractive({ useHandCursor: true })
-				.on("pointerout", () => {
-					button.setFillStyle(lightRed, 1);
-				});
-			highlight.setAlpha(0);
-			icon.setAlpha(1);
-		}
-	}
-
-	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, toggleLoadingToFalse) {
-		PlayFabClient.PurchaseItem(
-			{ ItemId: itemDetail.ItemId, Price: maybeItemDiscountPrice, StoreId: storeId, VirtualCurrency: "SB" },
-			(e, r) => {
-				if (e !== null) {
-					this.time.addEvent({
-						delay: 400,
-						callback: () => {
-							toggleLoadingToFalse();
-							this.showToast("Not enough snowballs", true);
-						},
-					});
-				} else {
-					PlayFabClient.ExecuteCloudScript(
-						{
-							FunctionName: "updateInventoryCustomData",
-							FunctionParameter: {
-								instanceId: r.data.Items[0].ItemInstanceId,
-								biomeId: this.biomeDetail.ItemId,
-							},
-						},
-						(error, result) => {
-							toggleLoadingToFalse();
-							this.registry.values.SB -= maybeItemDiscountPrice;
-							this.registry.values.Inventories.push(result.data.FunctionResult);
-							this.makeInventoryItem(result.data.FunctionResult);
-							this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+			button.toggleLoading(true);
+			this.sync(() => {
+				PlayFabClient.PurchaseItem(
+					{
+						ItemId: itemDetail.ItemId,
+						Price: maybeItemDiscountPrice,
+						StoreId: storeId,
+						VirtualCurrency: "SB",
+					},
+					(e, r) => {
+						if (e !== null) {
+							this.time.addEvent({
+								delay: 400,
+								callback: () => {
+									button.toggleLoading(false);
+									this.showToast("Not enough snowballs", true);
+								},
+							});
+						} else {
+							PlayFabClient.ExecuteCloudScript(
+								{
+									FunctionName: "updateInventoryCustomData",
+									FunctionParameter: {
+										instanceId: r.data.Items[0].ItemInstanceId,
+										biomeId: this.biomeDetail.ItemId,
+									},
+								},
+								(error, result) => {
+									button.toggleLoading(false);
+									this.registry.values.SB -= maybeItemDiscountPrice;
+									this.registry.values.Inventories.push(result.data.FunctionResult);
+									this.makeInventoryItem(result.data.FunctionResult);
+									this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+								}
+							);
 						}
-					);
-				}
-			}
-		);
+					}
+				);
+			});
+		}
 	}
 
 	makeInventoryItem(inventory: PlayFabClientModels.ItemInstance) {
