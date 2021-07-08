@@ -223,18 +223,17 @@ class MenuScene extends AScene {
 			})
 			.on("pointerup", () => {
 				this.setLoading(true);
-				const inventoriesToRevoke: { [key: number]: Set<string> } = {};
-				this.registry
+				const inventoryGroupsToRevoke: string[][] = [];
+				let i = 0;
+				const inventoryIds: string[] = this.registry
 					.get("Inventories")
 					.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
-					.forEach((inventory: PlayFabClientModels.ItemInstance, i) => {
-						const group = Math.floor(i / 25);
-						if (!(group in inventoriesToRevoke)) {
-							inventoriesToRevoke[group] = new Set();
-						}
-						inventoriesToRevoke[group].add(inventory.ItemInstanceId);
-					});
-				this.revokeInventoryItems(0, inventoriesToRevoke, () => this.reset());
+					.map((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemInstanceId);
+				while (i < inventoryIds.length) {
+					inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
+					i += 25;
+				}
+				this.reset(inventoryGroupsToRevoke);
 			});
 		this.resetConfirmationContainer.add([highlight, button, buttonText]);
 
@@ -304,7 +303,23 @@ class MenuScene extends AScene {
 		});
 	}
 
-	reset() {
+	reset(inventoryGroupsToRevoke: string[][]) {
+		inventoryGroupsToRevoke.forEach((ids: string[]) => {
+			PlayFabClient.ExecuteCloudScript(
+				{
+					FunctionName: "revokeInventoryItems",
+					FunctionParameter: { itemInstanceIds: ids },
+				},
+				(e, r) => {
+					console.log("Revoked items", ids);
+				}
+			);
+		});
+		const icebiome: PlayFabClientModels.ItemInstance = this.registry
+			.get("Inventories")
+			.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "5");
+		this.registry.set("Inventories", [icebiome]);
+
 		const bonus = Math.floor(this.registry.get("SB") / 1000000);
 		PlayFabClient.ExecuteCloudScript(
 			{
@@ -337,34 +352,6 @@ class MenuScene extends AScene {
 				);
 			}
 		);
-	}
-
-	revokeInventoryItems(key: number, inventoriesToRevoke: { [key: number]: Set<string> }, callback) {
-		if (!(key in inventoriesToRevoke)) {
-			callback();
-		} else {
-			const idsToRevoke: Set<string> = inventoriesToRevoke[key];
-			PlayFabClient.ExecuteCloudScript(
-				{
-					FunctionName: "revokeInventoryItems",
-					FunctionParameter: { itemInstanceIds: Array.from(idsToRevoke) },
-				},
-				(e, r) => {
-					console.log("Revoked items", idsToRevoke);
-					const newInventories = this.registry
-						.get("Inventories")
-						.filter(
-							(inventory: PlayFabClientModels.ItemInstance) => !idsToRevoke.has(inventory.ItemInstanceId)
-						);
-					this.registry.set("Inventories", newInventories);
-					if (key + 1 in inventoriesToRevoke) {
-						this.revokeInventoryItems(key + 1, inventoriesToRevoke, callback);
-					} else {
-						callback();
-					}
-				}
-			);
-		}
 	}
 
 	update() {

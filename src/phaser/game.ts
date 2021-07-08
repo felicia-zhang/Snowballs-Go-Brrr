@@ -488,24 +488,17 @@ class GameScene extends AScene {
 	}
 
 	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, toggleLoadingToFalse) {
-		const delay = this.time.addEvent({ delay: 500 });
 		PlayFabClient.PurchaseItem(
 			{ ItemId: itemDetail.ItemId, Price: maybeItemDiscountPrice, StoreId: storeId, VirtualCurrency: "SB" },
 			(e, r) => {
 				if (e !== null) {
-					const remaining = delay.getRemaining();
-					if (remaining > 0) {
-						this.time.addEvent({
-							delay: remaining,
-							callback: () => {
-								toggleLoadingToFalse();
-								this.showToast("Not enough snowballs", true);
-							},
-						});
-					} else {
-						toggleLoadingToFalse();
-						this.showToast("Not enough snowballs", true);
-					}
+					this.time.addEvent({
+						delay: 400,
+						callback: () => {
+							toggleLoadingToFalse();
+							this.showToast("Not enough snowballs", true);
+						},
+					});
 				} else {
 					PlayFabClient.ExecuteCloudScript(
 						{
@@ -516,25 +509,11 @@ class GameScene extends AScene {
 							},
 						},
 						(error, result) => {
-							const remaining = delay.getRemaining();
-							if (remaining > 0) {
-								this.time.addEvent({
-									delay: remaining,
-									callback: () => {
-										toggleLoadingToFalse();
-										this.registry.values.SB -= maybeItemDiscountPrice;
-										this.registry.values.Inventories.push(result.data.FunctionResult); // mutating the array will not fire registry changedata event
-										this.makeInventoryItem(result.data.FunctionResult);
-										this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-									},
-								});
-							} else {
-								toggleLoadingToFalse();
-								this.registry.values.SB -= maybeItemDiscountPrice;
-								this.registry.values.Inventories.push(result.data.FunctionResult);
-								this.makeInventoryItem(result.data.FunctionResult);
-								this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-							}
+							toggleLoadingToFalse();
+							this.registry.values.SB -= maybeItemDiscountPrice;
+							this.registry.values.Inventories.push(result.data.FunctionResult);
+							this.makeInventoryItem(result.data.FunctionResult);
+							this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 						}
 					);
 				}

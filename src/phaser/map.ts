@@ -602,7 +602,6 @@ class MapScene extends AScene {
 	}
 
 	purchaseBiome(biomeDetail: BiomeDetail, maybeDiscountPrice: number, currencyType: string, toggleLoadingToFalse) {
-		const delay = this.time.addEvent({ delay: 500 });
 		PlayFabClient.PurchaseItem(
 			{
 				ItemId: biomeDetail.ItemId,
@@ -612,54 +611,30 @@ class MapScene extends AScene {
 			},
 			(e, r) => {
 				if (e !== null) {
-					const remaining = delay.getRemaining();
-					if (remaining > 0) {
-						this.time.addEvent({
-							delay: remaining,
-							callback: () => {
-								toggleLoadingToFalse();
-								currencyType === "SB"
-									? this.showToast("Not enough snowballs", true)
-									: this.showToast("Not enough icicles", true);
-							},
-						});
-					} else {
-						toggleLoadingToFalse();
-						currencyType === "SB"
-							? this.showToast("Not enough snowballs", true)
-							: this.showToast("Not enough icicles", true);
-					}
+					this.time.addEvent({
+						delay: 400,
+						callback: () => {
+							toggleLoadingToFalse();
+							currencyType === "SB"
+								? this.showToast("Not enough snowballs", true)
+								: this.showToast("Not enough icicles", true);
+						},
+					});
 				} else {
-					const remaining = delay.getRemaining();
-					if (remaining > 0) {
-						this.time.addEvent({
-							delay: remaining,
-							callback: () => {
-								toggleLoadingToFalse();
-								currencyType === "SB"
-									? (this.registry.values.SB -= maybeDiscountPrice)
-									: (this.registry.values.IC -= maybeDiscountPrice);
-								this.registry.values.Inventories.push(...r.data.Items);
-								this.cameras.main.fadeOut(500, 0, 0, 0);
-								this.cameras.main.once(
-									Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
-									(cam, effect) => {
-										this.scene.start("Game", { biomeDetail: biomeDetail });
-									}
-								);
-							},
-						});
-					} else {
-						toggleLoadingToFalse();
-						currencyType === "SB"
-							? (this.registry.values.SB -= maybeDiscountPrice)
-							: (this.registry.values.IC -= maybeDiscountPrice);
-						this.registry.values.Inventories.push(...r.data.Items);
-						this.cameras.main.fadeOut(500, 0, 0, 0);
-						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-							this.scene.start("Game", { biomeDetail: biomeDetail });
-						});
-					}
+					this.time.addEvent({
+						delay: 400,
+						callback: () => {
+							toggleLoadingToFalse();
+							currencyType === "SB"
+								? (this.registry.values.SB -= maybeDiscountPrice)
+								: (this.registry.values.IC -= maybeDiscountPrice);
+							this.registry.values.Inventories.push(...r.data.Items);
+							this.cameras.main.fadeOut(500, 0, 0, 0);
+							this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+								this.scene.start("Game", { biomeDetail: biomeDetail });
+							});
+						},
+					});
 				}
 			}
 		);
