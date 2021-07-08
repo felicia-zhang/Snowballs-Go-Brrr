@@ -182,6 +182,7 @@ class MenuScene extends AScene {
 
 	reset(button: Button) {
 		button.toggleLoading(true);
+		const bonus = Math.floor(this.registry.get("SB") / 1000000);
 		const inventoryGroupsToRevoke: string[][] = [];
 		let i = 0;
 		const inventoryIds: string[] = this.registry
@@ -192,64 +193,41 @@ class MenuScene extends AScene {
 			inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
 			i += 25;
 		}
-		inventoryGroupsToRevoke.forEach((ids: string[]) => {
-			PlayFabClient.ExecuteCloudScript(
-				{
-					FunctionName: "revokeInventoryItems",
-					FunctionParameter: { itemInstanceIds: ids },
-				},
-				(e, r) => {
-					console.log("Revoked items", ids);
-				}
-			);
-		});
-		const icebiome: PlayFabClientModels.ItemInstance = this.registry
-			.get("Inventories")
-			.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "5");
-		this.registry.set("Inventories", [icebiome]);
-
-		const bonus = Math.floor(this.registry.get("SB") / 1000000);
 		PlayFabClient.ExecuteCloudScript(
 			{
-				FunctionName: "updateResetStatistics",
+				FunctionName: "resetGame",
 				FunctionParameter: {
+					inventoryGroupsToRevoke: inventoryGroupsToRevoke,
 					bonus: bonus,
+					snowballs: this.registry.get("SB"),
 				},
 			},
 			(e, r) => {
+				const icebiome: PlayFabClientModels.ItemInstance = this.registry
+					.get("Inventories")
+					.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "5");
+				this.registry.set("Inventories", [icebiome]);
 				const currentResetBonus = this.registry.get("ResetBonus");
 				this.registry.set("ResetBonus", currentResetBonus + bonus);
+				this.registry.set("SB", 0);
+
+				const result = r.data.FunctionResult;
+				console.log("Revoked items errors: ", result.revokeItemsErrors);
 				console.log("Added reset bonus statistics", bonus);
-				PlayFabClient.UpdateUserData(
-					{ KeysToRemove: ["5LastUpdated", "6LastUpdated", "7LastUpdated", "8LastUpdated", "9LastUpdated"] },
-					(e, r) => {
-						console.log("Cleared biomes LastUpdated data");
-						PlayFabClient.ExecuteCloudScript(
-							{
-								FunctionName: "subtractSnowballs",
-								FunctionParameter: { amount: this.registry.get("SB") },
-							},
-							(e, r) => {
-								console.log("Revoked all snowballs");
-								this.registry.set("SB", 0);
-								button.toggleLoading(false);
-								this.add.tween({
-									targets: [this.resetConfirmationContainer],
-									ease: "Sine.easeIn",
-									duration: 100,
-									alpha: 0,
-									onComplete: () => {
-										this.interactiveObjects.forEach(object =>
-											object.setInteractive({ useHandCursor: true })
-										);
-									},
-									callbackScope: this,
-								});
-								this.showToast("Reset Game", false);
-							}
-						);
-					}
-				);
+				console.log("Cleared biomes LastUpdated data");
+				console.log("Revoked all snowballs: ", result.subtractSBResult);
+				button.toggleLoading(false);
+				this.add.tween({
+					targets: [this.resetConfirmationContainer],
+					ease: "Sine.easeIn",
+					duration: 300,
+					alpha: 0,
+					onComplete: () => {
+						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+						this.showToast("Reset Game", false);
+					},
+					callbackScope: this,
+				});
 			}
 		);
 	}
