@@ -47,7 +47,7 @@ export default class CloseButton extends Phaser.GameObjects.Container {
 			this.scene.add.tween({
 				targets: [container],
 				ease: "Sine.easeIn",
-				duration: 100,
+				duration: 300,
 				alpha: 0,
 				onComplete: () => {
 					this.background.setStrokeStyle(6, lightBlue, 1);

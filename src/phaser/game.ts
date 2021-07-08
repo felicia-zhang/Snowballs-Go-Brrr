@@ -259,20 +259,18 @@ class GameScene extends AScene {
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (pointer.leftButtonReleased()) {
-					const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
-					this.totalAddedSnowballs += currentClickMultiplier;
-					this.registry.values.SB += currentClickMultiplier;
-					const amountText = this.add
-						.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), textStyle)
-						.setAlpha(0)
-						.setAlign("center")
-						.setOrigin(0.5, 0.5)
-						.setDepth(clickAnimationDepth);
-					this.showClickAnimation(amountText);
-					if (!sprite.anims.isPlaying) {
-						sprite.anims.play("squish");
-					}
+				const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
+				this.totalAddedSnowballs += currentClickMultiplier;
+				this.registry.values.SB += currentClickMultiplier;
+				const amountText = this.add
+					.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), textStyle)
+					.setAlpha(0)
+					.setAlign("center")
+					.setOrigin(0.5, 0.5)
+					.setDepth(clickAnimationDepth);
+				this.showClickAnimation(amountText);
+				if (!sprite.anims.isPlaying) {
+					sprite.anims.play("squish");
 				}
 			});
 		this.interactiveObjects.push(sprite);
