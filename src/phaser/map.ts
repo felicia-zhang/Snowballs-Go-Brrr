@@ -8,7 +8,7 @@ import {
 	overlayDepth,
 	popupDepth,
 } from "../utils/constants";
-import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
+import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import Button from "../utils/button";
@@ -55,13 +55,19 @@ class MapScene extends AScene {
 					DisplayName: item.DisplayName,
 					Description: item.Description,
 				} as BiomeDetail;
-			} else {
+			} else if (item.ItemClass === "item") {
 				this.itemsMap[item.ItemId] = {
 					ItemId: item.ItemId,
 					DisplayName: item.DisplayName,
 					Description: item.Description,
 					Instances: {},
 				} as ItemDetail;
+			} else if (item.ItemClass === "bundle") {
+				this.bundlesMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					DisplayName: item.DisplayName,
+					Icicles: item.Bundle.BundledVirtualCurrencies.IC,
+				} as BundleDetail;
 			}
 		});
 

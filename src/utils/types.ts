@@ -13,6 +13,12 @@ interface BiomeDetail {
 	Description: string;
 }
 
+interface BundleDetail {
+	ItemId: string;
+	DisplayName: string;
+	Icicles: number;
+}
+
 interface ItemCounter {
 	Mittens: number;
 	Bonfire: number;
@@ -21,4 +27,4 @@ interface ItemCounter {
 	"Arctic Vault": number;
 }
 
-export type { ItemDetail, BiomeDetail, ItemCounter };
+export type { ItemDetail, BiomeDetail, BundleDetail, ItemCounter };

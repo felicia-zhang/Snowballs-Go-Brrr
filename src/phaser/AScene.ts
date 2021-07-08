@@ -9,13 +9,14 @@ import {
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
-import { ItemDetail } from "../utils/types";
+import { ItemDetail, BundleDetail } from "../utils/types";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 
 abstract class AScene extends Phaser.Scene {
 	toast: Phaser.GameObjects.Text;
 	itemsMap: { [key: number]: ItemDetail };
+	bundlesMap: { [key: number]: BundleDetail };
 	currencyContainer: Phaser.GameObjects.Container;
 	currencyItems: PlayFabClientModels.StoreItem[];
 	interactiveObjects: Phaser.GameObjects.GameObject[];
@@ -29,6 +30,7 @@ abstract class AScene extends Phaser.Scene {
 			.setOrigin(0.5, 1);
 		this.currencyItems = [];
 		this.itemsMap = {};
+		this.bundlesMap = {};
 		this.interactiveObjects = [];
 		this.makeCurrencyContainer();
 	}
@@ -101,7 +103,7 @@ abstract class AScene extends Phaser.Scene {
 	}
 
 	makeCurrency(storeItem: PlayFabClientModels.StoreItem) {
-		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
+		const bundleDetail: BundleDetail = this.bundlesMap[storeItem.ItemId];
 		const usd = storeItem.VirtualCurrencyPrices.RM;
 
 		const index = this.currencyItems.length;
@@ -121,29 +123,27 @@ abstract class AScene extends Phaser.Scene {
 		}
 		const image = this.add.image(x, -10, imageKey).setScale(0.7);
 		const nameText = this.add
-			.text(x, -90, itemDetail.DisplayName.toUpperCase(), textStyle)
+			.text(x, -90, bundleDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
 		const button = new Button(this, x, 80, "red")
 			.setText(`$ ${usd}.00`)
-			.addCallback(() => this.purchaseCurrency(itemDetail, usd, button));
+			.addCallback(() => this.purchaseCurrency(bundleDetail, usd, button));
 		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
 		currencyList.add([background, image, nameText, button]);
 	}
 
-	purchaseCurrency(itemDetail: ItemDetail, usd: number, button: Button) {
+	purchaseCurrency(bundleDetail: BundleDetail, usd: number, button: Button) {
 		button.toggleLoading(true);
 		PlayFabClient.ExecuteCloudScript(
 			{
 				FunctionName: "grantIcicleBundle",
-				FunctionParameter: { itemId: itemDetail.ItemId, usd: usd },
+				FunctionParameter: { itemId: bundleDetail.ItemId, usd: usd },
 			},
 			(error, result) => {
-				PlayFabClient.UnlockContainerItem({ ContainerItemId: itemDetail.ItemId }, (e, r) => {
-					button.toggleLoading(false);
-					this.registry.values.IC += r.data.VirtualCurrency.IC;
-					this.showToast(`${itemDetail.DisplayName} successfully purchased`, false);
-				});
+				button.toggleLoading(false);
+				this.registry.values.IC += bundleDetail.Icicles;
+				this.showToast(`${bundleDetail.DisplayName} successfully purchased`, false);
 			}
 		);
 	}

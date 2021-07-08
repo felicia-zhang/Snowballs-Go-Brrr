@@ -11,7 +11,7 @@ import {
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
-import { BiomeDetail, ItemDetail } from "../utils/types";
+import { BiomeDetail, BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 
@@ -48,12 +48,20 @@ class GameScene extends AScene {
 			.get("CatalogItems")
 			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "biome")
 			.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				this.itemsMap[item.ItemId] = {
-					ItemId: item.ItemId,
-					DisplayName: item.DisplayName,
-					Description: item.Description,
-					Instances: {},
-				} as ItemDetail;
+				if (item.ItemClass === "item") {
+					this.itemsMap[item.ItemId] = {
+						ItemId: item.ItemId,
+						DisplayName: item.DisplayName,
+						Description: item.Description,
+						Instances: {},
+					} as ItemDetail;
+				} else if (item.ItemClass === "bundle") {
+					this.bundlesMap[item.ItemId] = {
+						ItemId: item.ItemId,
+						DisplayName: item.DisplayName,
+						Icicles: item.Bundle.BundledVirtualCurrencies.IC,
+					} as BundleDetail;
+				}
 			});
 
 		this.registry
