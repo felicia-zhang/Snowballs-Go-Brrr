@@ -105,14 +105,6 @@ export default class Button extends Phaser.GameObjects.Container {
 		this.background.on("pointerup", () => {
 			this.resetButton();
 			callback();
-			this.scene.add.tween({
-				targets: [this.highlight],
-				ease: "Sine.easeIn",
-				duration: 300,
-				alpha: 0,
-				delay: 300,
-				callbackScope: this,
-			});
 		});
 
 		return this;
@@ -152,7 +144,27 @@ export default class Button extends Phaser.GameObjects.Container {
 				: this.background.setFillStyle(lightBlue, 1);
 			this.background.setInteractive({ useHandCursor: true }).on("pointerout", () => this.resetButton());
 
-			this.highlight.setAlpha(0);
+			this.scene.add.tween({
+				targets: [this.highlight],
+				ease: "Sine.easeIn",
+				props: {
+					width: {
+						value: this.background.width,
+						duration: 300,
+						ease: "Sine.easeIn",
+					},
+					height: {
+						value: this.background.height,
+						duration: 300,
+						ease: "Sine.easeIn",
+					},
+					alpha: {
+						value: 0,
+						duration: 300,
+						ease: "Sine.easeIn",
+					},
+				},
+			});
 
 			if (this.icon !== undefined) {
 				this.icon.setAlpha(1);
