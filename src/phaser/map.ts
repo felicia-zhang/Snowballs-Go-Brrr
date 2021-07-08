@@ -19,6 +19,7 @@ import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import Button from "../utils/button";
+import CloseButton from "../utils/closeButton";
 
 const wrap = (s: string) => s.replace(/(?![^\n]{1,21}$)([^\n]{1,21})\s/g, "$1\n");
 
@@ -195,38 +196,13 @@ class MapScene extends AScene {
 			.container(400, 300, [overlay, bg, image, details])
 			.setDepth(popupDepth)
 			.setAlpha(0);
-		const closeButton = this.add
-			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, 0x2e5768, 1);
-			})
-			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-				this.add.tween({
-					targets: [this.biomeOwnedContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						button.removeListener("pointerup");
-						button.resetButton();
-						const counterText = details.getAt(3) as Phaser.GameObjects.Container;
-						counterText.removeAll(true);
-					},
-					callbackScope: this,
-				});
-			});
-		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, 0x2e5768).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, 0x2e5768).setLineWidth(3, 3);
-		this.biomeOwnedContainer.add([closeButton, line1, line2]);
+		const closeButton = new CloseButton(this, 247.5, -157.5).addCallback(this.biomeOwnedContainer, () => {
+			button.removeListener("pointerup");
+			button.resetButton();
+			const counterText = details.getAt(3) as Phaser.GameObjects.Container;
+			counterText.removeAll(true);
+		});
+		this.biomeOwnedContainer.add(closeButton);
 	}
 
 	makeBiomeNotOwnedContainer() {
@@ -250,40 +226,15 @@ class MapScene extends AScene {
 			.container(400, 300, [overlay, bg, image, details])
 			.setDepth(popupDepth)
 			.setAlpha(0);
-		const closeButton = this.add
-			.existing(new RoundRectangle(this, 245, -160, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, darkBlue, 1);
-			})
-			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-				this.add.tween({
-					targets: [this.biomeNotOwnedContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						snowballButton.removeListener("pointerup");
-						icicleButton.removeListener("pointerup");
-						snowballButton.resetButton();
-						icicleButton.resetButton();
-						const discounts = details.getAt(4) as Phaser.GameObjects.Container;
-						discounts.removeAll(true);
-					},
-					callbackScope: this,
-				});
-			});
-		const line1 = this.add.line(0, 0, 245, -142.5, 262, -159.5, darkBlue).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 245, -159.5, 262, -142.5, darkBlue).setLineWidth(3, 3);
-		this.biomeNotOwnedContainer.add([closeButton, line1, line2]);
+		const closeButton = new CloseButton(this, 247.5, -157.5).addCallback(this.biomeNotOwnedContainer, () => {
+			snowballButton.removeListener("pointerup");
+			icicleButton.removeListener("pointerup");
+			snowballButton.resetButton();
+			icicleButton.resetButton();
+			const discounts = details.getAt(4) as Phaser.GameObjects.Container;
+			discounts.removeAll(true);
+		});
+		this.biomeNotOwnedContainer.add(closeButton);
 	}
 
 	showBiomeOwnedContainer(biome: PlayFabClientModels.StoreItem, imageKey: string) {

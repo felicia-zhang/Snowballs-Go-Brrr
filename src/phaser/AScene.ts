@@ -19,6 +19,7 @@ import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import { ItemDetail } from "../utils/types";
 import Button from "../utils/button";
+import CloseButton from "../utils/closeButton";
 
 abstract class AScene extends Phaser.Scene {
 	toast: Phaser.GameObjects.Text;
@@ -57,37 +58,12 @@ abstract class AScene extends Phaser.Scene {
 			.container(400, 300, [overlay, mainBackground, currencyList, text])
 			.setAlpha(0)
 			.setDepth(popupDepth);
-		const closeButton = this.add
-			.existing(new RoundRectangle(this, 320, -115, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, darkBlue, 1);
-			})
-			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-				this.add.tween({
-					targets: [this.currencyContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-						currencyList.removeAll(true);
-						this.currencyItems = [];
-					},
-					callbackScope: this,
-				});
-			});
-		const line1 = this.add.line(0, 0, 320, -97.5, 337, -114.5, darkBlue).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 320, -114.5, 337, -97.5, darkBlue).setLineWidth(3, 3);
-		this.currencyContainer.add([closeButton, line1, line2]);
+		const closeButton = new CloseButton(this, 320, -115).addCallback(this.currencyContainer, () => {
+			const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
+			currencyList.removeAll(true);
+			this.currencyItems = [];
+		});
+		this.currencyContainer.add(closeButton);
 	}
 
 	showCurrencyContainer() {
@@ -97,16 +73,12 @@ abstract class AScene extends Phaser.Scene {
 			});
 			const overlay = this.currencyContainer.getAt(0) as Phaser.GameObjects.Rectangle;
 			const bg = this.currencyContainer.getAt(1) as RoundRectangle;
-			const closeButton = this.currencyContainer.getAt(4) as RoundRectangle;
-			const line1 = this.currencyContainer.getAt(5) as Phaser.GameObjects.Line;
-			const line2 = this.currencyContainer.getAt(6) as Phaser.GameObjects.Line;
+			const closeButton = this.currencyContainer.getAt(4) as CloseButton;
 			if (result.data.StoreId === "CurrenciesWithDiscount") {
 				overlay.setY(-25);
 				bg.height = 305;
 				bg.y = -25;
 				closeButton.setY(-165);
-				line1.setPosition(0, -50);
-				line2.setPosition(0, -50);
 				this.currencyContainer.setY(325);
 				const discountText = this.add
 					.text(
@@ -124,8 +96,6 @@ abstract class AScene extends Phaser.Scene {
 				bg.height = 255;
 				bg.y = 0;
 				closeButton.setY(-115);
-				line1.setPosition(0, 0);
-				line2.setPosition(0, 0);
 				this.currencyContainer.setY(300);
 			}
 		});

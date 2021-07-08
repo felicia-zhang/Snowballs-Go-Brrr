@@ -17,6 +17,7 @@ import {
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import Button from "../utils/button";
+import CloseButton from "../utils/closeButton";
 
 class MenuScene extends AScene {
 	resetConfirmationContainer: Phaser.GameObjects.Container;
@@ -184,44 +185,13 @@ class MenuScene extends AScene {
 			.setDepth(popupDepth)
 			.setAlpha(0);
 
-		const button = new Button(this, 0, 114, "blue").setText("RESET").addCallback(() => this.reset(button));
-		this.resetConfirmationContainer.add(button);
-
-		const closeButton = this.add
-			.existing(
-				new RoundRectangle(this, 177.5, -157.5, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1)
-			)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, darkBlue, 1);
-			})
-			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-				button.resetButton();
-				this.closeResetConfirmationContainer();
-			});
-		const line1 = this.add.line(0, 0, 177.5, -140.5, 194.5, -157.5, darkBlue).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 177.5, -157.5, 194.5, -140.5, darkBlue).setLineWidth(3, 3);
-		this.resetConfirmationContainer.add([closeButton, line1, line2]);
-	}
-
-	closeResetConfirmationContainer() {
-		this.add.tween({
-			targets: [this.resetConfirmationContainer],
-			ease: "Sine.easeIn",
-			duration: 100,
-			alpha: 0,
-			onComplete: () => {
-				this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-			},
-			callbackScope: this,
+		const resetButton = new Button(this, 0, 114, "blue")
+			.setText("RESET")
+			.addCallback(() => this.reset(resetButton));
+		const closeButton = new CloseButton(this, 177.5, -157.5).addCallback(this.resetConfirmationContainer, () => {
+			resetButton.resetButton();
 		});
+		this.resetConfirmationContainer.add([resetButton, closeButton]);
 	}
 
 	reset(button: Button) {
@@ -277,7 +247,18 @@ class MenuScene extends AScene {
 								console.log("Revoked all snowballs");
 								this.registry.set("SB", 0);
 								button.toggleLoading(false);
-								this.closeResetConfirmationContainer();
+								this.add.tween({
+									targets: [this.resetConfirmationContainer],
+									ease: "Sine.easeIn",
+									duration: 100,
+									alpha: 0,
+									onComplete: () => {
+										this.interactiveObjects.forEach(object =>
+											object.setInteractive({ useHandCursor: true })
+										);
+									},
+									callbackScope: this,
+								});
 								this.showToast("Reset Game", false);
 							}
 						);

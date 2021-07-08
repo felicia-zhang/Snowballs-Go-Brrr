@@ -20,6 +20,7 @@ import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import { BiomeDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
+import CloseButton from "../utils/closeButton";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
@@ -215,37 +216,12 @@ class GameScene extends AScene {
 			.container(400, 300, [overlay, mainBackground, itemDescriptionPopup, itemList])
 			.setAlpha(0)
 			.setDepth(popupDepth);
-		const closeButton = this.add
-			.existing(new RoundRectangle(this, 175, -215, 35, 35, 5, closeButtonFill).setStrokeStyle(6, lightBlue, 1))
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				closeButton.setStrokeStyle(6, normalBlue, 1);
-			})
-			.on("pointerout", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-			})
-			.on("pointerdown", () => {
-				closeButton.setStrokeStyle(6, darkBlue, 1);
-			})
-			.on("pointerup", () => {
-				closeButton.setStrokeStyle(6, lightBlue, 1);
-				this.add.tween({
-					targets: [this.storeContainer],
-					ease: "Sine.easeIn",
-					duration: 100,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
-						itemList.removeAll(true);
-						this.storeItems = [];
-					},
-					callbackScope: this,
-				});
-			});
-		const line1 = this.add.line(0, 0, 175, -197.5, 192, -214.5, darkBlue).setLineWidth(3, 3);
-		const line2 = this.add.line(0, 0, 175, -214.5, 192, -197.5, darkBlue).setLineWidth(3, 3);
-		this.storeContainer.add([closeButton, line1, line2]);
+		const closeButton = new CloseButton(this, 177.5, -212.5).addCallback(this.storeContainer, () => {
+			const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
+			itemList.removeAll(true);
+			this.storeItems = [];
+		});
+		this.storeContainer.add(closeButton);
 	}
 
 	showStoreContainer() {
