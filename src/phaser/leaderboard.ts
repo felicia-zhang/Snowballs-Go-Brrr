@@ -2,6 +2,7 @@ import { PlayFabClient } from "playfab-sdk";
 import { darkBackgroundColor, lightBackgroundColor, textStyle } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
+import { numberWithCommas } from "../utils/stringFormat";
 
 class LeaderboardScene extends AScene {
 	list: Phaser.GameObjects.Container;
@@ -33,7 +34,7 @@ class LeaderboardScene extends AScene {
 						.setAlign("Center")
 						.setOrigin(0.5, 0.5);
 					const statText = this.add
-						.text(184, i * 80 - 160, `${player.StatValue / 100}`, textStyle)
+						.text(184, i * 80 - 160, `${numberWithCommas(player.StatValue / 100)}`, textStyle)
 						.setOrigin(1, 0.5)
 						.setAlign("right");
 					this.list.add([darkBg, lightBg, rankText, playerText, statText]);

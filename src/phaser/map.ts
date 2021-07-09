@@ -13,8 +13,7 @@ import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
-
-const wrap = (s: string) => s.replace(/(?![^\n]{1,21}$)([^\n]{1,21})\s/g, "$1\n");
+import { numberWithCommas, wrapString } from "../utils/stringFormat";
 
 class MapScene extends AScene {
 	biomeMap: { [key: number]: BiomeDetail };
@@ -99,13 +98,13 @@ class MapScene extends AScene {
 
 		this.registry.events.on("changedata", this.updateData, this);
 
-		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB") / 100}`, textStyle);
+		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
 		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
-		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
+		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
 		if (this.registry.get("ResetBonus") !== 0) {
-			this.add.text(50, 96, `: +${this.registry.get("ResetBonus") / 100}`, textStyle);
+			this.add.text(50, 96, `: +${numberWithCommas(this.registry.get("ResetBonus") / 100)}`, textStyle);
 			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
 		}
 
@@ -148,7 +147,9 @@ class MapScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			key === "SB" ? this.snowballText.setText(`: ${data / 100}`) : this.icicleText.setText(`: ${data}`);
+			key === "SB"
+				? this.snowballText.setText(`: ${numberWithCommas(data / 100)}`)
+				: this.icicleText.setText(`: ${numberWithCommas(data)}`);
 		}
 	}
 
@@ -251,7 +252,7 @@ class MapScene extends AScene {
 		const image = this.biomeOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		const descriptionText = details.getAt(4) as Phaser.GameObjects.Text;
-		descriptionText.setText(wrap(biomeDetail.Description));
+		descriptionText.setText(wrapString(biomeDetail.Description));
 		const counterText = details.getAt(3) as Phaser.GameObjects.Container;
 		Object.keys(this.biomeItems[biome.ItemId]).forEach((name: string, i: number) => {
 			const text = this.add
@@ -277,17 +278,17 @@ class MapScene extends AScene {
 		const title = details.getAt(1) as Phaser.GameObjects.Text;
 		title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		const snowballButton = details.getAt(2) as Button;
-		snowballButton.setText(`${maybeDiscountSnowballPrice / 100} x`).addCallback(() => {
+		snowballButton.setText(`${numberWithCommas(maybeDiscountSnowballPrice / 100)} x`).addCallback(() => {
 			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", snowballButton);
 		});
 		const icicleButton = details.getAt(3) as Button;
-		icicleButton.setText(`${maybeDiscountIciclePrice} x`).addCallback(() => {
+		icicleButton.setText(`${numberWithCommas(maybeDiscountIciclePrice)} x`).addCallback(() => {
 			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", icicleButton);
 		});
 		const image = this.biomeNotOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
 		image.setTexture(imageKey);
 		const descriptionText = details.getAt(5) as Phaser.GameObjects.Text;
-		descriptionText.setText(wrap(biomeDetail.Description));
+		descriptionText.setText(wrapString(biomeDetail.Description));
 		this.add.tween({
 			targets: [this.biomeNotOwnedContainer],
 			ease: "Sine.easeIn",
@@ -299,14 +300,14 @@ class MapScene extends AScene {
 		if (this.storeId === "BiomeWithDiscount") {
 			snowballButton.setY(55);
 			const fullSnowballPriceText = this.add
-				.text(-10, 20, `${biomeDetail.FullSnowballPrice / 100} x`, {
+				.text(-10, 20, `${numberWithCommas(biomeDetail.FullSnowballPrice / 100)} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
 				.setAlign("center")
 				.setOrigin(0.5, 0.5);
 			const fullIciclePriceText = this.add
-				.text(-10, 90, `${biomeDetail.FullIciclePrice} x`, {
+				.text(-10, 90, `${numberWithCommas(biomeDetail.FullIciclePrice)} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})

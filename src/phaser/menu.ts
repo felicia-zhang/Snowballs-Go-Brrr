@@ -4,6 +4,7 @@ import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
+import { numberWithCommas } from "../utils/stringFormat";
 
 class MenuScene extends AScene {
 	resetConfirmationContainer: Phaser.GameObjects.Container;
@@ -109,9 +110,10 @@ class MenuScene extends AScene {
 
 	showResetConfirmationContainer() {
 		const snowballBalance = this.registry.get("SB");
+		const resetBonus = Math.floor(snowballBalance / 1000000);
 
 		const snowballText = this.resetConfirmationContainer.getAt(4) as Phaser.GameObjects.Text;
-		snowballText.setText(`${snowballBalance / 100} x`);
+		snowballText.setText(`${numberWithCommas(snowballBalance / 100)} x`);
 
 		const snowballIcon = this.resetConfirmationContainer.getAt(5) as Phaser.GameObjects.Image;
 		const snowballX = (snowballText.width + snowballIcon.displayWidth + 6) / 2;
@@ -119,7 +121,7 @@ class MenuScene extends AScene {
 		snowballIcon.setX(snowballX);
 
 		const resetBonusText = this.resetConfirmationContainer.getAt(6) as Phaser.GameObjects.Text;
-		resetBonusText.setText(`${Math.floor(snowballBalance / 1000000) / 100} x`);
+		resetBonusText.setText(`${numberWithCommas(resetBonus / 100)} x`);
 
 		const resetBonusIcon = this.resetConfirmationContainer.getAt(7) as Phaser.GameObjects.Image;
 		const resetX = (resetBonusText.width + resetBonusIcon.displayWidth + 6) / 2;
@@ -143,7 +145,7 @@ class MenuScene extends AScene {
 			.text(
 				0,
 				-150,
-				`Reset game to earn 0.01 reset bonus\nfor every 10000 snowballs in your balance.\nThe reset bonus will be applied to\nmanual clicks and item effects.\n\nYour current snowball balance is:\n\n\nReset will award you with:`,
+				`Reset game to earn 0.01 reset bonus\nfor every 10,000 snowballs in your balance.\nThe reset bonus will be applied to\nmanual clicks and item effects.\n\nYour current snowball balance is:\n\n\nReset will award you with:`,
 				textStyle
 			)
 			.setAlign("center")

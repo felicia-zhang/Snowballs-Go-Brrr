@@ -14,6 +14,7 @@ import AScene from "./AScene";
 import { BiomeDetail, BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
+import { numberWithCommas, wrapString } from "../utils/stringFormat";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
@@ -90,7 +91,7 @@ class GameScene extends AScene {
 
 				this.registry.values.SB += sb;
 				this.totalAddedSnowballs += sb;
-				this.showToast(`${sb / 100} snowballs added \nwhile player was away`, false);
+				this.showToast(`${numberWithCommas(sb / 100)} snowballs added \nwhile player was away`, false);
 			} else {
 				this.showToast(`Welcome to ${this.biomeDetail.DisplayName}`, false);
 			}
@@ -104,13 +105,13 @@ class GameScene extends AScene {
 			callback: () => this.sync(() => this.showToast("Saved", false)),
 		});
 
-		this.snowballText = this.add.text(50, 16, `: ${this.registry.get("SB") / 100}`, textStyle);
+		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
 		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
-		this.icicleText = this.add.text(44, 56, `: ${this.registry.get("IC")}`, textStyle);
+		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
 		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
 
 		if (this.resetBonus !== 0) {
-			this.add.text(50, 96, `: +${this.resetBonus / 100}`, textStyle);
+			this.add.text(50, 96, `: +${numberWithCommas(this.resetBonus / 100)}`, textStyle);
 			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
 		}
 
@@ -198,7 +199,9 @@ class GameScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			key === "SB" ? this.snowballText.setText(`: ${data / 100}`) : this.icicleText.setText(`: ${data}`);
+			key === "SB"
+				? this.snowballText.setText(`: ${numberWithCommas(data / 100)}`)
+				: this.icicleText.setText(`: ${numberWithCommas(data)}`);
 		}
 	}
 
@@ -282,7 +285,6 @@ class GameScene extends AScene {
 		const itemDescriptionPopup = this.storeContainer.getAt(2) as Phaser.GameObjects.Text;
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const maybeItemDiscountPrice = storeItem.VirtualCurrencyPrices.SB;
-		const wrap = (s: string) => s.replace(/(?![^\n]{1,22}$)([^\n]{1,22})\s/g, "$1\n");
 
 		const index = this.storeItems.length;
 		const y = -170 + index * 85;
@@ -297,7 +299,7 @@ class GameScene extends AScene {
 					alpha: 1,
 					duration: 300,
 					onStart: () => {
-						itemDescriptionPopup.setText(wrap(itemDetail.Description));
+						itemDescriptionPopup.setText(wrapString(itemDetail.Description));
 						itemDescriptionPopup.setY(pointer.y - 330);
 					},
 					callbackScope: this,
@@ -325,7 +327,7 @@ class GameScene extends AScene {
 			.setOrigin(0, 0.5);
 		const button = new Button(this, 150, y, "red")
 			.addIcon("snowball")
-			.setText(`${maybeItemDiscountPrice / 100} x`)
+			.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
 			.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button));
 		button.setX(160 - button.background.width / 2);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
@@ -335,7 +337,7 @@ class GameScene extends AScene {
 			button.setY(-160 + index * 85);
 
 			const fullPriceText = this.add
-				.text(121, -192 + index * 85, `${storeItem.CustomData.FullPrice / 100} x`, {
+				.text(121, -192 + index * 85, `${numberWithCommas(storeItem.CustomData.FullPrice / 100)} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
