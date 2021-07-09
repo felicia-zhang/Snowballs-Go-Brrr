@@ -14,6 +14,7 @@ import AScene from "./AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
+import TextButton from "../utils/textButton";
 
 class MapScene extends AScene {
 	biomeMap: { [key: number]: BiomeDetail };
@@ -108,40 +109,22 @@ class MapScene extends AScene {
 			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
 		}
 
-		const menuButtonUnderline = this.add.line(16, 544, 16, 544, 16, 544, 0xffffff).setAlpha(0);
-		const menuButton = this.add
-			.text(16, 544, "MENU", textStyle)
-			.setOrigin(0, 1)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				menuButtonUnderline.setTo(0, 0, menuButton.width, 0).setPosition(16, 544).setAlpha(1);
-			})
-			.on("pointerout", () => {
-				menuButtonUnderline.setAlpha(0);
-			})
-			.on("pointerup", () => {
+		const menuButton = this.add.existing(
+			new TextButton(this, 16, 544, "MENU", "left").addCallback(() => {
 				this.cameras.main.fadeOut(500, 0, 0, 0);
 				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 					this.scene.start("Menu");
 				});
-			});
+			})
+		);
 		this.interactiveObjects.push(menuButton);
 
-		const iapButtonUnderline = this.add.line(16, 584, 16, 584, 16, 584, 0xffffff).setAlpha(0);
-		const iapButton = this.add
-			.text(16, 584, "IN-APP PURCHASE EXAMPLE", textStyle)
-			.setOrigin(0, 1)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				iapButtonUnderline.setTo(0, 0, iapButton.width, 0).setPosition(16, 584).setAlpha(1);
-			})
-			.on("pointerout", () => {
-				iapButtonUnderline.setAlpha(0);
-			})
-			.on("pointerup", () => {
+		const iapButton = this.add.existing(
+			new TextButton(this, 16, 584, "IN-APP PURCHASE EXAMPLE", "left").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showCurrencyContainer();
-			});
+			})
+		);
 		this.interactiveObjects.push(iapButton);
 	}
 

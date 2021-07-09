@@ -5,6 +5,7 @@ import AScene from "./AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { numberWithCommas } from "../utils/stringFormat";
+import TextButton from "../utils/textButton";
 
 class MenuScene extends AScene {
 	resetConfirmationContainer: Phaser.GameObjects.Container;
@@ -38,71 +39,32 @@ class MenuScene extends AScene {
 
 				this.makeResetConfirmationContainer();
 
-				const startButtonUnderline = this.add.line(400, 200, 400, 200, 400, 200, 0xffffff).setAlpha(0);
-				const startButton = this.add
-					.text(400, 200, "START", textStyle)
-					.setOrigin(0.5, 0.5)
-					.setAlign("center")
-					.setInteractive({ useHandCursor: true })
-					.on("pointerover", () => {
-						startButtonUnderline
-							.setTo(0, 0, startButton.width, 0)
-							.setPosition(400 - startButton.width / 2, 200 + startButton.height / 2)
-							.setAlpha(1);
-					})
-					.on("pointerout", () => {
-						startButtonUnderline.setAlpha(0);
-					})
-					.on("pointerup", () => {
+				const startButton = this.add.existing(
+					new TextButton(this, 400, 200, "START", "center").addCallback(() => {
 						this.cameras.main.fadeOut(500, 0, 0, 0);
 						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 							this.scene.start("Map");
 						});
-					});
+					})
+				);
 				this.interactiveObjects.push(startButton);
 
-				const leaderboardButtonUnderline = this.add.line(400, 250, 400, 250, 400, 250, 0xffffff).setAlpha(0);
-				const leaderboardButton = this.add
-					.text(400, 250, "LEADERBOARD", textStyle)
-					.setOrigin(0.5, 0.5)
-					.setAlign("center")
-					.setInteractive({ useHandCursor: true })
-					.on("pointerover", () => {
-						leaderboardButtonUnderline
-							.setTo(0, 0, leaderboardButton.width, 0)
-							.setPosition(400 - leaderboardButton.width / 2, 250 + leaderboardButton.height / 2)
-							.setAlpha(1);
-					})
-					.on("pointerout", () => {
-						leaderboardButtonUnderline.setAlpha(0);
-					})
-					.on("pointerup", () => {
+				const leaderboardButton = this.add.existing(
+					new TextButton(this, 400, 250, "LEADERBOARD", "center").addCallback(() => {
 						this.cameras.main.fadeOut(500, 0, 0, 0);
 						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 							this.scene.start("Leaderboard");
 						});
-					});
+					})
+				);
 				this.interactiveObjects.push(leaderboardButton);
 
-				const resetButtonUnderline = this.add.line(400, 300, 400, 300, 400, 300, 0xffffff).setAlpha(0);
-				const resetButton = this.add
-					.text(400, 300, "RESET", textStyle)
-					.setOrigin(0.5, 0.5)
-					.setAlign("center")
-					.setInteractive({ useHandCursor: true })
-					.on("pointerover", () => {
-						resetButtonUnderline
-							.setTo(0, 0, resetButton.width, 0)
-							.setPosition(400 - resetButton.width / 2, 300 + resetButton.height / 2)
-							.setAlpha(1);
-					})
-					.on("pointerout", () => {
-						resetButtonUnderline.setAlpha(0);
-					})
-					.on("pointerup", () => {
+				const resetButton = this.add.existing(
+					new TextButton(this, 400, 300, "RESET", "center").addCallback(() => {
 						this.interactiveObjects.forEach(object => object.disableInteractive());
 						this.showResetConfirmationContainer();
-					});
+					})
+				);
 				this.interactiveObjects.push(resetButton);
 			});
 		});

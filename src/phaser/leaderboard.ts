@@ -3,6 +3,7 @@ import { darkBackgroundColor, lightBackgroundColor, textStyle } from "../utils/c
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
 import { numberWithCommas } from "../utils/stringFormat";
+import TextButton from "../utils/textButton";
 
 class LeaderboardScene extends AScene {
 	list: Phaser.GameObjects.Container;
@@ -42,26 +43,14 @@ class LeaderboardScene extends AScene {
 			}
 		);
 
-		const menuButtonUnderline = this.add.line(784, 584, 784, 584, 784, 584, 0xffffff).setAlpha(0);
-		const menuButton = this.add
-			.text(784, 584, "MENU", textStyle)
-			.setOrigin(1, 1)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => {
-				menuButtonUnderline
-					.setTo(0, 0, menuButton.width, 0)
-					.setPosition(784 - menuButton.width, 584)
-					.setAlpha(1);
-			})
-			.on("pointerout", () => {
-				menuButtonUnderline.setAlpha(0);
-			})
-			.on("pointerup", () => {
+		this.add.existing(
+			new TextButton(this, 784, 584, "MENU", "right").addCallback(() => {
 				this.cameras.main.fadeOut(500, 0, 0, 0);
 				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 					this.scene.start("Menu");
 				});
-			});
+			})
+		);
 	}
 
 	update() {
