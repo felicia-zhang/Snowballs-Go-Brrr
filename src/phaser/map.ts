@@ -167,7 +167,7 @@ class MapScene extends AScene {
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, lightBackgroundColor));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
-		const button = new Button(this, 0, 120, "blue").setText("VISIT");
+		const button = this.add.existing(new Button(this, 0, 120, "blue").setText("VISIT"));
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,
@@ -179,12 +179,14 @@ class MapScene extends AScene {
 			.container(400, 300, [overlay, bg, image, details])
 			.setDepth(popupDepth)
 			.setAlpha(0);
-		const closeButton = new CloseButton(this, 247.5, -157.5).addCallback(this.biomeOwnedContainer, () => {
-			button.removeListener("pointerup");
-			button.resetButton();
-			const counterText = details.getAt(3) as Phaser.GameObjects.Container;
-			counterText.removeAll(true);
-		});
+		const closeButton = this.add.existing(
+			new CloseButton(this, 247.5, -157.5).addCallback(this.biomeOwnedContainer, () => {
+				button.removeListener("pointerup");
+				button.resetButton();
+				const counterText = details.getAt(3) as Phaser.GameObjects.Container;
+				counterText.removeAll(true);
+			})
+		);
 		this.biomeOwnedContainer.add(closeButton);
 	}
 
@@ -195,8 +197,8 @@ class MapScene extends AScene {
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
-		const snowballButton = new Button(this, 0, 70, "red").addIcon("snowball");
-		const icicleButton = new Button(this, 0, 120, "red").addIcon("icicle");
+		const snowballButton = this.add.existing(new Button(this, 0, 70, "red").addIcon("snowball"));
+		const icicleButton = this.add.existing(new Button(this, 0, 120, "red").addIcon("icicle"));
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,
@@ -209,14 +211,16 @@ class MapScene extends AScene {
 			.container(400, 300, [overlay, bg, image, details])
 			.setDepth(popupDepth)
 			.setAlpha(0);
-		const closeButton = new CloseButton(this, 247.5, -157.5).addCallback(this.biomeNotOwnedContainer, () => {
-			snowballButton.removeListener("pointerup");
-			icicleButton.removeListener("pointerup");
-			snowballButton.resetButton();
-			icicleButton.resetButton();
-			const discounts = details.getAt(4) as Phaser.GameObjects.Container;
-			discounts.removeAll(true);
-		});
+		const closeButton = this.add.existing(
+			new CloseButton(this, 247.5, -157.5).addCallback(this.biomeNotOwnedContainer, () => {
+				snowballButton.removeListener("pointerup");
+				icicleButton.removeListener("pointerup");
+				snowballButton.resetButton();
+				icicleButton.resetButton();
+				const discounts = details.getAt(4) as Phaser.GameObjects.Container;
+				discounts.removeAll(true);
+			})
+		);
 		this.biomeNotOwnedContainer.add(closeButton);
 	}
 

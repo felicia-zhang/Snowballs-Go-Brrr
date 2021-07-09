@@ -185,11 +185,13 @@ class GameScene extends AScene {
 			.container(400, 300, [overlay, mainBackground, itemDescriptionPopup, itemList])
 			.setAlpha(0)
 			.setDepth(popupDepth);
-		const closeButton = new CloseButton(this, 177.5, -212.5).addCallback(this.storeContainer, () => {
-			const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
-			itemList.removeAll(true);
-			this.storeItems = [];
-		});
+		const closeButton = this.add.existing(
+			new CloseButton(this, 177.5, -212.5).addCallback(this.storeContainer, () => {
+				const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
+				itemList.removeAll(true);
+				this.storeItems = [];
+			})
+		);
 		this.storeContainer.add(closeButton);
 	}
 
@@ -290,10 +292,12 @@ class GameScene extends AScene {
 			.text(-100, y, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
-		const button = new Button(this, 150, y, "red")
-			.addIcon("snowball")
-			.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
-			.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button));
+		const button = this.add.existing(
+			new Button(this, 150, y, "red")
+				.addIcon("snowball")
+				.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
+				.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button))
+		);
 		button.setX(160 - button.background.width / 2);
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
 		itemList.add([background, image, nameText, button]);

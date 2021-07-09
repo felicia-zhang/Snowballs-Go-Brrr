@@ -52,11 +52,13 @@ abstract class AScene extends Phaser.Scene {
 			.container(400, 300, [overlay, mainBackground, currencyList, text])
 			.setAlpha(0)
 			.setDepth(popupDepth);
-		const closeButton = new CloseButton(this, 320, -115).addCallback(this.currencyContainer, () => {
-			const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
-			currencyList.removeAll(true);
-			this.currencyItems = [];
-		});
+		const closeButton = this.add.existing(
+			new CloseButton(this, 320, -115).addCallback(this.currencyContainer, () => {
+				const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
+				currencyList.removeAll(true);
+				this.currencyItems = [];
+			})
+		);
 		this.currencyContainer.add(closeButton);
 	}
 
@@ -126,9 +128,11 @@ abstract class AScene extends Phaser.Scene {
 			.text(x, -90, bundleDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
-		const button = new Button(this, x, 80, "red")
-			.setText(`$ ${usd}.00`)
-			.addCallback(() => this.purchaseCurrency(bundleDetail, usd, button));
+		const button = this.add.existing(
+			new Button(this, x, 80, "red")
+				.setText(`$ ${usd}.00`)
+				.addCallback(() => this.purchaseCurrency(bundleDetail, usd, button))
+		);
 		const currencyList = this.currencyContainer.getAt(2) as Phaser.GameObjects.Container;
 		currencyList.add([background, image, nameText, button]);
 	}

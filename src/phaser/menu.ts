@@ -135,12 +135,14 @@ class MenuScene extends AScene {
 			.setDepth(popupDepth)
 			.setAlpha(0);
 
-		const resetButton = new Button(this, 0, 114, "blue")
-			.setText("RESET")
-			.addCallback(() => this.reset(resetButton));
-		const closeButton = new CloseButton(this, 177.5, -157.5).addCallback(this.resetConfirmationContainer, () => {
-			resetButton.resetButton();
-		});
+		const resetButton = this.add.existing(
+			new Button(this, 0, 114, "blue").setText("RESET").addCallback(() => this.reset(resetButton))
+		);
+		const closeButton = this.add.existing(
+			new CloseButton(this, 177.5, -157.5).addCallback(this.resetConfirmationContainer, () => {
+				resetButton.resetButton();
+			})
+		);
 		this.resetConfirmationContainer.add([resetButton, closeButton]);
 	}
 
