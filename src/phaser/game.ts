@@ -72,7 +72,7 @@ class GameScene extends AScene {
 				(inventory: PlayFabClientModels.ItemInstance) =>
 					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeDetail.ItemId
 			)
-			.forEach(inventory => this.makeInventoryItem(inventory));
+			.forEach(inventory => this.inventoryItemFactory(inventory));
 
 		PlayFabClient.GetUserData({ Keys: [`${this.biomeDetail.ItemId}LastUpdated`] }, (error, result) => {
 			if (result.data.Data[`${this.biomeDetail.ItemId}LastUpdated`] !== undefined) {
@@ -356,7 +356,7 @@ class GameScene extends AScene {
 									button.toggleLoading(false);
 									this.registry.values.SB -= maybeItemDiscountPrice;
 									this.registry.values.Inventories.push(result.data.FunctionResult);
-									this.makeInventoryItem(result.data.FunctionResult);
+									this.inventoryItemFactory(result.data.FunctionResult);
 									this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
 								}
 							);
@@ -367,7 +367,7 @@ class GameScene extends AScene {
 		}
 	}
 
-	makeInventoryItem(inventory: PlayFabClientModels.ItemInstance) {
+	inventoryItemFactory(inventory: PlayFabClientModels.ItemInstance) {
 		const itemType = this.itemsMap[inventory.ItemId];
 		const index = Object.keys(itemType.Instances).length;
 		itemType.Instances[inventory.ItemInstanceId] = inventory;
@@ -375,13 +375,13 @@ class GameScene extends AScene {
 		if (inventory.ItemId === "0") {
 			sprite = this.makeMittens(index);
 		} else if (inventory.ItemId === "1") {
-			sprite = this.makeFire(index);
+			sprite = this.makeItem(index, 100, 150, 10000, "fire");
 		} else if (inventory.ItemId === "2") {
-			sprite = this.makeSnowman(index);
+			sprite = this.makeItem(index, 100, 250, 1000, "snowman");
 		} else if (inventory.ItemId === "3") {
-			sprite = this.makeIgloo(index);
+			sprite = this.makeItem(index, 1000, 350, 1000, "igloo");
 		} else if (inventory.ItemId === "4") {
-			sprite = this.makeVault(index);
+			sprite = this.makeItem(index, 10000, 450, 1000, "vault");
 		}
 		sprite.setOrigin(0, 0).setScale(0.5);
 	}
@@ -391,88 +391,25 @@ class GameScene extends AScene {
 		return this.add.sprite(170 + index * 100, 50, "mittens");
 	}
 
-	makeFire(index: number) {
-		const snowballsToAdd = 100 + this.resetBonus;
+	makeItem(index: number, effect: number, y: number, delay: number, imageKey: string) {
+		const snowballsToAdd = effect + this.resetBonus;
 		const amountText = this.add
-			.text(220 + index * 100, 150, `+${snowballsToAdd / 100}`, textStyle)
+			.text(220 + index * 100, y, `+${snowballsToAdd / 100}`, textStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
 			.setDepth(clickAnimationDepth);
 		this.time.addEvent({
-			delay: 10000,
+			delay: delay,
 			loop: true,
 			callback: () => {
-				amountText.setY(150);
+				amountText.setY(y);
 				this.registry.values.SB += snowballsToAdd;
 				this.totalAddedSnowballs += snowballsToAdd;
 				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add.sprite(170 + index * 100, 150, "fire");
-	}
-
-	makeSnowman(index: number) {
-		const snowballsToAdd = 100 + this.resetBonus;
-		const amountText = this.add
-			.text(220 + index * 100, 250, `+${snowballsToAdd / 100}`, textStyle)
-			.setAlpha(0)
-			.setAlign("center")
-			.setOrigin(0.5, 0.5)
-			.setDepth(clickAnimationDepth);
-		this.time.addEvent({
-			delay: 1000,
-			loop: true,
-			callback: () => {
-				amountText.setY(250);
-				this.registry.values.SB += snowballsToAdd;
-				this.totalAddedSnowballs += snowballsToAdd;
-				this.showClickAnimation(amountText);
-			},
-		});
-		return this.add.sprite(170 + index * 100, 250, "snowman");
-	}
-
-	makeIgloo(index: number) {
-		const snowballsToAdd = 1000 + this.resetBonus;
-		const amountText = this.add
-			.text(220 + index * 100, 350, `+${snowballsToAdd / 100}`, textStyle)
-			.setAlpha(0)
-			.setAlign("center")
-			.setOrigin(0.5, 0.5)
-			.setDepth(clickAnimationDepth);
-		this.time.addEvent({
-			delay: 1000,
-			loop: true,
-			callback: () => {
-				amountText.setY(350);
-				this.registry.values.SB += snowballsToAdd;
-				this.totalAddedSnowballs += snowballsToAdd;
-				this.showClickAnimation(amountText);
-			},
-		});
-		return this.add.sprite(170 + index * 100, 350, "igloo");
-	}
-
-	makeVault(index: number) {
-		const snowballsToAdd = 10000 + this.resetBonus;
-		const amountText = this.add
-			.text(220 + index * 100, 450, `+${snowballsToAdd / 100}`, textStyle)
-			.setAlpha(0)
-			.setAlign("center")
-			.setOrigin(0.5, 0.5)
-			.setDepth(clickAnimationDepth);
-		this.time.addEvent({
-			delay: 1000,
-			loop: true,
-			callback: () => {
-				amountText.setY(450);
-				this.registry.values.SB += snowballsToAdd;
-				this.totalAddedSnowballs += snowballsToAdd;
-				this.showClickAnimation(amountText);
-			},
-		});
-		return this.add.sprite(170 + index * 100, 450, "vault");
+		return this.add.sprite(170 + index * 100, y, imageKey);
 	}
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
