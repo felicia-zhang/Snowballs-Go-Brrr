@@ -110,6 +110,11 @@ export default class Button extends Phaser.GameObjects.Container {
 		return this;
 	}
 
+	removeListener(event: string): this {
+		this.background.removeListener(event);
+		return this;
+	}
+
 	toggleLoading(isLoading: boolean) {
 		if (isLoading) {
 			this.textObject

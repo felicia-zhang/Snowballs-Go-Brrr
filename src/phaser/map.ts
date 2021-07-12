@@ -181,8 +181,7 @@ class MapScene extends AScene {
 			.setAlpha(0);
 		const closeButton = this.add.existing(
 			new CloseButton(this, 247.5, -157.5).addCallback(this.biomeOwnedContainer, () => {
-				button.removeListener("pointerup");
-				button.resetButton();
+				button.removeListener("pointerup").resetButton();
 				const counterText = details.getAt(3) as Phaser.GameObjects.Container;
 				counterText.removeAll(true);
 			})
@@ -213,10 +212,8 @@ class MapScene extends AScene {
 			.setAlpha(0);
 		const closeButton = this.add.existing(
 			new CloseButton(this, 247.5, -157.5).addCallback(this.biomeNotOwnedContainer, () => {
-				snowballButton.removeListener("pointerup");
-				icicleButton.removeListener("pointerup");
-				snowballButton.resetButton();
-				icicleButton.resetButton();
+				snowballButton.removeListener("pointerup").resetButton();
+				icicleButton.removeListener("pointerup").resetButton();
 				const discounts = details.getAt(4) as Phaser.GameObjects.Container;
 				discounts.removeAll(true);
 			})
