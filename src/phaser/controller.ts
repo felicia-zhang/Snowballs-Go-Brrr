@@ -2,7 +2,7 @@ import LeaderboardScene from "./leaderboard";
 import GameScene from "./game";
 import SigninScene from "./signin";
 import sky from "../assets/sky.png";
-import fire from "../assets/fire.png";
+import bonfire from "../assets/bonfire.png";
 import igloo from "../assets/igloo.png";
 import snowball from "../assets/snowball.png";
 import icicle from "../assets/icicle.png";
@@ -34,7 +34,7 @@ class Controller extends AScene {
 
 	preload() {
 		this.load.image("sky", sky);
-		this.load.image("fire", fire);
+		this.load.image("bonfire", bonfire);
 		this.load.image("igloo", igloo);
 		this.load.image("snowball", snowball);
 		this.load.image("icicle", icicle);
