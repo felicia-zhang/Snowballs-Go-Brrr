@@ -136,7 +136,7 @@ class MenuScene extends AScene {
 			.setAlpha(0);
 
 		const resetButton = this.add.existing(
-			new Button(this, 0, 114, "blue").setText("RESET").addCallback(() => this.reset(resetButton))
+			new Button(this, 0, 114).setText("RESET").addCallback(() => this.reset(resetButton))
 		);
 		const closeButton = this.add.existing(
 			new CloseButton(this, 177.5, -157.5).addCallback(this.resetConfirmationContainer, () => {

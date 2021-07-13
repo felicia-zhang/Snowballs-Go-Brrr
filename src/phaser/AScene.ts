@@ -119,7 +119,7 @@ abstract class AScene extends Phaser.Scene {
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
 		const button = this.add.existing(
-			new Button(this, x, 80, "red")
+			new Button(this, x, 80)
 				.setText(`$ ${usd}.00`)
 				.addCallback(() => this.purchaseCurrency(bundleDetail, usd, button))
 		);
