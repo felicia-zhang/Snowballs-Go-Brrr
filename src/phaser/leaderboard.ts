@@ -14,13 +14,14 @@ class LeaderboardScene extends AScene {
 	create() {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
-		this.list = this.add.container(400, 300, []);
+		this.list = this.add.container(400, 300, [
+			this.add.existing(new RoundRectangle(this, 0, 0, 480, 460, 15, darkBackgroundColor)),
+		]);
 		this.add.text(400, 16, "LEADERBOARD", textStyle).setAlign("center").setOrigin(0.5, 0);
 
 		PlayFabClient.GetLeaderboard(
 			{ StatisticName: "snowballs", StartPosition: 0, MaxResultsCount: 5 },
 			(error, result) => {
-				const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 480, 460, 15, darkBackgroundColor));
 				const players = result.data.Leaderboard;
 				players.forEach((player, i) => {
 					const lightBg = this.add.existing(
@@ -38,7 +39,7 @@ class LeaderboardScene extends AScene {
 						.text(184, i * 80 - 160, `${numberWithCommas(player.StatValue / 100)}`, textStyle)
 						.setOrigin(1, 0.5)
 						.setAlign("right");
-					this.list.add([darkBg, lightBg, rankText, playerText, statText]);
+					this.list.add([lightBg, rankText, playerText, statText]);
 				});
 			}
 		);

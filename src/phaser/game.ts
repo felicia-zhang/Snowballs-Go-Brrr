@@ -80,12 +80,12 @@ class GameScene extends AScene {
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
 				console.log("Elapsed seconds:", elapsedSeconds);
-				const numberOfFires = Object.keys(this.itemsMap[1].Instances).length;
-				const numberOfSnowmans = Object.keys(this.itemsMap[2].Instances).length;
-				const numberOfIgloos = Object.keys(this.itemsMap[3].Instances).length;
-				const numberOfVaults = Object.keys(this.itemsMap[4].Instances).length;
+				const numberOfBonfires = Object.keys(this.itemsMap.bonfire.Instances).length;
+				const numberOfSnowmans = Object.keys(this.itemsMap.snowman.Instances).length;
+				const numberOfIgloos = Object.keys(this.itemsMap.igloo.Instances).length;
+				const numberOfVaults = Object.keys(this.itemsMap.vault.Instances).length;
 				const sb =
-					Math.floor(elapsedSeconds / 10) * numberOfFires * (100 + this.resetBonus) +
+					Math.floor(elapsedSeconds / 10) * numberOfBonfires * (100 + this.resetBonus) +
 					Math.floor(elapsedSeconds) * numberOfSnowmans * (100 + this.resetBonus) +
 					Math.floor(elapsedSeconds) * numberOfIgloos * (1000 + this.resetBonus) +
 					Math.floor(elapsedSeconds) * numberOfVaults * (10000 + this.resetBonus);
@@ -276,18 +276,7 @@ class GameScene extends AScene {
 				itemDescriptionPopup.setAlpha(0);
 			});
 
-		let image: Phaser.GameObjects.Image;
-		if (storeItem.ItemId === "0") {
-			image = this.add.image(-135, y, "mittens").setScale(0.25);
-		} else if (storeItem.ItemId === "1") {
-			image = this.add.image(-135, y, "fire").setScale(0.25);
-		} else if (storeItem.ItemId === "2") {
-			image = this.add.image(-135, y, "snowman").setScale(0.25);
-		} else if (storeItem.ItemId === "3") {
-			image = this.add.image(-135, y, "igloo").setScale(0.25);
-		} else if (storeItem.ItemId === "4") {
-			image = this.add.image(-135, y, "vault").setScale(0.25);
-		}
+		const image = this.add.image(-135, y, storeItem.ItemId).setScale(0.25);
 		const nameText = this.add
 			.text(-100, y, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("left")
@@ -368,20 +357,20 @@ class GameScene extends AScene {
 	}
 
 	inventoryItemFactory(inventory: PlayFabClientModels.ItemInstance) {
-		const itemType = this.itemsMap[inventory.ItemId];
-		const index = Object.keys(itemType.Instances).length;
-		itemType.Instances[inventory.ItemInstanceId] = inventory;
+		const itemDetail: ItemDetail = this.itemsMap[inventory.ItemId];
+		const index = Object.keys(itemDetail.Instances).length;
+		itemDetail.Instances[inventory.ItemInstanceId] = inventory;
 		let sprite: Phaser.GameObjects.Sprite;
-		if (inventory.ItemId === "0") {
+		if (inventory.ItemId === "mittens") {
 			sprite = this.makeMittens(index);
-		} else if (inventory.ItemId === "1") {
-			sprite = this.makeItem(index, 100, 150, 10000, "fire");
-		} else if (inventory.ItemId === "2") {
-			sprite = this.makeItem(index, 100, 250, 1000, "snowman");
-		} else if (inventory.ItemId === "3") {
-			sprite = this.makeItem(index, 1000, 350, 1000, "igloo");
-		} else if (inventory.ItemId === "4") {
-			sprite = this.makeItem(index, 10000, 450, 1000, "vault");
+		} else if (inventory.ItemId === "bonfire") {
+			sprite = this.makeItem(index, 150, 100, 10000, inventory.ItemId);
+		} else if (inventory.ItemId === "snowman") {
+			sprite = this.makeItem(index, 250, 100, 1000, inventory.ItemId);
+		} else if (inventory.ItemId === "igloo") {
+			sprite = this.makeItem(index, 350, 1000, 1000, inventory.ItemId);
+		} else if (inventory.ItemId === "vault") {
+			sprite = this.makeItem(index, 450, 10000, 1000, inventory.ItemId);
 		}
 		sprite.setOrigin(0, 0).setScale(0.5);
 	}
@@ -391,8 +380,8 @@ class GameScene extends AScene {
 		return this.add.sprite(170 + index * 100, 50, "mittens");
 	}
 
-	makeItem(index: number, effect: number, y: number, delay: number, imageKey: string) {
-		const snowballsToAdd = effect + this.resetBonus;
+	makeItem(index: number, y: number, snowballGeneration: number, delay: number, imageKey: string) {
+		const snowballsToAdd = snowballGeneration + this.resetBonus;
 		const amountText = this.add
 			.text(220 + index * 100, y, `+${snowballsToAdd / 100}`, textStyle)
 			.setAlpha(0)

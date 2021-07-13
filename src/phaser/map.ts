@@ -77,25 +77,25 @@ class MapScene extends AScene {
 			.forEach(
 				biome =>
 					(this.biomeItems[biome.ItemId] = {
-						Mittens: 0,
-						Bonfire: 0,
-						Snowman: 0,
-						"Igloo Factory": 0,
-						"Arctic Vault": 0,
-					})
+						mittens: 0,
+						bonfire: 0,
+						snowman: 0,
+						igloo: 0,
+						vault: 0,
+					} as ItemCounter)
 			);
 		inventories
 			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.CustomData !== undefined)
 			.forEach(
 				(inventory: PlayFabClientModels.ItemInstance) =>
-					(this.biomeItems[inventory.CustomData.BiomeId][inventory.DisplayName] += 1)
+					(this.biomeItems[inventory.CustomData.BiomeId][inventory.ItemId] += 1)
 			);
 
-		this.icebiome = this.makeBiomeImage(200, 200, "icebiome", "5");
-		this.marinebiome = this.makeBiomeImage(400, 200, "marinebiome", "6");
-		this.savannabiome = this.makeBiomeImage(600, 200, "savannabiome", "7");
-		this.tropicalbiome = this.makeBiomeImage(290, 400, "tropicalbiome", "8");
-		this.magmabiome = this.makeBiomeImage(490, 400, "magmabiome", "9");
+		this.icebiome = this.makeBiomeImage(200, 200, "icebiome");
+		this.marinebiome = this.makeBiomeImage(400, 200, "marinebiome");
+		this.savannabiome = this.makeBiomeImage(600, 200, "savannabiome");
+		this.tropicalbiome = this.makeBiomeImage(290, 400, "tropicalbiome");
+		this.magmabiome = this.makeBiomeImage(490, 400, "magmabiome");
 
 		this.registry.events.on("changedata", this.updateData, this);
 
@@ -136,9 +136,9 @@ class MapScene extends AScene {
 		}
 	}
 
-	makeBiomeImage(x: number, y: number, imageKey: string, biomeId: string) {
+	makeBiomeImage(x: number, y: number, biomeId: string) {
 		const image = this.add
-			.image(x, y, imageKey)
+			.image(x, y, biomeId)
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
@@ -149,8 +149,8 @@ class MapScene extends AScene {
 						(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === biomeId
 					);
 					biomeId in this.biomeItems
-						? this.showBiomeOwnedContainer(biome, imageKey)
-						: this.showBiomeNotOwnedContainer(biome, imageKey);
+						? this.showBiomeOwnedContainer(biome, biomeId)
+						: this.showBiomeNotOwnedContainer(biome, biomeId);
 				});
 			});
 		this.interactiveObjects.push(image);
@@ -238,9 +238,14 @@ class MapScene extends AScene {
 		const descriptionText = details.getAt(4) as Phaser.GameObjects.Text;
 		descriptionText.setText(wrapString(biomeDetail.Description));
 		const counterText = details.getAt(3) as Phaser.GameObjects.Container;
-		Object.keys(this.biomeItems[biome.ItemId]).forEach((name: string, i: number) => {
+		Object.keys(this.biomeItems[biome.ItemId]).forEach((itemId: string, i: number) => {
 			const text = this.add
-				.text(0, 20 * i, `${name}: ${this.biomeItems[biome.ItemId][name]}`, textStyle)
+				.text(
+					0,
+					20 * i,
+					`${this.itemsMap[itemId].DisplayName}: ${this.biomeItems[biome.ItemId][itemId]}`,
+					textStyle
+				)
 				.setAlign("left")
 				.setOrigin(0, 0);
 			counterText.add(text);

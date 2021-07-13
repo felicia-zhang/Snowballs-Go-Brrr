@@ -15,7 +15,7 @@ import CloseButton from "../utils/closeButton";
 
 abstract class AScene extends Phaser.Scene {
 	toast: Phaser.GameObjects.Text;
-	itemsMap: { [key: number]: ItemDetail };
+	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
 	currencyContainer: Phaser.GameObjects.Container;
 	currencyItems: PlayFabClientModels.StoreItem[];
@@ -113,17 +113,7 @@ abstract class AScene extends Phaser.Scene {
 		this.currencyItems.push(storeItem);
 		const background = this.add.existing(new RoundRectangle(this, x, 0, 140, 220, 15, lightBackgroundColor));
 
-		let imageKey: string;
-		if (storeItem.ItemId === "100") {
-			imageKey = "icicle1";
-		} else if (storeItem.ItemId === "101") {
-			imageKey = "icicle2";
-		} else if (storeItem.ItemId === "102") {
-			imageKey = "icicle3";
-		} else if (storeItem.ItemId === "103") {
-			imageKey = "icicle4";
-		}
-		const image = this.add.image(x, -10, imageKey).setScale(0.7);
+		const image = this.add.image(x, -10, storeItem.ItemId).setScale(0.7);
 		const nameText = this.add
 			.text(x, -90, bundleDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("center")

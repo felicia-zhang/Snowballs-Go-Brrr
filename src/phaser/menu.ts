@@ -153,7 +153,7 @@ class MenuScene extends AScene {
 		let i = 0;
 		const inventoryIds: string[] = this.registry
 			.get("Inventories")
-			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "5")
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "icebiome")
 			.map((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemInstanceId);
 		while (i < inventoryIds.length) {
 			inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
@@ -171,7 +171,7 @@ class MenuScene extends AScene {
 			(e, r) => {
 				const icebiome: PlayFabClientModels.ItemInstance = this.registry
 					.get("Inventories")
-					.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "5");
+					.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "icebiome");
 				this.registry.set("Inventories", [icebiome]);
 				const currentResetBonus = this.registry.get("ResetBonus");
 				this.registry.set("ResetBonus", currentResetBonus + bonus);

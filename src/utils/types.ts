@@ -1,12 +1,12 @@
 interface ItemDetail {
-	ItemId: string;
+	ItemId: "mittens" | "bonfire" | "snowman" | "igloo" | "vault";
 	DisplayName: string;
 	Description: string;
 	Instances: { [key: string]: PlayFabClientModels.ItemInstance };
 }
 
 interface BiomeDetail {
-	ItemId: string;
+	ItemId: "icebiome" | "marinebiome" | "savannabiome" | "tropicalbiome" | "magmabiome";
 	FullSnowballPrice: number;
 	FullIciclePrice: number;
 	DisplayName: string;
@@ -20,11 +20,11 @@ interface BundleDetail {
 }
 
 interface ItemCounter {
-	Mittens: number;
-	Bonfire: number;
-	Snowman: number;
-	"Igloo Factory": number;
-	"Arctic Vault": number;
+	mittens: number;
+	bonfire: number;
+	snowman: number;
+	igloo: number;
+	vault: number;
 }
 
 export type { ItemDetail, BiomeDetail, BundleDetail, ItemCounter };
