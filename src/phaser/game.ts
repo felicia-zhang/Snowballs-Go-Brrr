@@ -449,7 +449,7 @@ class GameScene extends AScene {
 						{
 							FunctionName: "updateSnowballStatistics",
 							FunctionParameter: {
-								snowballs: this.registry.values.SB,
+								amount: this.registry.values.SB,
 							},
 						},
 						() => {

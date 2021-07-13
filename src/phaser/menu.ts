@@ -165,7 +165,7 @@ class MenuScene extends AScene {
 				FunctionParameter: {
 					inventoryGroupsToRevoke: inventoryGroupsToRevoke,
 					bonus: bonus,
-					snowballs: this.registry.get("SB"),
+					snowballsToRevoke: this.registry.get("SB"),
 				},
 			},
 			(e, r) => {
