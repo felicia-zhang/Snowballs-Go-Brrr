@@ -24,7 +24,7 @@ const config = {
 	},
 };
 
-interface LoginWithGoogleAccountRequest extends PlayFabClientModels.LoginWithGoogleAccountRequest {
+interface LoginRequest extends PlayFabClientModels.LoginWithGoogleAccountRequest {
 	AccessToken: string;
 }
 
@@ -120,7 +120,7 @@ export class PhaserGame extends Phaser.Game {
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
-			} as LoginWithGoogleAccountRequest,
+			} as LoginRequest,
 			(error, result) => this.socialSignInCallback(error, result, name, finishSignIn)
 		);
 	}

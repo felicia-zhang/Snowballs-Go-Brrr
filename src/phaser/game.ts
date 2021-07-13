@@ -103,7 +103,7 @@ class GameScene extends AScene {
 		this.syncTimer = this.time.addEvent({
 			delay: this.syncDelay,
 			loop: true,
-			callback: () => this.sync(() => this.showToast("Saved", false)),
+			callback: () => this.syncData(() => this.showToast("Saved", false)),
 		});
 
 		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
@@ -131,7 +131,7 @@ class GameScene extends AScene {
 
 		const mapButton = this.add.existing(
 			new TextButton(this, 16, 504, "MAP", "left").addCallback(() => {
-				this.sync(() => {
+				this.syncData(() => {
 					this.cameras.main.fadeOut(500, 0, 0, 0);
 					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 						this.scene.start("Map");
@@ -143,7 +143,7 @@ class GameScene extends AScene {
 
 		const menuButton = this.add.existing(
 			new TextButton(this, 16, 544, "MENU", "left").addCallback(() => {
-				this.sync(() => {
+				this.syncData(() => {
 					this.cameras.main.fadeOut(500, 0, 0, 0);
 					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
 						this.scene.start("Menu");
@@ -326,7 +326,7 @@ class GameScene extends AScene {
 			this.showToast("Not enough room", true);
 		} else {
 			button.toggleLoading(true);
-			this.sync(() => {
+			this.syncData(() => {
 				PlayFabClient.PurchaseItem(
 					{
 						ItemId: itemDetail.ItemId,
@@ -435,7 +435,7 @@ class GameScene extends AScene {
 		});
 	}
 
-	sync(func: () => any) {
+	syncData(func: () => any) {
 		PlayFabClient.UpdateUserData(
 			{ Data: { [`${this.biomeDetail.ItemId}LastUpdated`]: new Date().valueOf().toString() } },
 			() => {}
