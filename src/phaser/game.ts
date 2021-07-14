@@ -331,71 +331,77 @@ class GameScene extends AScene {
 
 	reset(button: Button) {
 		button.toggleLoading(true);
-		const bonus = Math.floor(this.registry.get("SB") / 1000000);
-		const inventoryGroupsToRevoke: string[][] = [];
-		let i = 0;
-		const inventoryIds: string[] = this.registry
-			.get("Inventories")
-			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "icebiome")
-			.map((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemInstanceId);
-		while (i < inventoryIds.length) {
-			inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
-			i += 25;
-		}
-		PlayFabClient.ExecuteCloudScript(
-			{
-				FunctionName: "resetGame",
-				FunctionParameter: {
-					inventoryGroupsToRevoke: inventoryGroupsToRevoke,
-					bonus: bonus,
-					snowballsToRevoke: this.registry.get("SB"),
-				},
-			},
-			(e, r) => {
-				this.clickMultiplier = 100;
-				this.totalAddedSnowballs = 0;
-				this.inventoryObjects.forEach((object: Phaser.GameObjects.GameObject) => {
-					object.destroy(true);
-				});
-				this.inventoryObjects = [];
-				this.inventoryTimers.forEach((timer: Phaser.Time.TimerEvent) => {
-					timer.destroy();
-				});
-				this.inventoryTimers = [];
-				const icebiome: PlayFabClientModels.ItemInstance = this.registry
-					.get("Inventories")
-					.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "icebiome");
-				this.registry.set("Inventories", [icebiome]);
-				const currentResetBonus = this.registry.get("ResetBonus");
-				this.registry.set("ResetBonus", currentResetBonus + bonus);
-				this.registry.set("SB", 0);
+		this.inventoryObjects.forEach((object: Phaser.GameObjects.GameObject) => {
+			object.destroy(true);
+		});
+		this.inventoryObjects = [];
+		this.inventoryTimers.forEach((timer: Phaser.Time.TimerEvent) => {
+			timer.destroy();
+		});
+		this.inventoryTimers = [];
 
-				const result = r.data.FunctionResult;
-				console.log("Revoked items errors: ", result.revokeItemsErrors);
-				console.log("Added reset bonus statistics", bonus);
-				console.log("Cleared biomes LastUpdated data");
-				console.log("Revoked all snowballs: ", result.subtractSBResult);
-				button.toggleLoading(false);
-				this.add.tween({
-					targets: [this.resetConfirmationContainer],
-					ease: "Sine.easeIn",
-					duration: 300,
-					alpha: 0,
-					onComplete: () => {
-						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-						this.showToast("Reset Game", false);
-
-						if (this.biomeId !== "icebiome") {
-							this.cameras.main.fadeOut(500, 0, 0, 0);
-							this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-								this.scene.start("Game", { biomeId: "icebiome", biomeName: "Ice Biome" });
-							});
-						}
-					},
-					callbackScope: this,
-				});
+		this.syncData(() => {
+			const bonus = Math.floor(this.registry.get("SB") / 1000000);
+			const inventoryGroupsToRevoke: string[][] = [];
+			let i = 0;
+			const inventoryIds: string[] = this.registry
+				.get("Inventories")
+				.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "icebiome")
+				.map((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemInstanceId);
+			while (i < inventoryIds.length) {
+				inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
+				i += 25;
 			}
-		);
+			PlayFabClient.ExecuteCloudScript(
+				{
+					FunctionName: "resetGame",
+					FunctionParameter: {
+						inventoryGroupsToRevoke: inventoryGroupsToRevoke,
+						bonus: bonus,
+						snowballsToRevoke: this.registry.get("SB"),
+					},
+				},
+				(e, r) => {
+					this.clickMultiplier = 100;
+					this.totalAddedSnowballs = 0;
+					const icebiome: PlayFabClientModels.ItemInstance = this.registry
+						.get("Inventories")
+						.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "icebiome");
+					this.registry.set("Inventories", [icebiome]);
+					const currentResetBonus = this.registry.get("ResetBonus");
+					this.registry.set("ResetBonus", currentResetBonus + bonus);
+					this.registry.set("SB", 0);
+
+					const result = r.data.FunctionResult;
+					console.log("Revoked items errors: ", result.revokeItemsErrors);
+					console.log("Added reset bonus statistics", bonus);
+					console.log("Cleared biomes LastUpdated data");
+					console.log("Revoked all snowballs: ", result.subtractSBResult);
+					button.toggleLoading(false);
+					this.add.tween({
+						targets: [this.resetConfirmationContainer],
+						ease: "Sine.easeIn",
+						duration: 300,
+						alpha: 0,
+						onComplete: () => {
+							this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+							this.showToast("Reset Game", false);
+
+							if (this.biomeId !== "icebiome") {
+								this.cameras.main.fadeOut(500, 0, 0, 0);
+								this.cameras.main.once(
+									Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+									(cam, effect) => {
+										this.scene.start("Game", { biomeId: "icebiome", biomeName: "Ice Biome" });
+									}
+								);
+							}
+						},
+						callbackScope: this,
+					});
+				}
+			);
+		});
 	}
 
 	makeStoreContainer() {
