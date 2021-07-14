@@ -220,7 +220,7 @@ class MapScene extends AScene {
 		button.addCallback(() => {
 			this.cameras.main.fadeOut(500, 0, 0, 0);
 			this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-				this.scene.start("Game", { biomeDetail: biomeDetail });
+				this.scene.start("Game", { biomeId: biomeDetail.ItemId, biomeName: biomeDetail.DisplayName });
 			});
 		});
 		const image = this.biomeOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
@@ -345,7 +345,10 @@ class MapScene extends AScene {
 							this.registry.values.Inventories.push(...r.data.Items);
 							this.cameras.main.fadeOut(500, 0, 0, 0);
 							this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-								this.scene.start("Game", { biomeDetail: biomeDetail });
+								this.scene.start("Game", {
+									biomeId: biomeDetail.ItemId,
+									biomeName: biomeDetail.DisplayName,
+								});
 							});
 						},
 					});

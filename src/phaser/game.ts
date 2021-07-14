@@ -20,7 +20,8 @@ import TextButton from "../utils/textButton";
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
 	resetBonus: number;
-	biomeDetail: BiomeDetail;
+	biomeId: string;
+	biomeName: string;
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
 	syncTimer: Phaser.Time.TimerEvent;
@@ -41,11 +42,12 @@ class GameScene extends AScene {
 		super("Game");
 	}
 
-	create({ biomeDetail }) {
+	create({ biomeId, biomeName }) {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.resetBonus = this.registry.get("ResetBonus") === 0 ? 0 : this.registry.get("ResetBonus");
-		this.biomeDetail = biomeDetail;
+		this.biomeId = biomeId;
+		this.biomeName = biomeName;
 		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
 		this.storeItems = [];
@@ -80,13 +82,13 @@ class GameScene extends AScene {
 			.get("Inventories")
 			.filter(
 				(inventory: PlayFabClientModels.ItemInstance) =>
-					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeDetail.ItemId
+					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeId
 			)
 			.forEach(inventory => this.inventoryItemFactory(inventory));
 
-		PlayFabClient.GetUserData({ Keys: [`${this.biomeDetail.ItemId}LastUpdated`] }, (error, result) => {
-			if (result.data.Data[`${this.biomeDetail.ItemId}LastUpdated`] !== undefined) {
-				const lastUpdated = result.data.Data[`${this.biomeDetail.ItemId}LastUpdated`].Value;
+		PlayFabClient.GetUserData({ Keys: [`${this.biomeId}LastUpdated`] }, (error, result) => {
+			if (result.data.Data[`${this.biomeId}LastUpdated`] !== undefined) {
+				const lastUpdated = result.data.Data[`${this.biomeId}LastUpdated`].Value;
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
 				console.log("Elapsed seconds:", elapsedSeconds);
@@ -104,7 +106,7 @@ class GameScene extends AScene {
 				this.totalAddedSnowballs += sb;
 				this.showToast(`${numberWithCommas(sb / 100)} snowballs added \nwhile player was away`, false);
 			} else {
-				this.showToast(`Welcome to ${this.biomeDetail.DisplayName}`, false);
+				this.showToast(`Welcome to ${this.biomeName}`, false);
 			}
 		});
 
@@ -127,10 +129,7 @@ class GameScene extends AScene {
 			this.resetBonusIcon.setAlpha(1);
 		}
 
-		this.add
-			.text(400, 16, this.biomeDetail.DisplayName.toUpperCase(), textStyle)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
+		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
 			new TextButton(this, 16, 424, "STORE", "left").addCallback(() => {
@@ -386,20 +385,10 @@ class GameScene extends AScene {
 						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						this.showToast("Reset Game", false);
 
-						if (this.biomeDetail.ItemId !== "icebiome") {
-							const icebiome: PlayFabClientModels.CatalogItem = this.registry
-								.get("CatalogItems")
-								.find((item: PlayFabClientModels.CatalogItem) => item.ItemId === "icebiome");
-							const icebiomeDetail = {
-								ItemId: icebiome.ItemId,
-								FullSnowballPrice: icebiome.VirtualCurrencyPrices.SB,
-								FullIciclePrice: icebiome.VirtualCurrencyPrices.IC,
-								DisplayName: icebiome.DisplayName,
-								Description: icebiome.Description,
-							} as BiomeDetail;
+						if (this.biomeId !== "icebiome") {
 							this.cameras.main.fadeOut(500, 0, 0, 0);
 							this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-								this.scene.start("Game", { biomeDetail: icebiomeDetail });
+								this.scene.start("Game", { biomeId: "icebiome", biomeName: "Ice Biome" });
 							});
 						}
 					},
@@ -429,7 +418,7 @@ class GameScene extends AScene {
 	}
 
 	showStoreContainer() {
-		PlayFabClient.GetStoreItems({ StoreId: this.biomeDetail.ItemId }, (error, result) => {
+		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
 			const storeId = result.data.StoreId;
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeStoreItem(storeItem, storeId);
@@ -524,7 +513,7 @@ class GameScene extends AScene {
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
 		itemList.add([background, image, nameText, button]);
 
-		if (storeId === `${this.biomeDetail.ItemId}WithDiscount`) {
+		if (storeId === `${this.biomeId}WithDiscount`) {
 			button.setY(-160 + index * 85);
 
 			const fullPriceText = this.add
@@ -571,7 +560,7 @@ class GameScene extends AScene {
 									FunctionName: "updateInventoryCustomData",
 									FunctionParameter: {
 										instanceId: r.data.Items[0].ItemInstanceId,
-										biomeId: this.biomeDetail.ItemId,
+										biomeId: this.biomeId,
 									},
 								},
 								(error, result) => {
@@ -662,7 +651,7 @@ class GameScene extends AScene {
 
 	syncData(func: () => any) {
 		PlayFabClient.UpdateUserData(
-			{ Data: { [`${this.biomeDetail.ItemId}LastUpdated`]: new Date().valueOf().toString() } },
+			{ Data: { [`${this.biomeId}LastUpdated`]: new Date().valueOf().toString() } },
 			() => {}
 		);
 

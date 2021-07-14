@@ -55,17 +55,6 @@ class SigninScene extends AScene {
 			PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 				this.registry.set("CatalogItems", result.data.Catalog);
 
-				const icebiome: PlayFabClientModels.CatalogItem = result.data.Catalog.find(
-					(item: PlayFabClientModels.CatalogItem) => item.ItemId === "icebiome"
-				);
-				const icebiomeDetail = {
-					ItemId: icebiome.ItemId,
-					FullSnowballPrice: icebiome.VirtualCurrencyPrices.SB,
-					FullIciclePrice: icebiome.VirtualCurrencyPrices.IC,
-					DisplayName: icebiome.DisplayName,
-					Description: icebiome.Description,
-				} as BiomeDetail;
-
 				PlayFabClient.GetPlayerStatistics({ StatisticNames: ["resetBonus"] }, (e, r) => {
 					const resetStat = r.data.Statistics.find(
 						(stat: PlayFabClientModels.StatisticValue) => stat.StatisticName === "resetBonus"
@@ -77,7 +66,7 @@ class SigninScene extends AScene {
 						this.registry.set("IC", result.data.VirtualCurrency.IC);
 						this.registry.set("Inventories", result.data.Inventory);
 
-						this.scene.start("Game", { biomeDetail: icebiomeDetail });
+						this.scene.start("Game", { biomeId: "icebiome", biomeName: "Ice Biome" });
 					});
 				});
 			});
