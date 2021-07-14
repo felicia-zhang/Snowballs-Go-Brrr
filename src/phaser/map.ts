@@ -109,16 +109,6 @@ class MapScene extends AScene {
 			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
 		}
 
-		const menuButton = this.add.existing(
-			new TextButton(this, 16, 544, "MENU", "left").addCallback(() => {
-				this.cameras.main.fadeOut(500, 0, 0, 0);
-				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-					this.scene.start("Menu");
-				});
-			})
-		);
-		this.interactiveObjects.push(menuButton);
-
 		const iapButton = this.add.existing(
 			new TextButton(this, 16, 584, "IN-APP PURCHASE EXAMPLE", "left").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
@@ -230,7 +220,7 @@ class MapScene extends AScene {
 		button.addCallback(() => {
 			this.cameras.main.fadeOut(500, 0, 0, 0);
 			this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-				this.scene.start("Game", { biomeDetail: biomeDetail });
+				this.scene.start("Game", { biomeId: biomeDetail.ItemId, biomeName: biomeDetail.DisplayName });
 			});
 		});
 		const image = this.biomeOwnedContainer.getAt(2) as Phaser.GameObjects.Image;
@@ -355,7 +345,10 @@ class MapScene extends AScene {
 							this.registry.values.Inventories.push(...r.data.Items);
 							this.cameras.main.fadeOut(500, 0, 0, 0);
 							this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-								this.scene.start("Game", { biomeDetail: biomeDetail });
+								this.scene.start("Game", {
+									biomeId: biomeDetail.ItemId,
+									biomeName: biomeDetail.DisplayName,
+								});
 							});
 						},
 					});

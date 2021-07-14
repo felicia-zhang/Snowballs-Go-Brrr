@@ -20,31 +20,43 @@ import TextButton from "../utils/textButton";
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
 	resetBonus: number;
-	biomeDetail: BiomeDetail;
+	biomeId: string;
+	biomeName: string;
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
 	syncTimer: Phaser.Time.TimerEvent;
 	storeItems: PlayFabClientModels.StoreItem[];
+	inventoryObjects: Phaser.GameObjects.GameObject[];
+	inventoryTimers: Phaser.Time.TimerEvent[];
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
 	icicleText: Phaser.GameObjects.Text;
 	icicleIcon: Phaser.GameObjects.Image;
+	resetBonusText: Phaser.GameObjects.Text;
+	resetBonusIcon: Phaser.GameObjects.Image;
 	storeContainer: Phaser.GameObjects.Container;
+	resetConfirmationContainer: Phaser.GameObjects.Container;
+	leaderboardContainer: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
 	}
 
-	create({ biomeDetail }) {
+	create({ biomeId, biomeName }) {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.resetBonus = this.registry.get("ResetBonus") === 0 ? 0 : this.registry.get("ResetBonus");
-		this.biomeDetail = biomeDetail;
+		this.biomeId = biomeId;
+		this.biomeName = biomeName;
 		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
 		this.storeItems = [];
+		this.inventoryObjects = [];
+		this.inventoryTimers = [];
 		this.makePenguin();
 		this.makeStoreContainer();
+		this.makeResetConfirmationContainer();
+		this.makeLeaderboardContainer();
 
 		this.registry
 			.get("CatalogItems")
@@ -70,13 +82,13 @@ class GameScene extends AScene {
 			.get("Inventories")
 			.filter(
 				(inventory: PlayFabClientModels.ItemInstance) =>
-					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeDetail.ItemId
+					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeId
 			)
 			.forEach(inventory => this.inventoryItemFactory(inventory));
 
-		PlayFabClient.GetUserData({ Keys: [`${this.biomeDetail.ItemId}LastUpdated`] }, (error, result) => {
-			if (result.data.Data[`${this.biomeDetail.ItemId}LastUpdated`] !== undefined) {
-				const lastUpdated = result.data.Data[`${this.biomeDetail.ItemId}LastUpdated`].Value;
+		PlayFabClient.GetUserData({ Keys: [`${this.biomeId}LastUpdated`] }, (error, result) => {
+			if (result.data.Data[`${this.biomeId}LastUpdated`] !== undefined) {
+				const lastUpdated = result.data.Data[`${this.biomeId}LastUpdated`].Value;
 				const elapsed = new Date().valueOf() - Number(lastUpdated);
 				const elapsedSeconds = elapsed / 1000;
 				console.log("Elapsed seconds:", elapsedSeconds);
@@ -94,7 +106,7 @@ class GameScene extends AScene {
 				this.totalAddedSnowballs += sb;
 				this.showToast(`${numberWithCommas(sb / 100)} snowballs added \nwhile player was away`, false);
 			} else {
-				this.showToast(`Welcome to ${this.biomeDetail.DisplayName}`, false);
+				this.showToast(`Welcome to ${this.biomeName}`, false);
 			}
 		});
 
@@ -110,19 +122,17 @@ class GameScene extends AScene {
 		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
 		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
 		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
-
+		this.resetBonusText = this.add.text(50, 96, "", textStyle);
+		this.resetBonusIcon = this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5).setAlpha(0);
 		if (this.resetBonus !== 0) {
-			this.add.text(50, 96, `: +${numberWithCommas(this.resetBonus / 100)}`, textStyle);
-			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
+			this.resetBonusText.setText(`: +${numberWithCommas(this.resetBonus / 100)}`);
+			this.resetBonusIcon.setAlpha(1);
 		}
 
-		this.add
-			.text(400, 16, this.biomeDetail.DisplayName.toUpperCase(), textStyle)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
+		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
-			new TextButton(this, 16, 464, "STORE", "left").addCallback(() => {
+			new TextButton(this, 16, 424, "STORE", "left").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showStoreContainer();
 			})
@@ -130,7 +140,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(storeButton);
 
 		const mapButton = this.add.existing(
-			new TextButton(this, 16, 504, "MAP", "left").addCallback(() => {
+			new TextButton(this, 16, 464, "MAP", "left").addCallback(() => {
 				this.syncData(() => {
 					this.cameras.main.fadeOut(500, 0, 0, 0);
 					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
@@ -141,17 +151,21 @@ class GameScene extends AScene {
 		);
 		this.interactiveObjects.push(mapButton);
 
-		const menuButton = this.add.existing(
-			new TextButton(this, 16, 544, "MENU", "left").addCallback(() => {
-				this.syncData(() => {
-					this.cameras.main.fadeOut(500, 0, 0, 0);
-					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-						this.scene.start("Menu");
-					});
-				});
+		const leaderboardButton = this.add.existing(
+			new TextButton(this, 16, 504, "LEADERBOARD", "left").addCallback(() => {
+				this.interactiveObjects.forEach(object => object.disableInteractive());
+				this.showLeaderboardContainer();
 			})
 		);
-		this.interactiveObjects.push(menuButton);
+		this.interactiveObjects.push(leaderboardButton);
+
+		const resetButton = this.add.existing(
+			new TextButton(this, 16, 544, "RESET", "left").addCallback(() => {
+				this.interactiveObjects.forEach(object => object.disableInteractive());
+				this.showResetConfirmationContainer();
+			})
+		);
+		this.interactiveObjects.push(resetButton);
 
 		const iapButton = this.add.existing(
 			new TextButton(this, 16, 584, "IN-APP PURCHASE EXAMPLE", "left").addCallback(() => {
@@ -164,9 +178,17 @@ class GameScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			key === "SB"
-				? this.snowballText.setText(`: ${numberWithCommas(data / 100)}`)
-				: this.icicleText.setText(`: ${numberWithCommas(data)}`);
+			if (key === "SB") {
+				this.snowballText.setText(`: ${numberWithCommas(data / 100)}`);
+			} else if (key === "IC") {
+				this.icicleText.setText(`: ${numberWithCommas(data)}`);
+			} else if (key === "ResetBonus") {
+				if (data !== 0) {
+					this.resetBonus = data;
+					this.resetBonusText.setText(`: +${numberWithCommas(data / 100)}`);
+					this.resetBonusIcon.setAlpha(1);
+				}
+			}
 		}
 	}
 
@@ -174,6 +196,212 @@ class GameScene extends AScene {
 		if (!this.registry.has("FinishedSignIn")) {
 			this.scene.start("Signin");
 		}
+	}
+
+	showResetConfirmationContainer() {
+		const snowballBalance = this.registry.get("SB");
+		const resetBonus = Math.floor(snowballBalance / 1000000);
+
+		const snowballText = this.resetConfirmationContainer.getAt(4) as Phaser.GameObjects.Text;
+		snowballText.setText(`${numberWithCommas(snowballBalance / 100)} x`);
+
+		const snowballIcon = this.resetConfirmationContainer.getAt(5) as Phaser.GameObjects.Image;
+		const snowballX = (snowballText.width + snowballIcon.displayWidth + 6) / 2;
+		snowballText.setX(-snowballX);
+		snowballIcon.setX(snowballX);
+
+		const resetBonusText = this.resetConfirmationContainer.getAt(6) as Phaser.GameObjects.Text;
+		resetBonusText.setText(`${numberWithCommas(resetBonus / 100)} x`);
+
+		const resetBonusIcon = this.resetConfirmationContainer.getAt(7) as Phaser.GameObjects.Image;
+		const resetX = (resetBonusText.width + resetBonusIcon.displayWidth + 6) / 2;
+		resetBonusText.setX(-resetX);
+		resetBonusIcon.setX(resetX);
+
+		this.add.tween({
+			targets: [this.resetConfirmationContainer],
+			ease: "Sine.easeIn",
+			duration: 500,
+			alpha: 1,
+			callbackScope: this,
+		});
+	}
+
+	makeLeaderboardContainer() {
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
+		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 440, 420, 15, darkBackgroundColor));
+		const statList = this.add.container(0, 0, []);
+
+		this.leaderboardContainer = this.add
+			.container(400, 300, [overlay, darkBg, statList])
+			.setDepth(popupDepth)
+			.setAlpha(0);
+
+		const closeButton = this.add.existing(
+			new CloseButton(this, 207.5, -197.5).addCallback(this.leaderboardContainer, () => {
+				const statList = this.leaderboardContainer.getAt(2) as Phaser.GameObjects.Container;
+				statList.removeAll(true);
+			})
+		);
+		this.leaderboardContainer.add(closeButton);
+	}
+
+	showLeaderboardContainer() {
+		const statList = this.leaderboardContainer.getAt(2) as Phaser.GameObjects.Container;
+
+		PlayFabClient.GetLeaderboard(
+			{ StatisticName: "snowballs", StartPosition: 0, MaxResultsCount: 5 },
+			(error, result) => {
+				const players = result.data.Leaderboard;
+				players.forEach((player, i) => {
+					const lightBg = this.add.existing(
+						new RoundRectangle(this, 0, i * 80 - 160, 400, 60, 15, lightBackgroundColor)
+					);
+					const rankText = this.add
+						.text(-184, i * 80 - 160, `#${(i + 1).toString()}`, textStyle)
+						.setOrigin(0, 0.5)
+						.setAlign("left");
+					const playerText = this.add
+						.text(0, i * 80 - 160, player.DisplayName, textStyle)
+						.setAlign("Center")
+						.setOrigin(0.5, 0.5);
+					const statText = this.add
+						.text(184, i * 80 - 160, `${numberWithCommas(player.StatValue / 100)}`, textStyle)
+						.setOrigin(1, 0.5)
+						.setAlign("right");
+					statList.add([lightBg, rankText, playerText, statText]);
+				});
+			}
+		);
+		this.add.tween({
+			targets: [this.leaderboardContainer],
+			ease: "Sine.easeIn",
+			duration: 500,
+			alpha: 1,
+			callbackScope: this,
+		});
+	}
+
+	makeResetConfirmationContainer() {
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
+		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 380, 340, 15, darkBackgroundColor));
+		const lightBg = this.add.existing(new RoundRectangle(this, 0, 45, 340, 210, 15, lightBackgroundColor));
+		const description = this.add
+			.text(
+				0,
+				-150,
+				`Reset game to earn 0.01 reset bonus\nfor every 10,000 snowballs in your balance.\nThe reset bonus will be applied to\nmanual clicks and item effects.\n\nYour current snowball balance is:\n\n\nReset will award you with:`,
+				textStyle
+			)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
+		const snowballText = this.add.text(0, -15, "", textStyle).setAlign("left").setOrigin(0, 0.5);
+		const snowballIcon = this.add.image(0, -15, "snowball").setScale(0.15).setOrigin(1, 0.5);
+		const resetBonusText = this.add.text(0, 45, "", textStyle).setAlign("left").setOrigin(0, 0.5);
+		const resetBonusIcon = this.add.image(0, 45, "star").setScale(0.15).setOrigin(1, 0.5);
+		const footnote = this.add
+			.text(0, 180, "*Reset will NOT affect\nyour in-app purchase history\nor your icicle balance", textStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
+		this.resetConfirmationContainer = this.add
+			.container(400, 300, [
+				overlay,
+				darkBg,
+				lightBg,
+				description,
+				snowballText,
+				snowballIcon,
+				resetBonusText,
+				resetBonusIcon,
+				footnote,
+			])
+			.setDepth(popupDepth)
+			.setAlpha(0);
+
+		const resetButton = this.add.existing(
+			new Button(this, 0, 114).setText("RESET").addCallback(() => this.reset(resetButton))
+		);
+		const closeButton = this.add.existing(
+			new CloseButton(this, 177.5, -157.5).addCallback(this.resetConfirmationContainer, () => {
+				resetButton.resetButton();
+			})
+		);
+		this.resetConfirmationContainer.add([resetButton, closeButton]);
+	}
+
+	reset(button: Button) {
+		button.toggleLoading(true);
+		this.inventoryObjects.forEach((object: Phaser.GameObjects.GameObject) => {
+			object.destroy(true);
+		});
+		this.inventoryObjects = [];
+		this.inventoryTimers.forEach((timer: Phaser.Time.TimerEvent) => {
+			timer.destroy();
+		});
+		this.inventoryTimers = [];
+
+		this.syncData(() => {
+			const bonus = Math.floor(this.registry.get("SB") / 1000000);
+			const inventoryGroupsToRevoke: string[][] = [];
+			let i = 0;
+			const inventoryIds: string[] = this.registry
+				.get("Inventories")
+				.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId !== "icebiome")
+				.map((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemInstanceId);
+			while (i < inventoryIds.length) {
+				inventoryGroupsToRevoke.push(inventoryIds.slice(i, i + 25));
+				i += 25;
+			}
+			PlayFabClient.ExecuteCloudScript(
+				{
+					FunctionName: "resetGame",
+					FunctionParameter: {
+						inventoryGroupsToRevoke: inventoryGroupsToRevoke,
+						bonus: bonus,
+						snowballsToRevoke: this.registry.get("SB"),
+					},
+				},
+				(e, r) => {
+					this.clickMultiplier = 100;
+					this.totalAddedSnowballs = 0;
+					const icebiome: PlayFabClientModels.ItemInstance = this.registry
+						.get("Inventories")
+						.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "icebiome");
+					this.registry.set("Inventories", [icebiome]);
+					const currentResetBonus = this.registry.get("ResetBonus");
+					this.registry.set("ResetBonus", currentResetBonus + bonus);
+					this.registry.set("SB", 0);
+
+					const result = r.data.FunctionResult;
+					console.log("Revoked items errors: ", result.revokeItemsErrors);
+					console.log("Added reset bonus statistics", bonus);
+					console.log("Cleared biomes LastUpdated data");
+					console.log("Revoked all snowballs: ", result.subtractSBResult);
+					button.toggleLoading(false);
+					this.add.tween({
+						targets: [this.resetConfirmationContainer],
+						ease: "Sine.easeIn",
+						duration: 300,
+						alpha: 0,
+						onComplete: () => {
+							this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+							this.showToast("Reset Game", false);
+
+							if (this.biomeId !== "icebiome") {
+								this.cameras.main.fadeOut(500, 0, 0, 0);
+								this.cameras.main.once(
+									Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+									(cam, effect) => {
+										this.scene.start("Game", { biomeId: "icebiome", biomeName: "Ice Biome" });
+									}
+								);
+							}
+						},
+						callbackScope: this,
+					});
+				}
+			);
+		});
 	}
 
 	makeStoreContainer() {
@@ -196,7 +424,7 @@ class GameScene extends AScene {
 	}
 
 	showStoreContainer() {
-		PlayFabClient.GetStoreItems({ StoreId: this.biomeDetail.ItemId }, (error, result) => {
+		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
 			const storeId = result.data.StoreId;
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
 				this.makeStoreItem(storeItem, storeId);
@@ -291,7 +519,7 @@ class GameScene extends AScene {
 		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
 		itemList.add([background, image, nameText, button]);
 
-		if (storeId === `${this.biomeDetail.ItemId}WithDiscount`) {
+		if (storeId === `${this.biomeId}WithDiscount`) {
 			button.setY(-160 + index * 85);
 
 			const fullPriceText = this.add
@@ -338,7 +566,7 @@ class GameScene extends AScene {
 									FunctionName: "updateInventoryCustomData",
 									FunctionParameter: {
 										instanceId: r.data.Items[0].ItemInstanceId,
-										biomeId: this.biomeDetail.ItemId,
+										biomeId: this.biomeId,
 									},
 								},
 								(error, result) => {
@@ -388,7 +616,7 @@ class GameScene extends AScene {
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
 			.setDepth(clickAnimationDepth);
-		this.time.addEvent({
+		const timer = this.time.addEvent({
 			delay: delay,
 			loop: true,
 			callback: () => {
@@ -398,7 +626,10 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add.sprite(170 + index * 100, y, imageKey);
+		const sprite = this.add.sprite(170 + index * 100, y, imageKey);
+		this.inventoryObjects.push(sprite, amountText);
+		this.inventoryTimers.push(timer);
+		return sprite;
 	}
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
@@ -426,7 +657,7 @@ class GameScene extends AScene {
 
 	syncData(func: () => any) {
 		PlayFabClient.UpdateUserData(
-			{ Data: { [`${this.biomeDetail.ItemId}LastUpdated`]: new Date().valueOf().toString() } },
+			{ Data: { [`${this.biomeId}LastUpdated`]: new Date().valueOf().toString() } },
 			() => {}
 		);
 
