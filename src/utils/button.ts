@@ -1,5 +1,5 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import { darkBlue, darkRed, fontFamily, lightBlue, lightRed, normalBlue, normalRed, textStyle } from "./constants";
+import { darkBlue, fontFamily, lightBlue, normalBlue, textStyle } from "./constants";
 
 export default class Button extends Phaser.GameObjects.Container {
 	highlight: RoundRectangle;
@@ -7,9 +7,8 @@ export default class Button extends Phaser.GameObjects.Container {
 	textObject: Phaser.GameObjects.Text;
 	text: string;
 	icon?: Phaser.GameObjects.Image;
-	private color: "red" | "blue";
 
-	constructor(scene: Phaser.Scene, x: number, y: number, color: "red" | "blue") {
+	constructor(scene: Phaser.Scene, x: number, y: number) {
 		super(scene, x, y, []);
 
 		this.text = "";
@@ -17,18 +16,13 @@ export default class Button extends Phaser.GameObjects.Container {
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 
-		this.color = color;
 		this.highlight = new RoundRectangle(scene, 0, 0, 0, 0, 10, 0xffffff).setAlpha(0);
-		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, color === "red" ? lightRed : lightBlue)
+		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, lightBlue)
 			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () =>
-				color === "red"
-					? this.background.setFillStyle(normalRed, 1)
-					: this.background.setFillStyle(normalBlue, 1)
-			)
+			.on("pointerover", () => this.background.setFillStyle(normalBlue, 1))
 			.on("pointerout", () => this.resetButton())
 			.on("pointerdown", () => {
-				color === "red" ? this.background.setFillStyle(darkRed, 1) : this.background.setFillStyle(darkBlue, 1);
+				this.background.setFillStyle(darkBlue, 1);
 				scene.add.tween({
 					targets: [this.highlight],
 					ease: "Sine.easeIn",
@@ -56,7 +50,7 @@ export default class Button extends Phaser.GameObjects.Container {
 	}
 
 	resetButton(): this {
-		this.color === "red" ? this.background.setFillStyle(lightRed, 1) : this.background.setFillStyle(lightBlue, 1);
+		this.background.setFillStyle(lightBlue, 1);
 		this.highlight.setAlpha(0);
 		this.highlight.width = this.background.width;
 		this.highlight.height = this.background.height;
@@ -68,10 +62,10 @@ export default class Button extends Phaser.GameObjects.Container {
 		if (this.icon !== undefined) {
 			return this;
 		}
-		this.icon = new Phaser.GameObjects.Image(this.scene, 0, 0, imageKey).setScale(0.15).setOrigin(1, 0.5);
-		const textX = (this.textObject.width + this.icon.displayWidth + 6) / 2;
+		this.icon = new Phaser.GameObjects.Image(this.scene, 0, 0, imageKey).setScale(0.15);
+		const textX = (this.textObject.width + 36) / 2;
 		this.textObject.setX(-textX);
-		this.icon.setX(textX);
+		this.icon.setX(textX - 15);
 		this.background.width = this.textObject.width + 50;
 		this.background.height = this.textObject.height + 16;
 		this.highlight.width = this.background.width;
@@ -85,9 +79,9 @@ export default class Button extends Phaser.GameObjects.Container {
 		this.text = text;
 		this.textObject.setText(text);
 		if (this.icon !== undefined) {
-			const textX = (this.textObject.width + this.icon.displayWidth + 6) / 2;
+			const textX = (this.textObject.width + 36) / 2;
 			this.textObject.setX(-textX);
-			this.icon.setX(textX);
+			this.icon.setX(textX - 15);
 			this.background.width = this.textObject.width + 50;
 		} else {
 			const textX = this.textObject.width / 2;
@@ -124,7 +118,7 @@ export default class Button extends Phaser.GameObjects.Container {
 			const textX = this.textObject.width / 2;
 			this.textObject.setX(-textX);
 
-			this.color === "red" ? this.background.setFillStyle(darkRed, 1) : this.background.setFillStyle(darkBlue, 1);
+			this.background.setFillStyle(darkBlue, 1);
 			this.background.disableInteractive().removeListener("pointerout");
 
 			if (this.icon !== undefined) {
@@ -136,17 +130,15 @@ export default class Button extends Phaser.GameObjects.Container {
 				.setOrigin(0, 0.5)
 				.setStyle({ ...textStyle, strokeThickness: 0 });
 			if (this.icon !== undefined) {
-				const textX = (this.textObject.width + this.icon.displayWidth + 6) / 2;
+				const textX = (this.textObject.width + 36) / 2;
 				this.textObject.setX(-textX);
-				this.icon.setX(textX);
+				this.icon.setX(textX - 15);
 			} else {
 				const textX = this.textObject.width / 2;
 				this.textObject.setX(-textX);
 			}
 
-			this.color === "red"
-				? this.background.setFillStyle(lightRed, 1)
-				: this.background.setFillStyle(lightBlue, 1);
+			this.background.setFillStyle(lightBlue, 1);
 			this.background.setInteractive({ useHandCursor: true }).on("pointerout", () => this.resetButton());
 
 			this.scene.add.tween({

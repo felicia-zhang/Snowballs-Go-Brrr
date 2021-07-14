@@ -100,9 +100,9 @@ class MapScene extends AScene {
 		this.registry.events.on("changedata", this.updateData, this);
 
 		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
-		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
+		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
 		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
-		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
+		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
 
 		if (this.registry.get("ResetBonus") !== 0) {
 			this.add.text(50, 96, `: +${numberWithCommas(this.registry.get("ResetBonus") / 100)}`, textStyle);
@@ -167,7 +167,7 @@ class MapScene extends AScene {
 		const lightBg = this.add.existing(new RoundRectangle(this, 0, 0, 200, 300, 15, lightBackgroundColor));
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
-		const button = this.add.existing(new Button(this, 0, 120, "blue").setText("VISIT"));
+		const button = this.add.existing(new Button(this, 0, 120).setText("VISIT"));
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,
@@ -196,8 +196,8 @@ class MapScene extends AScene {
 		const title = this.add.text(0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
 		const description = this.add.text(-84, -110, "", textStyle).setAlign("left").setOrigin(0, 0);
 		const image = this.add.image(-115, -10, "icebiome").setScale(0.7);
-		const snowballButton = this.add.existing(new Button(this, 0, 70, "red").addIcon("snowball"));
-		const icicleButton = this.add.existing(new Button(this, 0, 120, "red").addIcon("icicle"));
+		const snowballButton = this.add.existing(new Button(this, 0, 70).addIcon("snowball"));
+		const icicleButton = this.add.existing(new Button(this, 0, 120).addIcon("icicle"));
 		const details = this.add.container(140, 0, [
 			lightBg,
 			title,

@@ -107,9 +107,9 @@ class GameScene extends AScene {
 		});
 
 		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
-		this.snowballIcon = this.add.image(16, 25, "snowball").setScale(0.15).setOrigin(0, 0.5);
+		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
 		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
-		this.icicleIcon = this.add.image(16, 65, "icicle").setScale(0.15).setOrigin(0, 0.5);
+		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
 
 		if (this.resetBonus !== 0) {
 			this.add.text(50, 96, `: +${numberWithCommas(this.resetBonus / 100)}`, textStyle);
@@ -282,7 +282,7 @@ class GameScene extends AScene {
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const button = this.add.existing(
-			new Button(this, 150, y, "red")
+			new Button(this, 150, y)
 				.addIcon("snowball")
 				.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
 				.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button))

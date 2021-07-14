@@ -8,12 +8,6 @@ const textStyle = { fontFamily: fontFamily, fontSize: normalFontSize };
 
 const errorHex = "#ff7360";
 
-const lightRed = 0xd05c4f;
-
-const normalRed = 0xb94e46;
-
-const darkRed = 0xa63e39;
-
 const closeButtonFill = 0xbadff2;
 
 const lightBlue = 0x6b94a5;
@@ -40,9 +34,6 @@ export {
 	smallFontSize,
 	textStyle,
 	errorHex,
-	lightRed,
-	normalRed,
-	darkRed,
 	closeButtonFill,
 	lightBlue,
 	normalBlue,
