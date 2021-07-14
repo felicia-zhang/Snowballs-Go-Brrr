@@ -25,10 +25,14 @@ class GameScene extends AScene {
 	totalAddedSnowballs: number;
 	syncTimer: Phaser.Time.TimerEvent;
 	storeItems: PlayFabClientModels.StoreItem[];
+	inventoryObjects: Phaser.GameObjects.GameObject[];
+	inventoryTimers: Phaser.Time.TimerEvent[];
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
 	icicleText: Phaser.GameObjects.Text;
 	icicleIcon: Phaser.GameObjects.Image;
+	resetBonusText: Phaser.GameObjects.Text;
+	resetBonusIcon: Phaser.GameObjects.Image;
 	storeContainer: Phaser.GameObjects.Container;
 	resetConfirmationContainer: Phaser.GameObjects.Container;
 	leaderboardContainer: Phaser.GameObjects.Container;
@@ -45,6 +49,8 @@ class GameScene extends AScene {
 		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
 		this.storeItems = [];
+		this.inventoryObjects = [];
+		this.inventoryTimers = [];
 		this.makePenguin();
 		this.makeStoreContainer();
 		this.makeResetConfirmationContainer();
@@ -114,10 +120,11 @@ class GameScene extends AScene {
 		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
 		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
 		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
-
+		this.resetBonusText = this.add.text(50, 96, "", textStyle);
+		this.resetBonusIcon = this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5).setAlpha(0);
 		if (this.resetBonus !== 0) {
-			this.add.text(50, 96, `: +${numberWithCommas(this.resetBonus / 100)}`, textStyle);
-			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
+			this.resetBonusText.setText(`: +${numberWithCommas(this.resetBonus / 100)}`);
+			this.resetBonusIcon.setAlpha(1);
 		}
 
 		this.add
@@ -172,9 +179,17 @@ class GameScene extends AScene {
 
 	updateData(parent, key, data) {
 		if (this.scene.isActive()) {
-			key === "SB"
-				? this.snowballText.setText(`: ${numberWithCommas(data / 100)}`)
-				: this.icicleText.setText(`: ${numberWithCommas(data)}`);
+			if (key === "SB") {
+				this.snowballText.setText(`: ${numberWithCommas(data / 100)}`);
+			} else if (key === "IC") {
+				this.icicleText.setText(`: ${numberWithCommas(data)}`);
+			} else if (key === "ResetBonus") {
+				if (data !== 0) {
+					this.resetBonus = data;
+					this.resetBonusText.setText(`: +${numberWithCommas(data / 100)}`);
+					this.resetBonusIcon.setAlpha(1);
+				}
+			}
 		}
 	}
 
@@ -338,6 +353,16 @@ class GameScene extends AScene {
 				},
 			},
 			(e, r) => {
+				this.clickMultiplier = 100;
+				this.totalAddedSnowballs = 0;
+				this.inventoryObjects.forEach((object: Phaser.GameObjects.GameObject) => {
+					object.destroy(true);
+				});
+				this.inventoryObjects = [];
+				this.inventoryTimers.forEach((timer: Phaser.Time.TimerEvent) => {
+					timer.destroy();
+				});
+				this.inventoryTimers = [];
 				const icebiome: PlayFabClientModels.ItemInstance = this.registry
 					.get("Inventories")
 					.find((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemId === "icebiome");
@@ -360,6 +385,23 @@ class GameScene extends AScene {
 					onComplete: () => {
 						this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 						this.showToast("Reset Game", false);
+
+						if (this.biomeDetail.ItemId !== "icebiome") {
+							const icebiome: PlayFabClientModels.CatalogItem = this.registry
+								.get("CatalogItems")
+								.find((item: PlayFabClientModels.CatalogItem) => item.ItemId === "icebiome");
+							const icebiomeDetail = {
+								ItemId: icebiome.ItemId,
+								FullSnowballPrice: icebiome.VirtualCurrencyPrices.SB,
+								FullIciclePrice: icebiome.VirtualCurrencyPrices.IC,
+								DisplayName: icebiome.DisplayName,
+								Description: icebiome.Description,
+							} as BiomeDetail;
+							this.cameras.main.fadeOut(500, 0, 0, 0);
+							this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+								this.scene.start("Game", { biomeDetail: icebiomeDetail });
+							});
+						}
 					},
 					callbackScope: this,
 				});
@@ -579,7 +621,7 @@ class GameScene extends AScene {
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
 			.setDepth(clickAnimationDepth);
-		this.time.addEvent({
+		const timer = this.time.addEvent({
 			delay: delay,
 			loop: true,
 			callback: () => {
@@ -589,7 +631,10 @@ class GameScene extends AScene {
 				this.showClickAnimation(amountText);
 			},
 		});
-		return this.add.sprite(170 + index * 100, y, imageKey);
+		const sprite = this.add.sprite(170 + index * 100, y, imageKey);
+		this.inventoryObjects.push(sprite, amountText);
+		this.inventoryTimers.push(timer);
+		return sprite;
 	}
 
 	showClickAnimation(amountText: Phaser.GameObjects.Text) {
