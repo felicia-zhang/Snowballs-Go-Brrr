@@ -30,7 +30,6 @@ import light2 from "../assets/light2.png";
 import light3 from "../assets/light3.png";
 import light4 from "../assets/light4.png";
 import star from "../assets/star.png";
-import MenuScene from "./menu";
 import AScene from "./AScene";
 import MapScene from "./map";
 
@@ -75,12 +74,11 @@ class Controller extends AScene {
 		this.game.input.mouse.disableContextMenu();
 		this.scene.add("Leaderboard", LeaderboardScene);
 		this.scene.add("Signin", SigninScene);
-		this.scene.add("Menu", MenuScene);
 		this.scene.add("Game", GameScene);
 		this.scene.add("Map", MapScene);
 
 		if (this.registry.has("FinishedSignIn")) {
-			this.scene.start("Menu");
+			console.log("Controller -- has finished sign in");
 		} else {
 			this.scene.start("Signin");
 		}

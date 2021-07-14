@@ -43,15 +43,6 @@ class LeaderboardScene extends AScene {
 				});
 			}
 		);
-
-		this.add.existing(
-			new TextButton(this, 784, 584, "MENU", "right").addCallback(() => {
-				this.cameras.main.fadeOut(500, 0, 0, 0);
-				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-					this.scene.start("Menu");
-				});
-			})
-		);
 	}
 
 	update() {

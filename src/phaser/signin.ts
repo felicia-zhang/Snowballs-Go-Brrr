@@ -1,13 +1,17 @@
 import AScene from "./AScene";
+import { PlayFabClient } from "playfab-sdk";
+import { BiomeDetail } from "../utils/types";
 
 class SigninScene extends AScene {
 	lightContainer: Phaser.GameObjects.Container;
+	updateCounter: number;
 
 	constructor() {
 		super("Signin");
 	}
 
 	create() {
+		this.updateCounter = 0;
 		this.add.image(400, 300, "sky").setScrollFactor(0);
 
 		this.createAligned(this, "mountain3", 0.2);
@@ -46,8 +50,37 @@ class SigninScene extends AScene {
 		this.cameras.main.scrollX += 0.25;
 		this.lightContainer.x += 0.25;
 
-		if (this.registry.has("FinishedSignIn")) {
-			this.scene.start("Menu");
+		if (this.registry.has("FinishedSignIn") && this.updateCounter === 0) {
+			this.updateCounter++;
+			PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
+				this.registry.set("CatalogItems", result.data.Catalog);
+
+				const icebiome: PlayFabClientModels.CatalogItem = result.data.Catalog.find(
+					(item: PlayFabClientModels.CatalogItem) => item.ItemId === "icebiome"
+				);
+				const icebiomeDetail = {
+					ItemId: icebiome.ItemId,
+					FullSnowballPrice: icebiome.VirtualCurrencyPrices.SB,
+					FullIciclePrice: icebiome.VirtualCurrencyPrices.IC,
+					DisplayName: icebiome.DisplayName,
+					Description: icebiome.Description,
+				} as BiomeDetail;
+
+				PlayFabClient.GetPlayerStatistics({ StatisticNames: ["resetBonus"] }, (e, r) => {
+					const resetStat = r.data.Statistics.find(
+						(stat: PlayFabClientModels.StatisticValue) => stat.StatisticName === "resetBonus"
+					);
+					this.registry.set("ResetBonus", resetStat === undefined ? 0 : resetStat.Value);
+
+					PlayFabClient.GetUserInventory({}, (error, result) => {
+						this.registry.set("SB", result.data.VirtualCurrency.SB);
+						this.registry.set("IC", result.data.VirtualCurrency.IC);
+						this.registry.set("Inventories", result.data.Inventory);
+
+						this.scene.start("Game", { biomeDetail: icebiomeDetail });
+					});
+				});
+			});
 		}
 	}
 }
