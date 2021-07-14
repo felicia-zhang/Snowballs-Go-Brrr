@@ -126,7 +126,7 @@ class GameScene extends AScene {
 			.setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
-			new TextButton(this, 16, 464, "STORE", "left").addCallback(() => {
+			new TextButton(this, 16, 424, "STORE", "left").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showStoreContainer();
 			})
@@ -134,7 +134,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(storeButton);
 
 		const mapButton = this.add.existing(
-			new TextButton(this, 16, 504, "MAP", "left").addCallback(() => {
+			new TextButton(this, 16, 464, "MAP", "left").addCallback(() => {
 				this.syncData(() => {
 					this.cameras.main.fadeOut(500, 0, 0, 0);
 					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
@@ -146,7 +146,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(mapButton);
 
 		const leaderboardButton = this.add.existing(
-			new TextButton(this, 16, 524, "LEADERBOARD", "left").addCallback(() => {
+			new TextButton(this, 16, 504, "LEADERBOARD", "left").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showLeaderboardContainer();
 			})
