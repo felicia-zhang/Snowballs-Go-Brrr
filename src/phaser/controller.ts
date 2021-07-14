@@ -1,4 +1,3 @@
-import LeaderboardScene from "./leaderboard";
 import GameScene from "./game";
 import SigninScene from "./signin";
 import sky from "../assets/sky.png";
@@ -72,7 +71,6 @@ class Controller extends AScene {
 
 	create() {
 		this.game.input.mouse.disableContextMenu();
-		this.scene.add("Leaderboard", LeaderboardScene);
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Game", GameScene);
 		this.scene.add("Map", MapScene);

@@ -31,6 +31,7 @@ class GameScene extends AScene {
 	icicleIcon: Phaser.GameObjects.Image;
 	storeContainer: Phaser.GameObjects.Container;
 	resetConfirmationContainer: Phaser.GameObjects.Container;
+	leaderboardContainer: Phaser.GameObjects.Container;
 
 	constructor() {
 		super("Game");
@@ -47,6 +48,7 @@ class GameScene extends AScene {
 		this.makePenguin();
 		this.makeStoreContainer();
 		this.makeResetConfirmationContainer();
+		this.makeLeaderboardContainer();
 
 		this.registry
 			.get("CatalogItems")
@@ -145,10 +147,8 @@ class GameScene extends AScene {
 
 		const leaderboardButton = this.add.existing(
 			new TextButton(this, 16, 524, "LEADERBOARD", "left").addCallback(() => {
-				this.cameras.main.fadeOut(500, 0, 0, 0);
-				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-					this.scene.start("Leaderboard");
-				});
+				this.interactiveObjects.forEach(object => object.disableInteractive());
+				this.showLeaderboardContainer();
 			})
 		);
 		this.interactiveObjects.push(leaderboardButton);
@@ -206,6 +206,61 @@ class GameScene extends AScene {
 
 		this.add.tween({
 			targets: [this.resetConfirmationContainer],
+			ease: "Sine.easeIn",
+			duration: 500,
+			alpha: 1,
+			callbackScope: this,
+		});
+	}
+
+	makeLeaderboardContainer() {
+		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
+		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 440, 420, 15, darkBackgroundColor));
+		const statList = this.add.container(0, 0, []);
+
+		this.leaderboardContainer = this.add
+			.container(400, 300, [overlay, darkBg, statList])
+			.setDepth(popupDepth)
+			.setAlpha(0);
+
+		const closeButton = this.add.existing(
+			new CloseButton(this, 207.5, -197.5).addCallback(this.leaderboardContainer, () => {
+				const statList = this.leaderboardContainer.getAt(2) as Phaser.GameObjects.Container;
+				statList.removeAll(true);
+			})
+		);
+		this.leaderboardContainer.add(closeButton);
+	}
+
+	showLeaderboardContainer() {
+		const statList = this.leaderboardContainer.getAt(2) as Phaser.GameObjects.Container;
+
+		PlayFabClient.GetLeaderboard(
+			{ StatisticName: "snowballs", StartPosition: 0, MaxResultsCount: 5 },
+			(error, result) => {
+				const players = result.data.Leaderboard;
+				players.forEach((player, i) => {
+					const lightBg = this.add.existing(
+						new RoundRectangle(this, 0, i * 80 - 160, 400, 60, 15, lightBackgroundColor)
+					);
+					const rankText = this.add
+						.text(-184, i * 80 - 160, `#${(i + 1).toString()}`, textStyle)
+						.setOrigin(0, 0.5)
+						.setAlign("left");
+					const playerText = this.add
+						.text(0, i * 80 - 160, player.DisplayName, textStyle)
+						.setAlign("Center")
+						.setOrigin(0.5, 0.5);
+					const statText = this.add
+						.text(184, i * 80 - 160, `${numberWithCommas(player.StatValue / 100)}`, textStyle)
+						.setOrigin(1, 0.5)
+						.setAlign("right");
+					statList.add([lightBg, rankText, playerText, statText]);
+				});
+			}
+		);
+		this.add.tween({
+			targets: [this.leaderboardContainer],
 			ease: "Sine.easeIn",
 			duration: 500,
 			alpha: 1,
