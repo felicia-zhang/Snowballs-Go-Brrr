@@ -21,13 +21,9 @@ import tropicalbiome from "../assets/tropicalbiome.png";
 import mountain1 from "../assets/mountain1.png";
 import mountain2 from "../assets/mountain2.png";
 import mountain3 from "../assets/mountain3.png";
-import light1 from "../assets/light1.png";
-import light2 from "../assets/light2.png";
-import light3 from "../assets/light3.png";
-import light4 from "../assets/light4.png";
 import star from "../assets/star.png";
-import title from "../assets/title.png";
 import AScene from "./AScene";
+import { fontFamily, largeFontSize } from "../utils/constants";
 
 class PreloadScene extends AScene {
 	constructor() {
@@ -36,7 +32,37 @@ class PreloadScene extends AScene {
 
 	preload() {
 		this.add.image(400, 300, "sky");
-		this.add.text(400, 300, "Loading");
+		this.add.image(400, 220, "title").setScale(0.75);
+		this.add
+			.text(400, 350, "LOADING", { fontFamily: fontFamily, fontSize: largeFontSize })
+			.setOrigin(0.5, 0.5)
+			.setAlign("center");
+		this.anims.create({
+			key: "flash",
+			yoyo: true,
+			frames: [{ key: "light4" }, { key: "light3" }, { key: "light2" }, { key: "light1" }],
+			frameRate: 8,
+		});
+		const light1 = this.add.sprite(370, 380, "light4").setScale(0.15);
+		const light2 = this.add.sprite(400, 380, "light4").setScale(0.15);
+		const light3 = this.add.sprite(430, 380, "light4").setScale(0.15);
+		let count = 1;
+		this.time.addEvent({
+			delay: 250,
+			loop: true,
+			callback: () => {
+				if (count === 1) {
+					light1.anims.play("flash");
+				} else if (count === 2) {
+					light2.anims.play("flash");
+				} else if (count === 3) {
+					light3.anims.play("flash");
+				} else if (count === 4) {
+					count = -1;
+				}
+				count++;
+			},
+		});
 
 		this.load.image("bonfire", bonfire);
 		this.load.image("igloo", igloo);
@@ -61,17 +87,12 @@ class PreloadScene extends AScene {
 		this.load.image("mountain1", mountain1);
 		this.load.image("mountain2", mountain2);
 		this.load.image("mountain3", mountain3);
-		this.load.image("light1", light1);
-		this.load.image("light2", light2);
-		this.load.image("light3", light3);
-		this.load.image("light4", light4);
 		this.load.image("star", star);
-		this.load.image("title", title);
 	}
 
 	create(finishLoading: () => any) {
 		this.time.addEvent({
-			delay: 2000,
+			delay: 3500,
 			loop: true,
 			callback: () => {
 				this.cameras.main.fadeOut(500, 0, 0, 0);

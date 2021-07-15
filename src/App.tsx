@@ -1,8 +1,20 @@
 import { PhaserGame } from "./phaser/phaser";
 import React from "react";
 import { GoogleLoginResponse } from "react-google-login";
-import { Button, ChakraProvider, Divider, Flex, Heading, HStack, Input, Link, Spacer, VStack } from "@chakra-ui/react";
-import { fontFamily, normalFontSize } from "./utils/constants";
+import {
+	Button,
+	ChakraProvider,
+	Divider,
+	Flex,
+	Heading,
+	HStack,
+	Input,
+	Link,
+	Spacer,
+	Text,
+	VStack,
+} from "@chakra-ui/react";
+import { fontFamily, largeFontSize, normalFontSize } from "./utils/constants";
 import { SocialSignins } from "./SocialSignins";
 
 interface IState {
@@ -85,9 +97,9 @@ class App extends React.PureComponent<any, IState> {
 					<HStack position="absolute" width={500} left={150} top={340} height={150}>
 						<VStack>
 							<Flex width={225}>
-								<Heading fontFamily={fontFamily} color="white">
+								<Text fontFamily={fontFamily} fontSize={largeFontSize} color="white">
 									{this.state.isRegistering ? "Register" : "Sign In"}
-								</Heading>
+								</Text>
 								<Spacer />
 							</Flex>
 							{this.state.isRegistering ? (
