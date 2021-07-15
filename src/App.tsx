@@ -1,7 +1,7 @@
 import { PhaserGame } from "./phaser/phaser";
 import React from "react";
 import { GoogleLoginResponse } from "react-google-login";
-import { Button, ChakraProvider, Divider, Flex, Input, Link, Spacer, VStack } from "@chakra-ui/react";
+import { Button, ChakraProvider, Divider, Flex, Heading, HStack, Input, Link, Spacer, VStack } from "@chakra-ui/react";
 import { fontFamily, normalFontSize } from "./utils/constants";
 import { SocialSignins } from "./SocialSignins";
 
@@ -74,79 +74,88 @@ class App extends React.PureComponent<any, IState> {
 		return (
 			<ChakraProvider>
 				{this.state.isSignedIn ? null : (
-					<VStack position="absolute" left={287.5} top={150} width={225} height={300}>
-						{this.state.isRegistering ? (
+					<HStack position="absolute" width={500} left={150} top={340} height={150}>
+						<VStack>
+							<Flex width={225}>
+								<Heading fontFamily={fontFamily} color="white">
+									{this.state.isRegistering ? "Register" : "Sign In"}
+								</Heading>
+								<Spacer />
+							</Flex>
+							{this.state.isRegistering ? (
+								<Input
+									backgroundColor="blackAlpha.500"
+									fontFamily={fontFamily}
+									fontSize={normalFontSize}
+									color="white"
+									size="md"
+									placeholder="Email"
+									onChange={e => {
+										this.setState({ email: e.target.value });
+									}}
+								/>
+							) : null}
 							<Input
+								backgroundColor="blackAlpha.500"
 								fontFamily={fontFamily}
 								fontSize={normalFontSize}
 								color="white"
 								size="md"
-								placeholder="Email"
+								placeholder="Username"
 								onChange={e => {
-									this.setState({ email: e.target.value });
+									this.setState({ username: e.target.value });
 								}}
 							/>
-						) : null}
-						<Input
-							fontFamily={fontFamily}
-							fontSize={normalFontSize}
-							color="white"
-							size="md"
-							placeholder="Username"
-							onChange={e => {
-								this.setState({ username: e.target.value });
-							}}
-						/>
-						<Input
-							fontFamily={fontFamily}
-							fontSize={normalFontSize}
-							color="white"
-							size="md"
-							type="password"
-							placeholder="Password"
-							onChange={e => {
-								this.setState({ password: e.target.value });
-							}}
-						/>
-						{this.state.isRegistering ? (
-							<Flex width={225}>
-								<Link
-									fontFamily={fontFamily}
-									fontSize={normalFontSize}
-									color="white"
-									onClick={() => this.setState({ isRegistering: false })}>
-									Sign in
-								</Link>
-								<Spacer />
-								<Button
-									fontFamily={fontFamily}
-									fontSize={normalFontSize}
-									colorScheme="whiteAlpha"
-									onClick={this.registerWithPlayFab}>
-									Register
-								</Button>
-							</Flex>
-						) : (
-							<Flex width={225}>
-								<Link
-									fontFamily={fontFamily}
-									fontSize={normalFontSize}
-									color="white"
-									onClick={() => this.setState({ isRegistering: true })}>
-									Register
-								</Link>
-								<Spacer />
-								<Button
-									fontFamily={fontFamily}
-									fontSize={normalFontSize}
-									colorScheme="whiteAlpha"
-									onClick={this.signInWithPlayFab}>
-									Sign in
-								</Button>
-							</Flex>
-						)}
+							<Input
+								backgroundColor="blackAlpha.500"
+								fontFamily={fontFamily}
+								fontSize={normalFontSize}
+								color="white"
+								size="md"
+								type="password"
+								placeholder="Password"
+								onChange={e => {
+									this.setState({ password: e.target.value });
+								}}
+							/>
+							{this.state.isRegistering ? (
+								<Flex width={225}>
+									<Link
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
+										color="white"
+										onClick={() => this.setState({ isRegistering: false })}>
+										Sign in
+									</Link>
+									<Spacer />
+									<Button
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
+										onClick={this.registerWithPlayFab}>
+										Register
+									</Button>
+								</Flex>
+							) : (
+								<Flex width={225}>
+									<Link
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
+										color="white"
+										onClick={() => this.setState({ isRegistering: true })}>
+										Register
+									</Link>
+									<Spacer />
+									<Button
+										fontFamily={fontFamily}
+										fontSize={normalFontSize}
+										onClick={this.signInWithPlayFab}>
+										Sign in
+									</Button>
+								</Flex>
+							)}
+						</VStack>
 						<Spacer />
-						<Divider />
+						<Divider orientation="vertical" />
 						<Spacer />
 						<SocialSignins
 							isSignedIn={this.state.isSignedIn}
@@ -154,7 +163,7 @@ class App extends React.PureComponent<any, IState> {
 							onGoogleFailure={this.onGoogleFailure}
 							onFacebookSignin={this.onFacebookSignin}
 						/>
-					</VStack>
+					</HStack>
 				)}
 			</ChakraProvider>
 		);

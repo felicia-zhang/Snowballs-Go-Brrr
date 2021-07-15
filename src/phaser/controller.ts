@@ -29,6 +29,7 @@ import light2 from "../assets/light2.png";
 import light3 from "../assets/light3.png";
 import light4 from "../assets/light4.png";
 import star from "../assets/star.png";
+import title from "../assets/title.png";
 import AScene from "./AScene";
 import MapScene from "./map";
 
@@ -67,6 +68,7 @@ class Controller extends AScene {
 		this.load.image("light3", light3);
 		this.load.image("light4", light4);
 		this.load.image("star", star);
+		this.load.image("title", title);
 	}
 
 	create() {

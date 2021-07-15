@@ -1,7 +1,7 @@
 import GoogleLogin, { GoogleLoginResponse } from "react-google-login";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 import { fontFamily, normalFontSize } from "./utils/constants";
-import { Button } from "@chakra-ui/react";
+import { Button, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 
 type SocialSigninsProps = {
@@ -18,7 +18,7 @@ export const SocialSignins: React.FC<SocialSigninsProps> = ({
 	onFacebookSignin,
 }) => {
 	return (
-		<>
+		<VStack>
 			<GoogleLogin
 				clientId={process.env.REACT_APP_GOOGLE_ID}
 				render={renderProps => (
@@ -52,6 +52,6 @@ export const SocialSignins: React.FC<SocialSigninsProps> = ({
 				)}
 				callback={onFacebookSignin}
 			/>
-		</>
+		</VStack>
 	);
 };
