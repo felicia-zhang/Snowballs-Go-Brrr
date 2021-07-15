@@ -106,7 +106,7 @@ class MapScene extends AScene {
 
 		if (this.registry.get("ResetBonus") !== 0) {
 			this.add.text(50, 96, `: +${numberWithCommas(this.registry.get("ResetBonus") / 100)}`, textStyle);
-			this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5);
+			this.add.image(31, 105, "star").setScale(0.15);
 		}
 
 		const iapButton = this.add.existing(

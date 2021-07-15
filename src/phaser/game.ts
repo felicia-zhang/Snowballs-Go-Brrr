@@ -123,7 +123,7 @@ class GameScene extends AScene {
 		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
 		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
 		this.resetBonusText = this.add.text(50, 96, "", textStyle);
-		this.resetBonusIcon = this.add.image(16, 105, "star").setScale(0.15).setOrigin(0, 0.5).setAlpha(0);
+		this.resetBonusIcon = this.add.image(31, 105, "star").setScale(0.15).setAlpha(0);
 		if (this.resetBonus !== 0) {
 			this.resetBonusText.setText(`: +${numberWithCommas(this.resetBonus / 100)}`);
 			this.resetBonusIcon.setAlpha(1);
@@ -214,9 +214,9 @@ class GameScene extends AScene {
 		resetBonusText.setText(`${numberWithCommas(resetBonus / 100)} x`);
 
 		const resetBonusIcon = this.resetConfirmationContainer.getAt(7) as Phaser.GameObjects.Image;
-		const resetX = (resetBonusText.width + resetBonusIcon.displayWidth + 6) / 2;
+		const resetX = (resetBonusText.width + 36) / 2;
 		resetBonusText.setX(-resetX);
-		resetBonusIcon.setX(resetX);
+		resetBonusIcon.setX(resetX + 7.5);
 
 		this.add.tween({
 			targets: [this.resetConfirmationContainer],
