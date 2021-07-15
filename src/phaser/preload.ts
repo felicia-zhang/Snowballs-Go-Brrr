@@ -1,6 +1,3 @@
-import GameScene from "./game";
-import SigninScene from "./signin";
-import sky from "../assets/sky.png";
 import bonfire from "../assets/bonfire.png";
 import igloo from "../assets/igloo.png";
 import snowball from "../assets/snowball.png";
@@ -32,13 +29,12 @@ import star from "../assets/star.png";
 import title from "../assets/title.png";
 import AScene from "./AScene";
 
-class Load extends AScene {
+class PreloadScene extends AScene {
 	constructor() {
-		super("Load");
+		super("Preload");
 	}
 
 	preload() {
-		this.load.image("sky", sky);
 		this.add.image(400, 300, "sky");
 		this.add.text(400, 300, "Loading");
 
@@ -74,14 +70,18 @@ class Load extends AScene {
 	}
 
 	create(finishLoading: () => any) {
-		this.cameras.main.fadeIn(1000, 0, 0, 0);
-
-		this.cameras.main.fadeOut(500, 0, 0, 0);
-		this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-			finishLoading();
-			this.scene.start("Signin");
+		this.time.addEvent({
+			delay: 2000,
+			loop: true,
+			callback: () => {
+				this.cameras.main.fadeOut(500, 0, 0, 0);
+				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+					finishLoading();
+					this.scene.start("Signin");
+				});
+			},
 		});
 	}
 }
 
-export default Load;
+export default PreloadScene;
