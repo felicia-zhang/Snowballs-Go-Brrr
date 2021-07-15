@@ -9,6 +9,7 @@ interface IState {
 	game: PhaserGame;
 	isSignedIn: boolean;
 	isRegistering: boolean;
+	isLoading: boolean;
 	email: string;
 	username: string;
 	password: string;
@@ -21,6 +22,7 @@ class App extends React.PureComponent<any, IState> {
 			game: null,
 			isSignedIn: false,
 			isRegistering: true,
+			isLoading: true,
 			email: "",
 			username: "",
 			password: "",
@@ -29,7 +31,7 @@ class App extends React.PureComponent<any, IState> {
 
 	componentDidMount() {
 		this.setState({
-			game: new PhaserGame(),
+			game: new PhaserGame(this.finishLoading),
 			isSignedIn: false,
 		});
 	}
@@ -37,6 +39,12 @@ class App extends React.PureComponent<any, IState> {
 	componentWillUnmount() {
 		this.state.game.destroy(true);
 	}
+
+	finishLoading = () => {
+		this.setState({
+			isLoading: false,
+		});
+	};
 
 	finishSignIn = () => {
 		this.setState({
@@ -73,7 +81,7 @@ class App extends React.PureComponent<any, IState> {
 	render() {
 		return (
 			<ChakraProvider>
-				{this.state.isSignedIn ? null : (
+				{this.state.isSignedIn || this.state.isLoading ? null : (
 					<HStack position="absolute" width={500} left={150} top={340} height={150}>
 						<VStack>
 							<Flex width={225}>

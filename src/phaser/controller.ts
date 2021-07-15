@@ -34,8 +34,10 @@ import AScene from "./AScene";
 import MapScene from "./map";
 
 class Controller extends AScene {
-	constructor() {
+	finishLoading: () => any;
+	constructor(finishLoading: () => any) {
 		super("Controller");
+		this.finishLoading = finishLoading;
 	}
 
 	preload() {
@@ -76,6 +78,7 @@ class Controller extends AScene {
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Game", GameScene);
 		this.scene.add("Map", MapScene);
+		this.finishLoading();
 
 		if (this.registry.has("FinishedSignIn")) {
 			console.log("Controller -- has finished sign in");
