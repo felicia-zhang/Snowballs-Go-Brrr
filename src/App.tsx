@@ -84,7 +84,7 @@ class App extends React.PureComponent<any, IState> {
 							</Flex>
 							{this.state.isRegistering ? (
 								<Input
-									backgroundColor="blackAlpha.500"
+									backgroundColor="blackAlpha.300"
 									fontFamily={fontFamily}
 									fontSize={normalFontSize}
 									color="white"
@@ -96,7 +96,7 @@ class App extends React.PureComponent<any, IState> {
 								/>
 							) : null}
 							<Input
-								backgroundColor="blackAlpha.500"
+								backgroundColor="blackAlpha.300"
 								fontFamily={fontFamily}
 								fontSize={normalFontSize}
 								color="white"
@@ -107,7 +107,7 @@ class App extends React.PureComponent<any, IState> {
 								}}
 							/>
 							<Input
-								backgroundColor="blackAlpha.500"
+								backgroundColor="blackAlpha.300"
 								fontFamily={fontFamily}
 								fontSize={normalFontSize}
 								color="white"

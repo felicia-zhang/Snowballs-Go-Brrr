@@ -26,12 +26,12 @@ class SigninScene extends AScene {
 		});
 
 		this.add.sprite(150, 70, "light1").setScale(0.15).anims.play("shine");
-		this.add.sprite(60, 140, "light1").setScale(0.1).anims.play("shine");
-		this.add.sprite(590, 240, "light1").setScale(0.2).anims.play("shine");
-		this.add.sprite(670, 100, "light1").setScale(0.07).anims.play("shine");
-		this.add.sprite(740, 160, "light1").setScale(0.15).anims.play("shine");
-		this.add.sprite(240, 260, "light1").setScale(0.23).anims.play("shine");
-		this.add.image(400, 150, "title").setScale(0.75);
+		this.add.sprite(40, 140, "light1").setScale(0.1).anims.play("shine");
+		this.add.sprite(620, 190, "light1").setScale(0.2).anims.play("shine");
+		this.add.sprite(670, 30, "light1").setScale(0.07).anims.play("shine");
+		this.add.sprite(740, 120, "light1").setScale(0.15).anims.play("shine");
+		this.add.sprite(240, 210, "light1").setScale(0.23).anims.play("shine");
+		this.add.image(400, 100, "title").setScale(0.75);
 		this.mountain3 = this.add.image(0, 600, "mountain3").setOrigin(0, 1);
 		this.mountain3Backup = this.add.image(800, 600, "mountain3").setOrigin(0, 1);
 		this.mountain2 = this.add.image(0, 600, "mountain2").setOrigin(0, 1);
