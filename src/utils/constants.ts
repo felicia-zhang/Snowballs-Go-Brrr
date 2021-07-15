@@ -1,5 +1,7 @@
 const fontFamily = "Didact Gothic";
 
+const largeFontSize = "24px";
+
 const normalFontSize = "18px";
 
 const smallFontSize = "14px";
@@ -30,6 +32,7 @@ const toastDepth = 4;
 
 export {
 	fontFamily,
+	largeFontSize,
 	normalFontSize,
 	smallFontSize,
 	textStyle,

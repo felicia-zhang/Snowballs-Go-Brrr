@@ -29,10 +29,10 @@ interface LoginRequest extends PlayFabClientModels.LoginWithGoogleAccountRequest
 }
 
 export class PhaserGame extends Phaser.Game {
-	constructor() {
+	constructor(finishLoading: () => any) {
 		super(config);
-		this.scene.add("Controller", new Controller());
-		this.scene.start("Controller");
+		this.scene.add("Controller", Controller);
+		this.scene.start("Controller", finishLoading);
 	}
 
 	grantInitialItemToNewPlayer(finishSignIn: () => void) {

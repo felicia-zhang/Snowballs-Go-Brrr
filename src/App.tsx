@@ -1,14 +1,27 @@
 import { PhaserGame } from "./phaser/phaser";
 import React from "react";
 import { GoogleLoginResponse } from "react-google-login";
-import { Button, ChakraProvider, Divider, Flex, Heading, HStack, Input, Link, Spacer, VStack } from "@chakra-ui/react";
-import { fontFamily, normalFontSize } from "./utils/constants";
+import {
+	Button,
+	ChakraProvider,
+	Divider,
+	Flex,
+	Heading,
+	HStack,
+	Input,
+	Link,
+	Spacer,
+	Text,
+	VStack,
+} from "@chakra-ui/react";
+import { fontFamily, largeFontSize, normalFontSize } from "./utils/constants";
 import { SocialSignins } from "./SocialSignins";
 
 interface IState {
 	game: PhaserGame;
 	isSignedIn: boolean;
 	isRegistering: boolean;
+	isLoading: boolean;
 	email: string;
 	username: string;
 	password: string;
@@ -21,6 +34,7 @@ class App extends React.PureComponent<any, IState> {
 			game: null,
 			isSignedIn: false,
 			isRegistering: true,
+			isLoading: true,
 			email: "",
 			username: "",
 			password: "",
@@ -29,7 +43,7 @@ class App extends React.PureComponent<any, IState> {
 
 	componentDidMount() {
 		this.setState({
-			game: new PhaserGame(),
+			game: new PhaserGame(this.finishLoading),
 			isSignedIn: false,
 		});
 	}
@@ -37,6 +51,12 @@ class App extends React.PureComponent<any, IState> {
 	componentWillUnmount() {
 		this.state.game.destroy(true);
 	}
+
+	finishLoading = () => {
+		this.setState({
+			isLoading: false,
+		});
+	};
 
 	finishSignIn = () => {
 		this.setState({
@@ -73,13 +93,13 @@ class App extends React.PureComponent<any, IState> {
 	render() {
 		return (
 			<ChakraProvider>
-				{this.state.isSignedIn ? null : (
+				{this.state.isSignedIn || this.state.isLoading ? null : (
 					<HStack position="absolute" width={500} left={150} top={340} height={150}>
 						<VStack>
 							<Flex width={225}>
-								<Heading fontFamily={fontFamily} color="white">
+								<Text fontFamily={fontFamily} fontSize={largeFontSize} color="white">
 									{this.state.isRegistering ? "Register" : "Sign In"}
-								</Heading>
+								</Text>
 								<Spacer />
 							</Flex>
 							{this.state.isRegistering ? (

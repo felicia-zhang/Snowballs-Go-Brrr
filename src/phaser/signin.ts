@@ -15,6 +15,7 @@ class SigninScene extends AScene {
 	}
 
 	create() {
+		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.updateCounter = 0;
 		this.add.image(400, 300, "sky");
 		this.anims.create({
@@ -65,6 +66,8 @@ class SigninScene extends AScene {
 
 		if (this.registry.has("FinishedSignIn") && this.updateCounter === 0) {
 			this.updateCounter++;
+			this.cameras.main.fadeOut(500, 0, 0, 0);
+
 			PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 				this.registry.set("CatalogItems", result.data.Catalog);
 
