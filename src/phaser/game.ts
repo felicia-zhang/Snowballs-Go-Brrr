@@ -38,6 +38,7 @@ class GameScene extends AScene {
 	resetConfirmationContainer: Phaser.GameObjects.Container;
 	leaderboardContainer: Phaser.GameObjects.Container;
 	isNewPlayer: boolean;
+	clickPenguinInstruction?: Phaser.GameObjects.Text;
 
 	constructor() {
 		super("Game");
@@ -177,6 +178,12 @@ class GameScene extends AScene {
 			})
 		);
 		this.interactiveObjects.push(iapButton);
+
+		if (this.isNewPlayer) {
+			this.clickPenguinInstruction = this.add
+				.text(200, 300, wrapString("Click on the penguin to generate snowballs"), textStyle)
+				.setAlign("left");
+		}
 	}
 
 	updateData(parent, key, data) {
@@ -461,6 +468,9 @@ class GameScene extends AScene {
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (this.clickPenguinInstruction !== undefined) {
+					this.clickPenguinInstruction.setAlpha(0);
+				}
 				const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
 				this.totalAddedSnowballs += currentClickMultiplier;
 				this.registry.values.SB += currentClickMultiplier;
