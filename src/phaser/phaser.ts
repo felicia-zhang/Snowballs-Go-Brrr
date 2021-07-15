@@ -50,6 +50,7 @@ export class PhaserGame extends Phaser.Game {
 			console.log("Failed to sign in", error);
 		} else {
 			if (result.data.NewlyCreated) {
+				this.registry.set("isNewPlayer", true);
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});

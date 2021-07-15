@@ -37,6 +37,7 @@ class GameScene extends AScene {
 	storeContainer: Phaser.GameObjects.Container;
 	resetConfirmationContainer: Phaser.GameObjects.Container;
 	leaderboardContainer: Phaser.GameObjects.Container;
+	isNewPlayer: boolean;
 
 	constructor() {
 		super("Game");
@@ -44,6 +45,7 @@ class GameScene extends AScene {
 
 	create({ biomeId, biomeName }) {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
+		this.isNewPlayer = this.registry.get("isNewPlayer") ? true : false;
 		this.add.image(400, 300, "sky");
 		this.resetBonus = this.registry.get("ResetBonus") === 0 ? 0 : this.registry.get("ResetBonus");
 		this.biomeId = biomeId;
