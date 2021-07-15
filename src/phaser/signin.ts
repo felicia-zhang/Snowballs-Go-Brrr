@@ -65,6 +65,8 @@ class SigninScene extends AScene {
 
 		if (this.registry.has("FinishedSignIn") && this.updateCounter === 0) {
 			this.updateCounter++;
+			this.cameras.main.fadeOut(500, 0, 0, 0);
+
 			PlayFabClient.GetCatalogItems({ CatalogVersion: "1" }, (error, result) => {
 				this.registry.set("CatalogItems", result.data.Catalog);
 
