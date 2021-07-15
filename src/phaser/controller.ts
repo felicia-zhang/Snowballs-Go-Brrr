@@ -11,10 +11,8 @@ import light4 from "../assets/light4.png";
 import PreloadScene from "./preload";
 
 class Controller extends AScene {
-	finishLoading: () => any;
-	constructor(finishLoading: () => any) {
+	constructor() {
 		super("Controller");
-		this.finishLoading = finishLoading;
 	}
 
 	preload() {
@@ -26,7 +24,7 @@ class Controller extends AScene {
 		this.load.image("light4", light4);
 	}
 
-	create() {
+	create(finishLoading: () => any) {
 		this.game.input.mouse.disableContextMenu();
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Game", GameScene);
@@ -36,7 +34,7 @@ class Controller extends AScene {
 		if (this.registry.has("FinishedSignIn")) {
 			console.log("Controller -- has finished sign in");
 		} else {
-			this.scene.start("Preload", this.finishLoading);
+			this.scene.start("Preload", finishLoading);
 		}
 	}
 }
