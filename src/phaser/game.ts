@@ -11,7 +11,7 @@ import {
 } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import AScene from "./AScene";
-import { BiomeDetail, BundleDetail, ItemDetail } from "../utils/types";
+import { BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";

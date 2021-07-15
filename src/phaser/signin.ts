@@ -1,10 +1,14 @@
 import AScene from "./AScene";
 import { PlayFabClient } from "playfab-sdk";
-import { BiomeDetail } from "../utils/types";
 
 class SigninScene extends AScene {
-	lightContainer: Phaser.GameObjects.Container;
 	updateCounter: number;
+	mountain3: Phaser.GameObjects.Image;
+	mountain2: Phaser.GameObjects.Image;
+	mountain1: Phaser.GameObjects.Image;
+	mountain3Backup: Phaser.GameObjects.Image;
+	mountain2Backup: Phaser.GameObjects.Image;
+	mountain1Backup: Phaser.GameObjects.Image;
 
 	constructor() {
 		super("Signin");
@@ -12,12 +16,7 @@ class SigninScene extends AScene {
 
 	create() {
 		this.updateCounter = 0;
-		this.add.image(400, 300, "sky").setScrollFactor(0);
-
-		this.createAligned(this, "mountain3", 0.2);
-		this.createAligned(this, "mountain2", 0.5);
-		this.createAligned(this, "mountain1", 1);
-
+		this.add.image(400, 300, "sky");
 		this.anims.create({
 			key: "shine",
 			repeat: -1,
@@ -26,29 +25,41 @@ class SigninScene extends AScene {
 			frameRate: 4,
 		});
 
-		this.lightContainer = this.add.container(400, 300, [
-			this.add.sprite(-250, -230, "light1").setScale(0.15).anims.play("shine"),
-			this.add.sprite(-340, -160, "light1").setScale(0.1).anims.play("shine"),
-			this.add.sprite(190, -70, "light1").setScale(0.2).anims.play("shine"),
-			this.add.sprite(270, -200, "light1").setScale(0.07).anims.play("shine"),
-			this.add.sprite(340, -140, "light1").setScale(0.15).anims.play("shine"),
-			this.add.sprite(-160, -110, "light1").setScale(0.23).anims.play("shine"),
-		]);
-	}
-
-	createAligned(scene: AScene, texture: string, scrollFactor: number) {
-		const count = 10 * scrollFactor;
-
-		let x = 0;
-		for (let i = 0; i < count; ++i) {
-			const image = scene.add.image(x, 600, texture).setOrigin(0, 1).setScrollFactor(scrollFactor);
-			x += image.width;
-		}
+		this.add.sprite(150, 70, "light1").setScale(0.15).anims.play("shine");
+		this.add.sprite(60, 140, "light1").setScale(0.1).anims.play("shine");
+		this.add.sprite(590, 230, "light1").setScale(0.2).anims.play("shine");
+		this.add.sprite(670, 100, "light1").setScale(0.07).anims.play("shine");
+		this.add.sprite(740, 160, "light1").setScale(0.15).anims.play("shine");
+		this.add.sprite(240, 190, "light1").setScale(0.23).anims.play("shine");
+		this.mountain3 = this.add.image(0, 600, "mountain3").setOrigin(0, 1);
+		this.mountain3Backup = this.add.image(800, 600, "mountain3").setOrigin(0, 1);
+		this.mountain2 = this.add.image(0, 600, "mountain2").setOrigin(0, 1);
+		this.mountain2Backup = this.add.image(800, 600, "mountain2").setOrigin(0, 1);
+		this.mountain1 = this.add.image(0, 600, "mountain1").setOrigin(0, 1);
+		this.mountain1Backup = this.add.image(800, 600, "mountain1").setOrigin(0, 1);
 	}
 
 	update() {
-		this.cameras.main.scrollX += 0.25;
-		this.lightContainer.x += 0.25;
+		this.mountain3.x -= 0.1;
+		this.mountain2.x -= 0.2;
+		this.mountain1.x -= 0.4;
+		this.mountain3Backup.x -= 0.1;
+		this.mountain2Backup.x -= 0.2;
+		this.mountain1Backup.x -= 0.4;
+
+		[
+			this.mountain1,
+			this.mountain2,
+			this.mountain3,
+			this.mountain1Backup,
+			this.mountain2Backup,
+			this.mountain3Backup,
+		].forEach((image: Phaser.GameObjects.Image) => {
+			if (image.x <= -800) {
+				const diff = -800 - image.x;
+				image.setX(800 - diff);
+			}
+		});
 
 		if (this.registry.has("FinishedSignIn") && this.updateCounter === 0) {
 			this.updateCounter++;
