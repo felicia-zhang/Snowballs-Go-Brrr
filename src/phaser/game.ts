@@ -181,8 +181,16 @@ class GameScene extends AScene {
 
 		if (this.isNewPlayer) {
 			this.clickPenguinInstruction = this.add
-				.text(200, 300, wrapString("Click on the penguin to generate snowballs"), textStyle)
+				.text(150, 300, wrapString("Click on the penguin to generate snowballs"), textStyle)
 				.setAlign("left");
+			this.add.tween({
+				targets: [this.clickPenguinInstruction],
+				ease: "Sine.easeIn",
+				duration: 500,
+				x: 140,
+				yoyo: true,
+				repeat: -1,
+			});
 		}
 	}
 
@@ -469,7 +477,11 @@ class GameScene extends AScene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (this.clickPenguinInstruction !== undefined) {
-					this.clickPenguinInstruction.setAlpha(0);
+					this.add.tween({
+						targets: [this.clickPenguinInstruction],
+						duration: 200,
+						alpha: 0,
+					});
 				}
 				const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
 				this.totalAddedSnowballs += currentClickMultiplier;
