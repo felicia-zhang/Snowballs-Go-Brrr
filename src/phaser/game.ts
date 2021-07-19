@@ -37,6 +37,9 @@ class GameScene extends AScene {
 	storeContainer: Phaser.GameObjects.Container;
 	resetConfirmationContainer: Phaser.GameObjects.Container;
 	leaderboardContainer: Phaser.GameObjects.Container;
+	clickPenguinInstruction: Phaser.GameObjects.Text;
+	clickStoreInstruction: Phaser.GameObjects.Text;
+	firstItemPrice: number;
 
 	constructor() {
 		super("Game");
@@ -45,6 +48,7 @@ class GameScene extends AScene {
 	create({ biomeId, biomeName }) {
 		this.cameras.main.fadeIn(1000, 0, 0, 0);
 		this.add.image(400, 300, "sky");
+
 		this.resetBonus = this.registry.get("ResetBonus") === 0 ? 0 : this.registry.get("ResetBonus");
 		this.biomeId = biomeId;
 		this.biomeName = biomeName;
@@ -53,10 +57,18 @@ class GameScene extends AScene {
 		this.storeItems = [];
 		this.inventoryObjects = [];
 		this.inventoryTimers = [];
+		this.firstItemPrice = undefined;
 		this.makePenguin();
 		this.makeStoreContainer();
 		this.makeResetConfirmationContainer();
 		this.makeLeaderboardContainer();
+
+		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
+			const mittens: PlayFabClientModels.StoreItem = result.data.Store.find(
+				(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === "mittens"
+			);
+			this.firstItemPrice = mittens.VirtualCurrencyPrices.SB;
+		});
 
 		this.registry
 			.get("CatalogItems")
@@ -174,6 +186,33 @@ class GameScene extends AScene {
 			})
 		);
 		this.interactiveObjects.push(iapButton);
+
+		this.clickPenguinInstruction = this.add
+			.text(150, 300, wrapString("Click on the penguin to generate snowballs"), textStyle)
+			.setAlign("left")
+			.setOrigin(0, 1)
+			.setAlpha(0);
+		this.add.tween({
+			targets: [this.clickPenguinInstruction],
+			ease: "Sine.easeIn",
+			duration: 500,
+			x: 140,
+			yoyo: true,
+			repeat: -1,
+		});
+		this.clickStoreInstruction = this.add
+			.text(100, 424, wrapString("Purchase your first item"), textStyle)
+			.setAlign("left")
+			.setOrigin(0, 1)
+			.setAlpha(0);
+		this.add.tween({
+			targets: [this.clickStoreInstruction],
+			ease: "Sine.easeIn",
+			duration: 500,
+			x: 90,
+			yoyo: true,
+			repeat: -1,
+		});
 	}
 
 	updateData(parent, key, data) {
@@ -193,6 +232,22 @@ class GameScene extends AScene {
 	}
 
 	update() {
+		if (this.registry.get("isNewPlayer")) {
+			if (!this.registry.get("hasShownClickPenguinInstruction")) {
+				this.clickPenguinInstruction.setAlpha(1);
+			}
+
+			if (
+				!this.registry.get("hasShownClickStoreInstruction") &&
+				this.firstItemPrice !== undefined &&
+				this.registry.get("SB") >= this.firstItemPrice
+			) {
+				this.clickStoreInstruction.setAlpha(1);
+			} else {
+				this.clickStoreInstruction.setAlpha(0);
+			}
+		}
+
 		if (!this.registry.has("FinishedSignIn")) {
 			this.scene.start("Signin");
 		}
@@ -424,6 +479,15 @@ class GameScene extends AScene {
 	}
 
 	showStoreContainer() {
+		if (this.clickStoreInstruction.alpha === 1) {
+			this.registry.set("hasShownClickStoreInstruction", true);
+			this.add.tween({
+				targets: [this.clickStoreInstruction],
+				duration: 200,
+				alpha: 0,
+			});
+		}
+
 		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
 			const storeId = result.data.StoreId;
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
@@ -458,6 +522,14 @@ class GameScene extends AScene {
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
+				if (this.clickPenguinInstruction.alpha === 1) {
+					this.registry.set("hasShownClickPenguinInstruction", true);
+					this.add.tween({
+						targets: [this.clickPenguinInstruction],
+						duration: 200,
+						alpha: 0,
+					});
+				}
 				const currentClickMultiplier = this.clickMultiplier + this.resetBonus;
 				this.totalAddedSnowballs += currentClickMultiplier;
 				this.registry.values.SB += currentClickMultiplier;
