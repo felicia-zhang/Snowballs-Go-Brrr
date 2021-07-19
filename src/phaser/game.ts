@@ -233,7 +233,7 @@ class GameScene extends AScene {
 	update() {
 		if (this.registry.get("isNewPlayer")) {
 			if (!this.registry.get("hasShownClickPenguinInstruction")) {
-				this.clickPenguinInstruction.setAlpha(0);
+				this.clickPenguinInstruction.setAlpha(1);
 				this.registry.set("hasShownClickPenguinInstruction", true);
 			}
 
@@ -478,7 +478,7 @@ class GameScene extends AScene {
 	}
 
 	showStoreContainer() {
-		if (this.clickStoreInstruction !== undefined && this.clickStoreInstruction.alpha === 1) {
+		if (this.clickStoreInstruction.alpha === 1) {
 			this.add.tween({
 				targets: [this.clickStoreInstruction],
 				duration: 200,
@@ -520,7 +520,7 @@ class GameScene extends AScene {
 			.setScale(0.5)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
-				if (this.clickPenguinInstruction !== undefined) {
+				if (this.clickPenguinInstruction.alpha === 1) {
 					this.add.tween({
 						targets: [this.clickPenguinInstruction],
 						duration: 200,

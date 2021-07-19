@@ -35,7 +35,10 @@ export class PhaserGame extends Phaser.Game {
 		this.scene.start("Controller", finishLoading);
 	}
 
-	grantInitialItemToNewPlayer(finishSignIn: () => void) {
+	grantInitialItemAndTutorialToNewPlayer(finishSignIn: () => void) {
+		this.registry.set("isNewPlayer", true);
+		this.registry.set("hasShownClickPenguinInstruction", false);
+		this.registry.set("hasShownClickStoreInstruction", false);
 		PlayFabClient.ExecuteCloudScript(
 			{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
 			(error, result) => {
@@ -50,13 +53,10 @@ export class PhaserGame extends Phaser.Game {
 			console.log("Failed to sign in", error);
 		} else {
 			if (result.data.NewlyCreated) {
-				this.registry.set("isNewPlayer", true);
-				this.registry.set("hasShownClickPenguinInstruction", false);
-				this.registry.set("hasShownClickStoreInstruction", false);
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});
-				this.grantInitialItemToNewPlayer(finishSignIn);
+				this.grantInitialItemAndTutorialToNewPlayer(finishSignIn);
 			} else {
 				finishSignIn();
 			}
@@ -87,7 +87,7 @@ export class PhaserGame extends Phaser.Game {
 			}
 		} else {
 			console.log(`Registered as ${result.data.PlayFabId}`);
-			this.grantInitialItemToNewPlayer(finishSignIn);
+			this.grantInitialItemAndTutorialToNewPlayer(finishSignIn);
 		}
 	}
 
