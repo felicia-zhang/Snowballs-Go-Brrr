@@ -51,6 +51,8 @@ export class PhaserGame extends Phaser.Game {
 		} else {
 			if (result.data.NewlyCreated) {
 				this.registry.set("isNewPlayer", true);
+				this.registry.set("hasShownClickPenguinInstruction", false);
+				this.registry.set("hasShownClickStoreInstruction", false);
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});
