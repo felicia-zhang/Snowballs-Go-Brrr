@@ -57,6 +57,7 @@ class GameScene extends AScene {
 		this.storeItems = [];
 		this.inventoryObjects = [];
 		this.inventoryTimers = [];
+		this.firstItemPrice = undefined;
 		this.makePenguin();
 		this.makeStoreContainer();
 		this.makeResetConfirmationContainer();
@@ -234,7 +235,6 @@ class GameScene extends AScene {
 		if (this.registry.get("isNewPlayer")) {
 			if (!this.registry.get("hasShownClickPenguinInstruction")) {
 				this.clickPenguinInstruction.setAlpha(1);
-				this.registry.set("hasShownClickPenguinInstruction", true);
 			}
 
 			if (
@@ -243,7 +243,8 @@ class GameScene extends AScene {
 				this.registry.get("SB") >= this.firstItemPrice
 			) {
 				this.clickStoreInstruction.setAlpha(1);
-				this.registry.set("hasShownClickStoreInstruction", true);
+			} else {
+				this.clickStoreInstruction.setAlpha(0);
 			}
 		}
 
@@ -479,6 +480,7 @@ class GameScene extends AScene {
 
 	showStoreContainer() {
 		if (this.clickStoreInstruction.alpha === 1) {
+			this.registry.set("hasShownClickStoreInstruction", true);
 			this.add.tween({
 				targets: [this.clickStoreInstruction],
 				duration: 200,
@@ -521,6 +523,7 @@ class GameScene extends AScene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (this.clickPenguinInstruction.alpha === 1) {
+					this.registry.set("hasShownClickPenguinInstruction", true);
 					this.add.tween({
 						targets: [this.clickPenguinInstruction],
 						duration: 200,
