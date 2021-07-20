@@ -6,7 +6,6 @@ import {
 	ChakraProvider,
 	Divider,
 	Flex,
-	Heading,
 	HStack,
 	Input,
 	Link,
@@ -94,7 +93,7 @@ class App extends React.PureComponent<any, IState> {
 		return (
 			<ChakraProvider>
 				{this.state.isSignedIn || this.state.isLoading ? null : (
-					<HStack position="absolute" width={500} left={150} top={340} height={150}>
+					<HStack position="absolute" width={500} left={0} right={0} top={340} marginLeft="auto" marginRight="auto">
 						<VStack>
 							<Flex width={225}>
 								<Text fontFamily={fontFamily} fontSize={largeFontSize} color="white">

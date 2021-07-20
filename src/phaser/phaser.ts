@@ -9,6 +9,7 @@ const config = {
 	type: Phaser.AUTO,
 	width: 800,
 	height: 600,
+	autoCenter: Phaser.Scale.CENTER_HORIZONTALLY,
 	parent: "phaser-container",
 	dom: {
 		createContainer: true,
