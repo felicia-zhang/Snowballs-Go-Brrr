@@ -1,0 +1,871 @@
+[
+  {
+    "StoreId": "Biome",
+    "Store": [
+      {
+        "ItemId": "icebiome",
+        "VirtualCurrencyPrices": {
+          "IC": 0,
+          "SB": 0,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "marinebiome",
+        "VirtualCurrencyPrices": {
+          "IC": 20,
+          "SB": 2000000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "savannabiome",
+        "VirtualCurrencyPrices": {
+          "IC": 50,
+          "SB": 5000000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "tropicalbiome",
+        "VirtualCurrencyPrices": {
+          "IC": 100,
+          "SB": 10000000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "magmabiome",
+        "VirtualCurrencyPrices": {
+          "IC": 400,
+          "SB": 40000000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [
+      {
+        "StoreId": "BiomeWithDiscount",
+        "SegmentId": "9963152CC5E619F2"
+      }
+    ],
+    "MarketingData": {
+      "DisplayName": null,
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "BiomeWithDiscount",
+    "Store": [
+      {
+        "ItemId": "icebiome",
+        "VirtualCurrencyPrices": {
+          "IC": 0,
+          "SB": 0,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "marinebiome",
+        "VirtualCurrencyPrices": {
+          "IC": 18,
+          "SB": 1800000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "savannabiome",
+        "VirtualCurrencyPrices": {
+          "IC": 45,
+          "SB": 4500000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "tropicalbiome",
+        "VirtualCurrencyPrices": {
+          "IC": 90,
+          "SB": 9000000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "magmabiome",
+        "VirtualCurrencyPrices": {
+          "IC": 360,
+          "SB": 36000000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [],
+    "MarketingData": {
+      "DisplayName": null,
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "Currencies",
+    "Store": [
+      {
+        "ItemId": "icicles10",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 2
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "icicles50",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 8
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "icicles100",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 12
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "icicles500",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 40
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [],
+    "MarketingData": {
+      "DisplayName": null,
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "CurrenciesWithDiscount",
+    "Store": [
+      {
+        "ItemId": "icicles10",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 2
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "icicles50",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 8
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "icicles100",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 12
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "icicles500",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": null,
+          "RM": 40
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [
+      {
+        "StoreId": "Currencies",
+        "SegmentId": "9963152CC5E619F2"
+      }
+    ],
+    "MarketingData": {
+      "DisplayName": null,
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "icebiome",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 1000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 5000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 10000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 50000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 100000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [
+      {
+        "StoreId": "icebiomeWithDiscount",
+        "SegmentId": "9963152CC5E619F2"
+      }
+    ],
+    "MarketingData": {
+      "DisplayName": "Ice Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "icebiomeWithDiscount",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 900,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"1000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 4500,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"5000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 9000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"10000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 45000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"50000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 90000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"100000\"}",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [],
+    "MarketingData": {
+      "DisplayName": "Ice Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "magmabiome",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 3000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 15000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 30000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 150000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 300000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [
+      {
+        "StoreId": "magmabiomeWithDiscount",
+        "SegmentId": "9963152CC5E619F2"
+      }
+    ],
+    "MarketingData": {
+      "DisplayName": "Magma Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "magmabiomeWithDiscount",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 2700,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"3000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 13500,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"15000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 27000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"30000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 135000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"150000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 270000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"300000\"}",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [],
+    "MarketingData": {
+      "DisplayName": "Magma Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "marinebiome",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 1500,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 7500,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 15000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 75000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 150000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [
+      {
+        "StoreId": "marinebiomeWithDiscount",
+        "SegmentId": "9963152CC5E619F2"
+      }
+    ],
+    "MarketingData": {
+      "DisplayName": "Marine Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "marinebiomeWithDiscount",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 1400,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"1500\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 6800,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"7500\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 13500,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"15000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 67500,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"75000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 135000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"150000\"}",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [],
+    "MarketingData": {
+      "DisplayName": "Marine Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "savannabiome",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 2000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 10000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 20000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 100000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 200000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [
+      {
+        "StoreId": "savannabiomeWithDiscount",
+        "SegmentId": "9963152CC5E619F2"
+      }
+    ],
+    "MarketingData": {
+      "DisplayName": "Savanna Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "savannabiomeWithDiscount",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 1800,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"2000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 9000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"10000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 18000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"20000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 90000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"100000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 180000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"200000\"}",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [],
+    "MarketingData": {
+      "DisplayName": "Savanna Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "tropicalbiome",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 2500,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 12500,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 25000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 125000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 250000,
+          "RM": null
+        },
+        "CustomData": "",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [
+      {
+        "StoreId": "tropicalbiomeWithDiscount",
+        "SegmentId": "9963152CC5E619F2"
+      }
+    ],
+    "MarketingData": {
+      "DisplayName": "Tropical Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  },
+  {
+    "StoreId": "tropicalbiomeWithDiscount",
+    "Store": [
+      {
+        "ItemId": "mittens",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 2300,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"2500\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "bonfire",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 11300,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"12500\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "snowman",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 22500,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"25000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "igloo",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 112500,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"125000\"}",
+        "DisplayPosition": null
+      },
+      {
+        "ItemId": "vault",
+        "VirtualCurrencyPrices": {
+          "IC": null,
+          "SB": 225000,
+          "RM": null
+        },
+        "CustomData": "{\"FullPrice\":\"250000\"}",
+        "DisplayPosition": null
+      }
+    ],
+    "SegmentOverrides": [],
+    "MarketingData": {
+      "DisplayName": "Tropical Biome Store",
+      "Description": null,
+      "Metadata": ""
+    }
+  }
+]
