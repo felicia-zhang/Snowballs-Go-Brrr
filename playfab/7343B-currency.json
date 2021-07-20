@@ -1,20 +1,20 @@
 [
-  {
-    "CurrencyCode": "IC",
-    "DisplayName": "Icicle ",
-    "InitialDeposit": 0,
-    "RechargeRate": 0,
-    "RechargeMax": 0,
-    "CurrencyCodeFull": "IC (Icicle )",
-    "GameManagerClassMetadata": null
-  },
-  {
-    "CurrencyCode": "SB",
-    "DisplayName": "Snowball",
-    "InitialDeposit": 0,
-    "RechargeRate": 0,
-    "RechargeMax": 0,
-    "CurrencyCodeFull": "SB (Snowball)",
-    "GameManagerClassMetadata": null
-  }
+	{
+		"CurrencyCode": "IC",
+		"DisplayName": "Icicle ",
+		"InitialDeposit": 0,
+		"RechargeRate": 0,
+		"RechargeMax": 0,
+		"CurrencyCodeFull": "IC (Icicle )",
+		"GameManagerClassMetadata": null
+	},
+	{
+		"CurrencyCode": "SB",
+		"DisplayName": "Snowball",
+		"InitialDeposit": 0,
+		"RechargeRate": 0,
+		"RechargeMax": 0,
+		"CurrencyCodeFull": "SB (Snowball)",
+		"GameManagerClassMetadata": null
+	}
 ]
