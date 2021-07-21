@@ -101,7 +101,7 @@ class MapScene extends AScene {
 
 		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
 		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(44, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
+		this.icicleText = this.add.text(50, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
 		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
 
 		if (this.registry.get("ResetBonus") !== 0) {
