@@ -5,16 +5,18 @@ import {
 	Button,
 	ChakraProvider,
 	Divider,
-	Flex,
 	HStack,
-	Input,
-	Link,
 	Spacer,
-	Text,
+	TabList,
+	TabPanel,
+	TabPanels,
+	Tabs,
 	VStack,
 } from "@chakra-ui/react";
-import { fontFamily, largeFontSize, normalFontSize } from "./utils/constants";
+import { fontFamily, normalFontSize } from "./utils/constants";
 import { SocialSignins } from "./SocialSignins";
+import { CustomTab } from "./CustomTab";
+import { CustomInput } from "./CustomInput";
 
 interface IState {
 	game: PhaserGame;
@@ -93,86 +95,78 @@ class App extends React.PureComponent<any, IState> {
 		return (
 			<ChakraProvider>
 				{this.state.isSignedIn || this.state.isLoading ? null : (
-					<HStack position="absolute" width={500} left={0} right={0} top={340} marginLeft="auto" marginRight="auto">
-						<VStack>
-							<Flex width={225}>
-								<Text fontFamily={fontFamily} fontSize={largeFontSize} color="white">
-									{this.state.isRegistering ? "Register" : "Sign In"}
-								</Text>
-								<Spacer />
-							</Flex>
-							{this.state.isRegistering ? (
-								<Input
-									backgroundColor="blackAlpha.300"
-									fontFamily={fontFamily}
-									fontSize={normalFontSize}
-									color="white"
-									size="md"
-									placeholder="Email"
-									onChange={e => {
-										this.setState({ email: e.target.value });
-									}}
-								/>
-							) : null}
-							<Input
-								backgroundColor="blackAlpha.300"
-								fontFamily={fontFamily}
-								fontSize={normalFontSize}
-								color="white"
-								size="md"
-								placeholder="Username"
-								onChange={e => {
-									this.setState({ username: e.target.value });
-								}}
-							/>
-							<Input
-								backgroundColor="blackAlpha.300"
-								fontFamily={fontFamily}
-								fontSize={normalFontSize}
-								color="white"
-								size="md"
-								type="password"
-								placeholder="Password"
-								onChange={e => {
-									this.setState({ password: e.target.value });
-								}}
-							/>
-							{this.state.isRegistering ? (
-								<Flex width={225}>
-									<Link
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										color="white"
-										onClick={() => this.setState({ isRegistering: false })}>
-										Sign in
-									</Link>
-									<Spacer />
-									<Button
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										onClick={this.registerWithPlayFab}>
-										Register
-									</Button>
-								</Flex>
-							) : (
-								<Flex width={225}>
-									<Link
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										color="white"
-										onClick={() => this.setState({ isRegistering: true })}>
-										Register
-									</Link>
-									<Spacer />
-									<Button
-										fontFamily={fontFamily}
-										fontSize={normalFontSize}
-										onClick={this.signInWithPlayFab}>
-										Sign in
-									</Button>
-								</Flex>
-							)}
-						</VStack>
+					<HStack
+						position="absolute"
+						width={500}
+						left={0}
+						right={0}
+						top={320}
+						marginLeft="auto"
+						marginRight="auto">
+						<Tabs isFitted>
+							<TabList>
+								<CustomTab>Register</CustomTab>
+								<CustomTab>Sign In</CustomTab>
+							</TabList>
+
+							<TabPanels>
+								<TabPanel>
+									<VStack>
+										<CustomInput
+											placeholder="Email"
+											handleChange={e => {
+												this.setState({ email: e.target.value });
+											}}
+										/>
+										<CustomInput
+											placeholder="Username"
+											handleChange={e => {
+												this.setState({ username: e.target.value });
+											}}
+										/>
+										<CustomInput
+											type="password"
+											placeholder="Password"
+											handleChange={e => {
+												this.setState({ password: e.target.value });
+											}}
+										/>
+										<Button
+											width={225}
+											fontFamily={fontFamily}
+											fontSize={normalFontSize}
+											onClick={this.registerWithPlayFab}>
+											Register
+										</Button>
+									</VStack>
+								</TabPanel>
+								<TabPanel>
+									<VStack>
+										<CustomInput
+											placeholder="Username"
+											handleChange={e => {
+												this.setState({ username: e.target.value });
+											}}
+										/>
+										<CustomInput
+											type="password"
+											placeholder="Password"
+											handleChange={e => {
+												this.setState({ password: e.target.value });
+											}}
+										/>
+										<Button
+											width={225}
+											fontFamily={fontFamily}
+											fontSize={normalFontSize}
+											onClick={this.signInWithPlayFab}>
+											Sign in
+										</Button>
+									</VStack>
+								</TabPanel>
+							</TabPanels>
+						</Tabs>
+
 						<Spacer />
 						<Divider orientation="vertical" />
 						<Spacer />
