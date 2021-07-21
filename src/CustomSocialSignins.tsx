@@ -4,14 +4,16 @@ import { fontFamily, normalFontSize } from "./utils/constants";
 import { Button, VStack } from "@chakra-ui/react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 
-type SocialSigninsProps = {
+type CustomSocialSigninsProps = {
+	seen: boolean;
 	isSignedIn: boolean;
 	onGoogleSuccess: (response: GoogleLoginResponse) => void;
 	onGoogleFailure: (error: any) => void;
 	onFacebookSignin: (response: any) => void;
 };
 
-export const SocialSignins: React.FC<SocialSigninsProps> = ({
+export const CustomSocialSignins: React.FC<CustomSocialSigninsProps> = ({
+	seen,
 	isSignedIn,
 	onGoogleSuccess,
 	onGoogleFailure,
@@ -23,6 +25,7 @@ export const SocialSignins: React.FC<SocialSigninsProps> = ({
 				clientId={process.env.REACT_APP_GOOGLE_ID}
 				render={renderProps => (
 					<Button
+						cursor={seen ? "pointer" : "default"}
 						width={225}
 						fontFamily={fontFamily}
 						fontSize={normalFontSize}
@@ -42,6 +45,7 @@ export const SocialSignins: React.FC<SocialSigninsProps> = ({
 				autoLoad={true}
 				render={renderProps => (
 					<Button
+						cursor={seen ? "pointer" : "default"}
 						width={225}
 						fontFamily={fontFamily}
 						fontSize={normalFontSize}

@@ -5,6 +5,7 @@ import {
 	Button,
 	ChakraProvider,
 	Divider,
+	SlideFade,
 	HStack,
 	Spacer,
 	TabList,
@@ -14,7 +15,7 @@ import {
 	VStack,
 } from "@chakra-ui/react";
 import { fontFamily, normalFontSize } from "./utils/constants";
-import { SocialSignins } from "./SocialSignins";
+import { CustomSocialSignins } from "./CustomSocialSignins";
 import { CustomTab } from "./CustomTab";
 import { CustomInput } from "./CustomInput";
 
@@ -92,9 +93,10 @@ class App extends React.PureComponent<any, IState> {
 	};
 
 	render() {
+		const seen = !this.state.isSignedIn && !this.state.isLoading;
 		return (
 			<ChakraProvider>
-				{this.state.isSignedIn || this.state.isLoading ? null : (
+				<SlideFade in={seen} delay={{ enter: 0.5, exit: 0 }}>
 					<HStack
 						position="absolute"
 						width={500}
@@ -105,26 +107,29 @@ class App extends React.PureComponent<any, IState> {
 						marginRight="auto">
 						<Tabs isFitted>
 							<TabList>
-								<CustomTab>Register</CustomTab>
-								<CustomTab>Sign In</CustomTab>
+								<CustomTab cursor={seen ? "pointer" : "default"}>Register</CustomTab>
+								<CustomTab cursor={seen ? "pointer" : "default"}>Sign In</CustomTab>
 							</TabList>
 
 							<TabPanels>
 								<TabPanel>
 									<VStack>
 										<CustomInput
+											seen={seen}
 											placeholder="Email"
 											handleChange={e => {
 												this.setState({ email: e.target.value });
 											}}
 										/>
 										<CustomInput
+											seen={seen}
 											placeholder="Username"
 											handleChange={e => {
 												this.setState({ username: e.target.value });
 											}}
 										/>
 										<CustomInput
+											seen={seen}
 											type="password"
 											placeholder="Password"
 											handleChange={e => {
@@ -132,6 +137,7 @@ class App extends React.PureComponent<any, IState> {
 											}}
 										/>
 										<Button
+											cursor={seen ? "pointer" : "default"}
 											width={225}
 											fontFamily={fontFamily}
 											fontSize={normalFontSize}
@@ -143,12 +149,14 @@ class App extends React.PureComponent<any, IState> {
 								<TabPanel>
 									<VStack>
 										<CustomInput
+											seen={seen}
 											placeholder="Username"
 											handleChange={e => {
 												this.setState({ username: e.target.value });
 											}}
 										/>
 										<CustomInput
+											seen={seen}
 											type="password"
 											placeholder="Password"
 											handleChange={e => {
@@ -170,14 +178,15 @@ class App extends React.PureComponent<any, IState> {
 						<Spacer />
 						<Divider orientation="vertical" />
 						<Spacer />
-						<SocialSignins
+						<CustomSocialSignins
+							seen={seen}
 							isSignedIn={this.state.isSignedIn}
 							onGoogleSuccess={this.onGoogleSuccess}
 							onGoogleFailure={this.onGoogleFailure}
 							onFacebookSignin={this.onFacebookSignin}
 						/>
 					</HStack>
-				)}
+				</SlideFade>
 			</ChakraProvider>
 		);
 	}
