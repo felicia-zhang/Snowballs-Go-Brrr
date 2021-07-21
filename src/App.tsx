@@ -96,7 +96,7 @@ class App extends React.PureComponent<any, IState> {
 		const seen = !this.state.isSignedIn && !this.state.isLoading;
 		return (
 			<ChakraProvider>
-				<SlideFade in={seen} delay={{ enter: 0.5, exit: 0 }}>
+				<SlideFade in={seen} unmountOnExit={true} delay={{ enter: 0.5, exit: 0 }}>
 					<HStack
 						position="absolute"
 						width={500}
