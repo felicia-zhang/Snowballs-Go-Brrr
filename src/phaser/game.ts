@@ -14,7 +14,7 @@ import AScene from "./AScene";
 import { BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
-import { numberWithCommas, wrapString } from "../utils/stringFormat";
+import { numberWithCommas, wrapString, wrapStringLong } from "../utils/stringFormat";
 import TextButton from "../utils/textButton";
 
 class GameScene extends AScene {
@@ -461,16 +461,15 @@ class GameScene extends AScene {
 
 	makeStoreContainer() {
 		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 380, 450, 15, darkBackgroundColor));
-		const itemDescriptionPopup = this.add.text(200, -60, "", textStyle).setAlpha(0);
+		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 420, 550, 15, darkBackgroundColor));
 		const itemList = this.add.container(0, 0, []);
 		this.storeContainer = this.add
-			.container(400, 300, [overlay, mainBackground, itemDescriptionPopup, itemList])
+			.container(400, 300, [overlay, mainBackground, itemList])
 			.setAlpha(0)
 			.setDepth(popupDepth);
 		const closeButton = this.add.existing(
-			new CloseButton(this, 177.5, -212.5).addCallback(this.storeContainer, () => {
-				const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
+			new CloseButton(this, 197.5, -262.5).addCallback(this.storeContainer, () => {
+				const itemList = this.storeContainer.getAt(2) as Phaser.GameObjects.Container;
 				itemList.removeAll(true);
 				this.storeItems = [];
 			})
@@ -549,62 +548,51 @@ class GameScene extends AScene {
 	}
 
 	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, storeId: string) {
-		const itemDescriptionPopup = this.storeContainer.getAt(2) as Phaser.GameObjects.Text;
 		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
 		const maybeItemDiscountPrice = storeItem.VirtualCurrencyPrices.SB;
 
 		const index = this.storeItems.length;
-		const y = -170 + index * 85;
+		const y = -210 + index * 105;
 		this.storeItems.push(storeItem);
-		const background = this.add
-			.existing(new RoundRectangle(this, 0, y, 340, 70, 15, lightBackgroundColor))
-			.setInteractive()
-			.on("pointerover", (pointer: Phaser.Input.Pointer, localX, localY, event) => {
-				this.add.tween({
-					targets: [itemDescriptionPopup],
-					ease: "Sine.easeIn",
-					alpha: 1,
-					duration: 300,
-					onStart: () => {
-						itemDescriptionPopup.setText(wrapString(itemDetail.Description));
-						itemDescriptionPopup.setY(pointer.y - 330);
-					},
-					callbackScope: this,
-				});
-			})
-			.on("pointerout", (pointer: Phaser.Input.Pointer, event) => {
-				itemDescriptionPopup.setAlpha(0);
-			});
-
-		const image = this.add.image(-135, y, storeItem.ItemId).setScale(0.25);
+		const image = this.add.image(-145, y, storeItem.ItemId).setScale(0.35);
 		const nameText = this.add
-			.text(-100, y, itemDetail.DisplayName.toUpperCase(), textStyle)
+			.text(-100, y - 27, itemDetail.DisplayName.toUpperCase(), textStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
+		const description = itemDetail.Description.split("\n");
+		const descriptionText = this.add
+			.text(-100, y + 5, wrapStringLong(description[0]), { fontSize: smallFontSize, fontFamily: fontFamily })
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const effectText = this.add
+			.text(-100, y + 30, description[2], { fontSize: smallFontSize, fontFamily: fontFamily })
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const background = this.add.existing(new RoundRectangle(this, 0, y, 380, 90, 15, lightBackgroundColor));
+
 		const button = this.add.existing(
-			new Button(this, 150, y)
+			new Button(this, 170, y)
 				.addIcon("snowball")
 				.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
 				.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button))
 		);
-		button.setX(160 - button.background.width / 2);
-		const itemList = this.storeContainer.getAt(3) as Phaser.GameObjects.Container;
-		itemList.add([background, image, nameText, button]);
+		button.setX(180 - button.background.width / 2);
+		const itemList = this.storeContainer.getAt(2) as Phaser.GameObjects.Container;
+		itemList.add([background, image, nameText, descriptionText, effectText, button]);
 
 		if (storeId === `${this.biomeId}WithDiscount`) {
-			button.setY(-160 + index * 85);
+			button.setY(y + 5);
 
 			const fullPriceText = this.add
-				.text(121, -192 + index * 85, `${numberWithCommas(storeItem.CustomData.FullPrice / 100)} x`, {
+				.text(141, y - 25, `${numberWithCommas(storeItem.CustomData.FullPrice / 100)} x`, {
 					fontSize: smallFontSize,
 					fontFamily: fontFamily,
 				})
 				.setAlign("right")
 				.setOrigin(1, 0.5);
-			const oldSnowballIcon = this.add.image(135, -191 + index * 85, "snowball").setScale(0.09);
-			const yPosition = -96 + index * 42.5;
+			const oldSnowballIcon = this.add.image(155, y - 25, "snowball").setScale(0.09);
 			const line = this.add
-				.line(75, yPosition, 75, yPosition, 110 + fullPriceText.width, yPosition, 0xffffff)
+				.line(0, 0, 170, y - 25, 205 + fullPriceText.width, y - 25, 0xffffff)
 				.setOrigin(1, 0.5);
 			itemList.add([fullPriceText, oldSnowballIcon, line]);
 		}
