@@ -143,46 +143,61 @@ class GameScene extends AScene {
 		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
-			new Button(this, 570, 30).addIcon("store").addCallback(() => {
-				this.interactiveObjects.forEach(object => object.disableInteractive());
-				this.showStoreContainer();
-			})
+			new Button(this, 570, 30)
+				.addIcon("store")
+				.addHoverText("Store")
+				.addCallback(() => {
+					this.interactiveObjects.forEach(object => object.disableInteractive());
+					this.showStoreContainer();
+				})
 		);
 		this.interactiveObjects.push(storeButton);
 
 		const mapButton = this.add.existing(
-			new Button(this, 620, 30).addIcon("map").addCallback(() => {
-				this.syncData(() => {
-					this.cameras.main.fadeOut(500, 0, 0, 0);
-					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-						this.scene.start("Map");
+			new Button(this, 620, 30)
+				.addIcon("map")
+				.addHoverText("Map")
+				.addCallback(() => {
+					this.syncData(() => {
+						this.cameras.main.fadeOut(500, 0, 0, 0);
+						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+							this.scene.start("Map");
+						});
 					});
-				});
-			})
+				})
 		);
 		this.interactiveObjects.push(mapButton);
 
 		const leaderboardButton = this.add.existing(
-			new Button(this, 670, 30).addIcon("leaderboard").addCallback(() => {
-				this.interactiveObjects.forEach(object => object.disableInteractive());
-				this.showLeaderboardContainer();
-			})
+			new Button(this, 670, 30)
+				.addIcon("leaderboard")
+				.addHoverText("Leaderboard")
+				.addCallback(() => {
+					this.interactiveObjects.forEach(object => object.disableInteractive());
+					this.showLeaderboardContainer();
+				})
 		);
 		this.interactiveObjects.push(leaderboardButton);
 
 		const resetButton = this.add.existing(
-			new Button(this, 720, 30).addIcon("reset").addCallback(() => {
-				this.interactiveObjects.forEach(object => object.disableInteractive());
-				this.showResetConfirmationContainer();
-			})
+			new Button(this, 720, 30)
+				.addIcon("reset")
+				.addHoverText("Reset")
+				.addCallback(() => {
+					this.interactiveObjects.forEach(object => object.disableInteractive());
+					this.showResetConfirmationContainer();
+				})
 		);
 		this.interactiveObjects.push(resetButton);
 
 		const iapButton = this.add.existing(
-			new Button(this, 770, 30).addIcon("iap").addCallback(() => {
-				this.interactiveObjects.forEach(object => object.disableInteractive());
-				this.showCurrencyContainer();
-			})
+			new Button(this, 770, 30)
+				.addIcon("iap")
+				.addHoverText("In-app Purchase")
+				.addCallback(() => {
+					this.interactiveObjects.forEach(object => object.disableInteractive());
+					this.showCurrencyContainer();
+				})
 		);
 		this.interactiveObjects.push(iapButton);
 

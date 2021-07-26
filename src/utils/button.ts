@@ -1,9 +1,11 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import { darkBlue, fontFamily, lightBlue, normalBlue, textStyle } from "./constants";
+import { darkBlue, fontFamily, lightBlue, normalBlue, smallFontSize, textStyle, toastDepth } from "./constants";
 
 export default class Button extends Phaser.GameObjects.Container {
 	highlight: RoundRectangle;
 	background: RoundRectangle;
+	hoverBackground: RoundRectangle;
+	hoverText: Phaser.GameObjects.Text;
 	textObject: Phaser.GameObjects.Text;
 	text: string;
 	icon?: Phaser.GameObjects.Image;
@@ -17,6 +19,15 @@ export default class Button extends Phaser.GameObjects.Container {
 			.setOrigin(0, 0.5);
 
 		this.highlight = new RoundRectangle(scene, 0, 0, 0, 0, 10, 0xffffff).setAlpha(0);
+		this.hoverBackground = new RoundRectangle(scene, 0, 0, 0, 0, 5, darkBlue).setAlpha(0).setDepth(toastDepth);
+		this.hoverText = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {
+			fontFamily: fontFamily,
+			fontSize: smallFontSize,
+		})
+			.setAlign("right")
+			.setOrigin(1, 0.5)
+			.setAlpha(0)
+			.setDepth(toastDepth);
 		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, lightBlue)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerover", () => this.background.setFillStyle(normalBlue, 1))
@@ -46,7 +57,7 @@ export default class Button extends Phaser.GameObjects.Container {
 				});
 			});
 
-		this.add([this.highlight, this.background, this.textObject]);
+		this.add([this.highlight, this.background, this.textObject, this.hoverBackground, this.hoverText]);
 	}
 
 	resetButton(): this {
@@ -105,6 +116,25 @@ export default class Button extends Phaser.GameObjects.Container {
 			this.resetButton();
 			callback();
 		});
+
+		return this;
+	}
+
+	addHoverText(text: string): this {
+		this.hoverText.setText(text).setX(16).setY(34);
+		this.hoverBackground.setSize(this.hoverText.width + 8, this.hoverText.height + 8);
+		this.hoverBackground.y = 34;
+		this.hoverBackground.x = -(this.hoverBackground.width / 2) + 20;
+
+		this.background
+			.on("pointerover", () => {
+				this.hoverText.setAlpha(1);
+				this.hoverBackground.setAlpha(1);
+			})
+			.on("pointerout", () => {
+				this.hoverText.setAlpha(0);
+				this.hoverBackground.setAlpha(0);
+			});
 
 		return this;
 	}
