@@ -16,6 +16,7 @@ import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { numberWithCommas, wrapString, wrapStringLong } from "../utils/stringFormat";
 import LeaderboardContainer from "./leaderboardContainer";
+import ResetContainer from "./resetContainer";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
@@ -35,7 +36,7 @@ class GameScene extends AScene {
 	resetBonusText: Phaser.GameObjects.Text;
 	resetBonusIcon: Phaser.GameObjects.Image;
 	storeContainer: Phaser.GameObjects.Container;
-	resetConfirmationContainer: Phaser.GameObjects.Container;
+	resetContainer: ResetContainer;
 	leaderboardContainer: LeaderboardContainer;
 	clickPenguinInstruction: Phaser.GameObjects.Text;
 	clickStoreInstruction: Phaser.GameObjects.Text;
@@ -60,7 +61,7 @@ class GameScene extends AScene {
 		this.firstItemPrice = undefined;
 		this.makePenguin();
 		this.makeStoreContainer();
-		this.makeResetConfirmationContainer();
+		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
 		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
 
 		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
@@ -186,7 +187,7 @@ class GameScene extends AScene {
 				.addHoverText("Reset")
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showResetConfirmationContainer();
+					this.resetContainer.show();
 				})
 		);
 		this.interactiveObjects.push(resetButton);
@@ -268,82 +269,6 @@ class GameScene extends AScene {
 		}
 	}
 
-	showResetConfirmationContainer() {
-		const snowballBalance = this.registry.get("SB");
-		const resetBonus = Math.floor(snowballBalance / 1000000);
-
-		const snowballText = this.resetConfirmationContainer.getAt(4) as Phaser.GameObjects.Text;
-		snowballText.setText(`${numberWithCommas(snowballBalance / 100)} x`);
-
-		const snowballIcon = this.resetConfirmationContainer.getAt(5) as Phaser.GameObjects.Image;
-		const snowballX = (snowballText.width + snowballIcon.displayWidth + 6) / 2;
-		snowballText.setX(-snowballX);
-		snowballIcon.setX(snowballX);
-
-		const resetBonusText = this.resetConfirmationContainer.getAt(6) as Phaser.GameObjects.Text;
-		resetBonusText.setText(`${numberWithCommas(resetBonus / 100)} x`);
-
-		const resetBonusIcon = this.resetConfirmationContainer.getAt(7) as Phaser.GameObjects.Image;
-		const resetX = (resetBonusText.width + 36) / 2;
-		resetBonusText.setX(-resetX);
-		resetBonusIcon.setX(resetX + 7.5);
-
-		this.add.tween({
-			targets: [this.resetConfirmationContainer],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 1,
-			callbackScope: this,
-		});
-	}
-
-	makeResetConfirmationContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 380, 340, 15, darkBackgroundColor));
-		const lightBg = this.add.existing(new RoundRectangle(this, 0, 45, 340, 210, 15, lightBackgroundColor));
-		const description = this.add
-			.text(
-				0,
-				-150,
-				`Reset game to earn 0.01 reset bonus\nfor every 10,000 snowballs in your balance.\nThe reset bonus will be applied to\nmanual clicks and item effects.\n\nYour current snowball balance is:\n\n\nReset will award you with:`,
-				textStyle
-			)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
-		const snowballText = this.add.text(0, -15, "", textStyle).setAlign("left").setOrigin(0, 0.5);
-		const snowballIcon = this.add.image(0, -15, "snowball").setScale(0.15).setOrigin(1, 0.5);
-		const resetBonusText = this.add.text(0, 45, "", textStyle).setAlign("left").setOrigin(0, 0.5);
-		const resetBonusIcon = this.add.image(0, 45, "star").setScale(0.15).setOrigin(1, 0.5);
-		const footnote = this.add
-			.text(0, 180, "*Reset will NOT affect\nyour in-app purchase history\nor your icicle balance", textStyle)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
-		this.resetConfirmationContainer = this.add
-			.container(400, 300, [
-				overlay,
-				darkBg,
-				lightBg,
-				description,
-				snowballText,
-				snowballIcon,
-				resetBonusText,
-				resetBonusIcon,
-				footnote,
-			])
-			.setDepth(popupDepth)
-			.setAlpha(0);
-
-		const resetButton = this.add.existing(
-			new Button(this, 0, 114).setText("RESET").addCallback(() => this.reset(resetButton))
-		);
-		const closeButton = this.add.existing(
-			new CloseButton(this, 177.5, -157.5).addCallback(this.resetConfirmationContainer, () => {
-				resetButton.resetButton();
-			})
-		);
-		this.resetConfirmationContainer.add([resetButton, closeButton]);
-	}
-
 	reset(button: Button) {
 		button.toggleLoading(true);
 		this.inventoryObjects.forEach((object: Phaser.GameObjects.GameObject) => {
@@ -394,7 +319,7 @@ class GameScene extends AScene {
 					console.log("Revoked all snowballs: ", result.subtractSBResult);
 					button.toggleLoading(false);
 					this.add.tween({
-						targets: [this.resetConfirmationContainer],
+						targets: [this.resetContainer],
 						ease: "Sine.easeIn",
 						duration: 300,
 						alpha: 0,
@@ -625,7 +550,9 @@ class GameScene extends AScene {
 
 	makeMittens(index: number) {
 		this.clickMultiplier += 100;
-		return this.add.sprite(170 + index * 100, 50, "mittens");
+		const sprite = this.add.sprite(170 + index * 100, 50, "mittens");
+		this.inventoryObjects.push(sprite);
+		return sprite;
 	}
 
 	makeItem(index: number, y: number, snowballGeneration: number, delay: number, imageKey: string) {
