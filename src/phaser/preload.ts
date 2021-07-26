@@ -21,6 +21,11 @@ import tropicalbiome from "../assets/tropicalbiome.png";
 import mountain1 from "../assets/mountain1.png";
 import mountain2 from "../assets/mountain2.png";
 import mountain3 from "../assets/mountain3.png";
+import leaderboard from "../assets/leaderboard.png";
+import reset from "../assets/reset.png";
+import iap from "../assets/iap.png";
+import store from "../assets/store.png";
+import map from "../assets/map.png";
 import star from "../assets/star.png";
 import AScene from "./AScene";
 import { fontFamily, largeFontSize } from "../utils/constants";
@@ -87,6 +92,11 @@ class PreloadScene extends AScene {
 		this.load.image("mountain1", mountain1);
 		this.load.image("mountain2", mountain2);
 		this.load.image("mountain3", mountain3);
+		this.load.image("leaderboard", leaderboard);
+		this.load.image("reset", reset);
+		this.load.image("iap", iap);
+		this.load.image("store", store);
+		this.load.image("map", map);
 		this.load.image("star", star);
 	}
 

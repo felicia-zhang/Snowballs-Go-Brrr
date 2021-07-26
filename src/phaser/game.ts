@@ -15,7 +15,6 @@ import { BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { numberWithCommas, wrapString, wrapStringLong } from "../utils/stringFormat";
-import TextButton from "../utils/textButton";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
@@ -144,7 +143,7 @@ class GameScene extends AScene {
 		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
-			new TextButton(this, 16, 424, "STORE", "left").addCallback(() => {
+			new Button(this, 570, 30).addIcon("store").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showStoreContainer();
 			})
@@ -152,7 +151,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(storeButton);
 
 		const mapButton = this.add.existing(
-			new TextButton(this, 16, 464, "MAP", "left").addCallback(() => {
+			new Button(this, 620, 30).addIcon("map").addCallback(() => {
 				this.syncData(() => {
 					this.cameras.main.fadeOut(500, 0, 0, 0);
 					this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
@@ -164,7 +163,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(mapButton);
 
 		const leaderboardButton = this.add.existing(
-			new TextButton(this, 16, 504, "LEADERBOARD", "left").addCallback(() => {
+			new Button(this, 670, 30).addIcon("leaderboard").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showLeaderboardContainer();
 			})
@@ -172,7 +171,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(leaderboardButton);
 
 		const resetButton = this.add.existing(
-			new TextButton(this, 16, 544, "RESET", "left").addCallback(() => {
+			new Button(this, 720, 30).addIcon("reset").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showResetConfirmationContainer();
 			})
@@ -180,7 +179,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(resetButton);
 
 		const iapButton = this.add.existing(
-			new TextButton(this, 16, 584, "IN-APP PURCHASE EXAMPLE", "left").addCallback(() => {
+			new Button(this, 770, 30).addIcon("iap").addCallback(() => {
 				this.interactiveObjects.forEach(object => object.disableInteractive());
 				this.showCurrencyContainer();
 			})

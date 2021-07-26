@@ -65,8 +65,13 @@ export default class Button extends Phaser.GameObjects.Container {
 		this.icon = new Phaser.GameObjects.Image(this.scene, 0, 0, imageKey).setScale(0.15);
 		const textX = (this.textObject.width + 36) / 2;
 		this.textObject.setX(-textX);
-		this.icon.setX(textX - 15);
-		this.background.width = this.textObject.width + 50;
+		if (this.textObject.text === "") {
+			this.icon.setX(0);
+			this.background.width = 40;
+		} else {
+			this.icon.setX(textX - 15);
+			this.background.width = this.textObject.width + 50;
+		}
 		this.background.height = this.textObject.height + 16;
 		this.highlight.width = this.background.width;
 		this.highlight.height = this.background.height;
@@ -106,6 +111,16 @@ export default class Button extends Phaser.GameObjects.Container {
 
 	removeListener(event: string): this {
 		this.background.removeListener(event);
+		return this;
+	}
+
+	disableInteractive(): this {
+		this.background.disableInteractive();
+		return this;
+	}
+
+	setInteractive(hitArea?: Phaser.Types.Input.InputConfiguration | any): this {
+		this.background.setInteractive(hitArea);
 		return this;
 	}
 

@@ -14,7 +14,6 @@ import AScene from "./AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
-import TextButton from "../utils/textButton";
 
 class MapScene extends AScene {
 	biomeMap: { [key: number]: BiomeDetail };
@@ -108,14 +107,6 @@ class MapScene extends AScene {
 			this.add.text(50, 96, `: +${numberWithCommas(this.registry.get("ResetBonus") / 100)}`, textStyle);
 			this.add.image(31, 105, "star").setScale(0.15);
 		}
-
-		const iapButton = this.add.existing(
-			new TextButton(this, 16, 584, "IN-APP PURCHASE EXAMPLE", "left").addCallback(() => {
-				this.interactiveObjects.forEach(object => object.disableInteractive());
-				this.showCurrencyContainer();
-			})
-		);
-		this.interactiveObjects.push(iapButton);
 	}
 
 	updateData(parent, key, data) {
