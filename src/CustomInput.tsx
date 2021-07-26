@@ -1,6 +1,6 @@
 import { Input } from "@chakra-ui/react";
 import { InputHTMLAttributes, ChangeEvent } from "react";
-import { fontFamily, normalFontSize } from "./utils/constants";
+import { errorHex, fontFamily, normalFontSize } from "./utils/constants";
 
 type CustomInputProps = InputHTMLAttributes<HTMLInputElement> & {
 	errors: string[];
@@ -14,6 +14,7 @@ export const CustomInput: React.FC<CustomInputProps> = props => {
 	return (
 		<Input
 			isInvalid={props.errors.includes(props.placeholder)}
+			errorBorderColor={errorHex}
 			isReadOnly={!props.seen}
 			cursor={props.seen ? "text" : "default"}
 			backgroundColor="blackAlpha.300"

@@ -1,7 +1,9 @@
 import {
 	darkBackgroundColor,
-	errorHex,
+	error,
 	lightBackgroundColor,
+	lightBlue,
+	normalBlue,
 	overlayDepth,
 	popupDepth,
 	textStyle,
@@ -12,9 +14,11 @@ import { PlayFabClient } from "playfab-sdk";
 import { ItemDetail, BundleDetail } from "../utils/types";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
+import { wrapStringLong } from "../utils/stringFormat";
 
 abstract class AScene extends Phaser.Scene {
-	toast: Phaser.GameObjects.Text;
+	toastText: Phaser.GameObjects.Text;
+	toastBackground: RoundRectangle;
 	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
 	currencyContainer: Phaser.GameObjects.Container;
@@ -22,12 +26,16 @@ abstract class AScene extends Phaser.Scene {
 	interactiveObjects: Phaser.GameObjects.GameObject[];
 
 	init() {
-		this.toast = this.add
-			.text(400, 584, "", textStyle)
+		this.toastBackground = this.add
+			.existing(new RoundRectangle(this, 400, 20, 0, 0, 10, lightBlue))
+			.setAlpha(0)
+			.setDepth(toastDepth);
+		this.toastText = this.add
+			.text(400, 20, "", textStyle)
 			.setAlpha(0)
 			.setDepth(toastDepth)
 			.setAlign("center")
-			.setOrigin(0.5, 1);
+			.setOrigin(0.5, 0);
 		this.currencyItems = [];
 		this.itemsMap = {};
 		this.bundlesMap = {};
@@ -148,21 +156,28 @@ abstract class AScene extends Phaser.Scene {
 	}
 
 	showToast(message: string, isError: boolean) {
-		this.toast.setText(message);
+		this.toastText.setText(wrapStringLong(message));
+		this.toastBackground.setSize(this.toastText.width + 20, this.toastText.height + 20);
+		this.toastBackground.y = (this.toastText.height + 40) / 2;
 		if (isError) {
-			this.toast.setColor(errorHex);
+			this.toastBackground.setFillStyle(error);
 		} else {
-			this.toast.setColor("#ffffff");
+			this.toastBackground.setFillStyle(lightBlue);
 		}
 
 		this.add.tween({
-			targets: [this.toast],
+			targets: [this.toastBackground, this.toastText],
 			ease: "Sine.easeIn",
-			duration: 300,
+			duration: 500,
 			alpha: 1,
-			completeDelay: 1000,
-			onComplete: () => {
-				this.toast.setAlpha(0);
+			completeDelay: 2000,
+			onComplete: (tween, targets) => {
+				this.add.tween({
+					targets: targets,
+					ease: "Sine.easeIn",
+					duration: 300,
+					alpha: 0,
+				});
 			},
 			callbackScope: this,
 		});

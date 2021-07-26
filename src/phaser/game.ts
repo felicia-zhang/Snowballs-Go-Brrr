@@ -116,7 +116,7 @@ class GameScene extends AScene {
 
 				this.registry.values.SB += sb;
 				this.totalAddedSnowballs += sb;
-				this.showToast(`${numberWithCommas(sb / 100)} snowballs added \nwhile player was away`, false);
+				this.showToast(`${numberWithCommas(sb / 100)} snowballs added while player was away`, false);
 			} else {
 				this.showToast(`Welcome to ${this.biomeName}`, false);
 			}
