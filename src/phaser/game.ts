@@ -1,22 +1,12 @@
 import { PlayFabClient } from "playfab-sdk";
-import {
-	darkBackgroundColor,
-	fontFamily,
-	smallFontSize,
-	textStyle,
-	lightBackgroundColor,
-	overlayDepth,
-	popupDepth,
-	clickAnimationDepth,
-} from "../utils/constants";
-import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
+import { textStyle, clickAnimationDepth } from "../utils/constants";
 import AScene from "./AScene";
 import { BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
-import CloseButton from "../utils/closeButton";
-import { numberWithCommas, wrapString, wrapStringLong } from "../utils/stringFormat";
+import { numberWithCommas, wrapString } from "../utils/stringFormat";
 import LeaderboardContainer from "./leaderboardContainer";
 import ResetContainer from "./resetContainer";
+import StoreContainer from "./storeContainer";
 
 class GameScene extends AScene {
 	readonly syncDelay = 60000;
@@ -26,7 +16,6 @@ class GameScene extends AScene {
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	storeItems: PlayFabClientModels.StoreItem[];
 	inventoryObjects: Phaser.GameObjects.GameObject[];
 	inventoryTimers: Phaser.Time.TimerEvent[];
 	snowballText: Phaser.GameObjects.Text;
@@ -35,7 +24,7 @@ class GameScene extends AScene {
 	icicleIcon: Phaser.GameObjects.Image;
 	resetBonusText: Phaser.GameObjects.Text;
 	resetBonusIcon: Phaser.GameObjects.Image;
-	storeContainer: Phaser.GameObjects.Container;
+	storeContainer: StoreContainer;
 	resetContainer: ResetContainer;
 	leaderboardContainer: LeaderboardContainer;
 	clickPenguinInstruction: Phaser.GameObjects.Text;
@@ -55,12 +44,11 @@ class GameScene extends AScene {
 		this.biomeName = biomeName;
 		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
-		this.storeItems = [];
 		this.inventoryObjects = [];
 		this.inventoryTimers = [];
 		this.firstItemPrice = undefined;
 		this.makePenguin();
-		this.makeStoreContainer();
+		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
 		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
 		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
 
@@ -150,7 +138,15 @@ class GameScene extends AScene {
 				.addHoverText("Store")
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showStoreContainer();
+					if (this.clickStoreInstruction.alpha === 1) {
+						this.registry.set("hasShownClickStoreInstruction", true);
+						this.add.tween({
+							targets: [this.clickStoreInstruction],
+							duration: 200,
+							alpha: 0,
+						});
+					}
+					this.storeContainer.show();
 				})
 		);
 		this.interactiveObjects.push(storeButton);
@@ -344,49 +340,6 @@ class GameScene extends AScene {
 		});
 	}
 
-	makeStoreContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 420, 550, 15, darkBackgroundColor));
-		const itemList = this.add.container(0, 0, []);
-		this.storeContainer = this.add
-			.container(400, 300, [overlay, mainBackground, itemList])
-			.setAlpha(0)
-			.setDepth(popupDepth);
-		const closeButton = this.add.existing(
-			new CloseButton(this, 197.5, -262.5).addCallback(this.storeContainer, () => {
-				const itemList = this.storeContainer.getAt(2) as Phaser.GameObjects.Container;
-				itemList.removeAll(true);
-				this.storeItems = [];
-			})
-		);
-		this.storeContainer.add(closeButton);
-	}
-
-	showStoreContainer() {
-		if (this.clickStoreInstruction.alpha === 1) {
-			this.registry.set("hasShownClickStoreInstruction", true);
-			this.add.tween({
-				targets: [this.clickStoreInstruction],
-				duration: 200,
-				alpha: 0,
-			});
-		}
-
-		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
-			const storeId = result.data.StoreId;
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem, storeId);
-			});
-		});
-		this.add.tween({
-			targets: [this.storeContainer],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 1,
-			callbackScope: this,
-		});
-	}
-
 	makePenguin() {
 		this.anims.create({
 			key: "squish",
@@ -430,57 +383,6 @@ class GameScene extends AScene {
 			});
 		this.interactiveObjects.push(sprite);
 		return sprite;
-	}
-
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, storeId: string) {
-		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
-		const maybeItemDiscountPrice = storeItem.VirtualCurrencyPrices.SB;
-
-		const index = this.storeItems.length;
-		const y = -210 + index * 105;
-		this.storeItems.push(storeItem);
-		const image = this.add.image(-145, y, storeItem.ItemId).setScale(0.35);
-		const nameText = this.add
-			.text(-100, y - 27, itemDetail.DisplayName.toUpperCase(), textStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		const description = itemDetail.Description.split("\n");
-		const descriptionText = this.add
-			.text(-100, y + 5, wrapStringLong(description[0]), { fontSize: smallFontSize, fontFamily: fontFamily })
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		const effectText = this.add
-			.text(-100, y + 30, description[2], { fontSize: smallFontSize, fontFamily: fontFamily })
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		const background = this.add.existing(new RoundRectangle(this, 0, y, 380, 90, 15, lightBackgroundColor));
-
-		const button = this.add.existing(
-			new Button(this, 170, y)
-				.addIcon("snowball")
-				.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
-				.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button))
-		);
-		button.setX(180 - button.background.width / 2);
-		const itemList = this.storeContainer.getAt(2) as Phaser.GameObjects.Container;
-		itemList.add([background, image, nameText, descriptionText, effectText, button]);
-
-		if (storeId === `${this.biomeId}WithDiscount`) {
-			button.setY(y + 10);
-
-			const fullPriceText = this.add
-				.text(141, y - 25, `${numberWithCommas(storeItem.CustomData.FullPrice / 100)} x`, {
-					fontSize: smallFontSize,
-					fontFamily: fontFamily,
-				})
-				.setAlign("right")
-				.setOrigin(1, 0.5);
-			const oldSnowballIcon = this.add.image(155, y - 25, "snowball").setScale(0.09);
-			const line = this.add
-				.line(0, 0, 170, y - 25, 205 + fullPriceText.width, y - 25, 0xffffff)
-				.setOrigin(1, 0.5);
-			itemList.add([fullPriceText, oldSnowballIcon, line]);
-		}
 	}
 
 	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, button: Button) {

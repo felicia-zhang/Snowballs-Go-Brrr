@@ -1,5 +1,4 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import { PlayFabClient } from "playfab-sdk";
 import AScene from "../phaser/AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
