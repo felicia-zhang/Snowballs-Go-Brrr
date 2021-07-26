@@ -581,7 +581,7 @@ class GameScene extends AScene {
 		itemList.add([background, image, nameText, descriptionText, effectText, button]);
 
 		if (storeId === `${this.biomeId}WithDiscount`) {
-			button.setY(y + 5);
+			button.setY(y + 10);
 
 			const fullPriceText = this.add
 				.text(141, y - 25, `${numberWithCommas(storeItem.CustomData.FullPrice / 100)} x`, {

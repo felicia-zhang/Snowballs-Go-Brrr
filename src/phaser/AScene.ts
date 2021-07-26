@@ -3,7 +3,6 @@ import {
 	error,
 	lightBackgroundColor,
 	lightBlue,
-	normalBlue,
 	overlayDepth,
 	popupDepth,
 	textStyle,
