@@ -143,7 +143,7 @@ class GameScene extends AScene {
 		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
-			new Button(this, 570, 30)
+			new Button(this, 30, 390)
 				.addIcon("store")
 				.addHoverText("Store")
 				.addCallback(() => {
@@ -154,7 +154,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(storeButton);
 
 		const mapButton = this.add.existing(
-			new Button(this, 620, 30)
+			new Button(this, 30, 435)
 				.addIcon("map")
 				.addHoverText("Map")
 				.addCallback(() => {
@@ -169,7 +169,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(mapButton);
 
 		const leaderboardButton = this.add.existing(
-			new Button(this, 670, 30)
+			new Button(this, 30, 480)
 				.addIcon("leaderboard")
 				.addHoverText("Leaderboard")
 				.addCallback(() => {
@@ -180,7 +180,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(leaderboardButton);
 
 		const resetButton = this.add.existing(
-			new Button(this, 720, 30)
+			new Button(this, 30, 525)
 				.addIcon("reset")
 				.addHoverText("Reset")
 				.addCallback(() => {
@@ -191,7 +191,7 @@ class GameScene extends AScene {
 		this.interactiveObjects.push(resetButton);
 
 		const iapButton = this.add.existing(
-			new Button(this, 770, 30)
+			new Button(this, 30, 570)
 				.addIcon("iap")
 				.addHoverText("In-app Purchase")
 				.addCallback(() => {
