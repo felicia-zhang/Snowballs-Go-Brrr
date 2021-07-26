@@ -358,7 +358,7 @@ class MapScene extends AScene {
 	}
 
 	update() {
-		if (!this.registry.has("FinishedSignIn")) {
+		if (!this.registry.has("IsSignedIn") || !this.registry.get("IsSignedIn")) {
 			this.scene.start("Signin");
 		}
 	}

@@ -30,13 +30,13 @@ interface LoginRequest extends PlayFabClientModels.LoginWithGoogleAccountRequest
 }
 
 export class PhaserGame extends Phaser.Game {
-	constructor(finishLoading: () => any) {
+	constructor(toggleSignIn: (isSignedIn: boolean, errors?: string[]) => any) {
 		super(config);
 		this.scene.add("Controller", Controller);
-		this.scene.start("Controller", finishLoading);
+		this.scene.start("Controller", toggleSignIn);
 	}
 
-	grantInitialItemAndTutorialToNewPlayer(finishSignIn: () => void) {
+	grantInitialItemAndTutorialToNewPlayer(toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void) {
 		this.registry.set("isNewPlayer", true);
 		this.registry.set("hasShownClickPenguinInstruction", false);
 		this.registry.set("hasShownClickStoreInstruction", false);
@@ -44,12 +44,17 @@ export class PhaserGame extends Phaser.Game {
 			{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
 			(error, result) => {
 				console.log("Granted initial items to new player", result.data.FunctionResult);
-				finishSignIn();
+				toggleSignIn(true);
 			}
 		);
 	}
 
-	socialSignInCallback(error: PlayFabModule.IPlayFabError, result, name: string, finishSignIn: () => void) {
+	socialSignInCallback(
+		error: PlayFabModule.IPlayFabError,
+		result,
+		name: string,
+		toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void
+	) {
 		if (result === null) {
 			console.log("Failed to sign in", error);
 		} else {
@@ -57,53 +62,74 @@ export class PhaserGame extends Phaser.Game {
 				PlayFabClient.UpdateUserTitleDisplayName({ DisplayName: name }, () => {
 					console.log("Added new player", name);
 				});
-				this.grantInitialItemAndTutorialToNewPlayer(finishSignIn);
+				this.grantInitialItemAndTutorialToNewPlayer(toggleSignIn);
 			} else {
-				finishSignIn();
+				toggleSignIn(true);
 			}
 			console.log("Signed in as", result.data.PlayFabId);
 		}
 	}
 
-	playfabSignInCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: () => void) {
+	playfabSignInCallback(
+		error: PlayFabModule.IPlayFabError,
+		result,
+		toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void
+	) {
 		if (result === null) {
 			if (this.scene.isActive("Signin")) {
 				const scene = this.scene.getScene("Signin") as SigninScene;
 				const errorMessage = error.errorDetails ? Object.values(error.errorDetails)[0] : error.errorMessage;
 				scene.showToast(`${errorMessage}`, true);
+				const errorFields = error.errorDetails ? Object.keys(error.errorDetails) : ["Password"];
+				toggleSignIn(false, errorFields);
 			}
 		} else {
-			finishSignIn();
+			toggleSignIn(true);
 			console.log(`Signed in as ${result.data.PlayFabId}`);
 		}
 	}
 
-	playfabRegisterCallback(error: PlayFabModule.IPlayFabError, result, finishSignIn: () => void) {
+	playfabRegisterCallback(
+		error: PlayFabModule.IPlayFabError,
+		result,
+		toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void
+	) {
 		if (result === null) {
 			console.log(error);
 			if (this.scene.isActive("Signin")) {
 				const scene = this.scene.getScene("Signin") as SigninScene;
 				const errorMessage = error.errorDetails ? Object.values(error.errorDetails)[0] : error.errorMessage;
 				scene.showToast(`${errorMessage}`, true);
+				const errorFields = error.errorDetails ? Object.keys(error.errorDetails) : ["Password"];
+				toggleSignIn(false, errorFields);
 			}
 		} else {
 			console.log(`Registered as ${result.data.PlayFabId}`);
-			this.grantInitialItemAndTutorialToNewPlayer(finishSignIn);
+			this.grantInitialItemAndTutorialToNewPlayer(toggleSignIn);
 		}
 	}
 
-	signInWithPlayFab(username: string, password: string, finishSignIn: () => void) {
+	signInWithPlayFab(
+		username: string,
+		password: string,
+		toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void
+	) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithPlayFab(
 			{
 				Username: username,
 				Password: password,
 			},
-			(error, result) => this.playfabSignInCallback(error, result, finishSignIn)
+			(error, result) => this.playfabSignInCallback(error, result, toggleSignIn)
 		);
 	}
 
-	registerWithPlayFab(email: string, username: string, password: string, finishSignIn: () => void) {
+	registerWithPlayFab(
+		email: string,
+		username: string,
+		password: string,
+		toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void
+	) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.RegisterPlayFabUser(
 			{
@@ -113,30 +139,38 @@ export class PhaserGame extends Phaser.Game {
 				Password: password,
 			},
 			(error, result) => {
-				this.playfabRegisterCallback(error, result, finishSignIn);
+				this.playfabRegisterCallback(error, result, toggleSignIn);
 			}
 		);
 	}
 
-	signInWithGoogle(accessToken: string, name: string, finishSignIn: () => void) {
+	signInWithGoogle(
+		accessToken: string,
+		name: string,
+		toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void
+	) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithGoogleAccount(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			} as LoginRequest,
-			(error, result) => this.socialSignInCallback(error, result, name, finishSignIn)
+			(error, result) => this.socialSignInCallback(error, result, name, toggleSignIn)
 		);
 	}
 
-	signInWithFacebook(accessToken: string, name: string, finishSignIn: () => void) {
+	signInWithFacebook(
+		accessToken: string,
+		name: string,
+		toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void
+	) {
 		PlayFab.settings.titleId = "7343B";
 		PlayFabClient.LoginWithFacebook(
 			{
 				AccessToken: accessToken,
 				CreateAccount: true,
 			},
-			(error, result) => this.socialSignInCallback(error, result, name, finishSignIn)
+			(error, result) => this.socialSignInCallback(error, result, name, toggleSignIn)
 		);
 	}
 }

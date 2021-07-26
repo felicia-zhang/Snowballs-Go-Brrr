@@ -64,7 +64,7 @@ class SigninScene extends AScene {
 			}
 		});
 
-		if (this.registry.has("FinishedSignIn") && this.updateCounter === 0) {
+		if (this.registry.has("IsSignedIn") && this.registry.get("IsSignedIn") && this.updateCounter === 0) {
 			this.updateCounter++;
 			this.cameras.main.fadeOut(500, 0, 0, 0);
 

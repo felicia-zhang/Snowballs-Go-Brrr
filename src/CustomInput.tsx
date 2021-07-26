@@ -3,6 +3,7 @@ import { InputHTMLAttributes, ChangeEvent } from "react";
 import { fontFamily, normalFontSize } from "./utils/constants";
 
 type CustomInputProps = InputHTMLAttributes<HTMLInputElement> & {
+	errors: string[];
 	seen: boolean;
 	placeholder: string;
 	type?: string;
@@ -12,6 +13,7 @@ type CustomInputProps = InputHTMLAttributes<HTMLInputElement> & {
 export const CustomInput: React.FC<CustomInputProps> = props => {
 	return (
 		<Input
+			isInvalid={props.errors.includes(props.placeholder)}
 			isReadOnly={!props.seen}
 			cursor={props.seen ? "text" : "default"}
 			backgroundColor="blackAlpha.300"

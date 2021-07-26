@@ -27,6 +27,7 @@ interface IState {
 	email: string;
 	username: string;
 	password: string;
+	errors: string[];
 }
 
 class App extends React.PureComponent<any, IState> {
@@ -40,6 +41,7 @@ class App extends React.PureComponent<any, IState> {
 			email: "",
 			username: "",
 			password: "",
+			errors: [],
 		};
 	}
 
@@ -60,28 +62,39 @@ class App extends React.PureComponent<any, IState> {
 		});
 	};
 
-	finishSignIn = () => {
+	toggleSignIn = (isSignedIn: boolean, errors?: string[]) => {
+		if (errors !== undefined) {
+			this.setState({
+				errors: errors,
+			});
+		}
 		this.setState({
-			isSignedIn: true,
+			isSignedIn: isSignedIn,
 		});
-		this.state.game.registry.set("FinishedSignIn", true);
+		this.state.game.registry.set("IsSignedIn", isSignedIn);
 	};
 
 	signInWithPlayFab = () => {
-		this.state.game.signInWithPlayFab(this.state.username, this.state.password, this.finishSignIn);
+		this.setState({
+			errors: [],
+		});
+		this.state.game.signInWithPlayFab(this.state.username, this.state.password, this.toggleSignIn);
 	};
 
 	registerWithPlayFab = () => {
+		this.setState({
+			errors: [],
+		});
 		this.state.game.registerWithPlayFab(
 			this.state.email,
 			this.state.username,
 			this.state.password,
-			this.finishSignIn
+			this.toggleSignIn
 		);
 	};
 
 	onGoogleSuccess = (response: GoogleLoginResponse) => {
-		this.state.game.signInWithGoogle(response.accessToken, response.getBasicProfile().getName(), this.finishSignIn);
+		this.state.game.signInWithGoogle(response.accessToken, response.getBasicProfile().getName(), this.toggleSignIn);
 	};
 
 	onGoogleFailure = (error: any) => {
@@ -89,7 +102,7 @@ class App extends React.PureComponent<any, IState> {
 	};
 
 	onFacebookSignin = response => {
-		this.state.game.signInWithFacebook(response.accessToken, response.name, this.finishSignIn);
+		this.state.game.signInWithFacebook(response.accessToken, response.name, this.toggleSignIn);
 	};
 
 	render() {
@@ -105,7 +118,7 @@ class App extends React.PureComponent<any, IState> {
 						top={320}
 						marginLeft="auto"
 						marginRight="auto">
-						<Tabs isFitted>
+						<Tabs isFitted onChange={() => this.setState({ errors: [] })}>
 							<TabList>
 								<CustomTab cursor={seen ? "pointer" : "default"}>Register</CustomTab>
 								<CustomTab cursor={seen ? "pointer" : "default"}>Sign In</CustomTab>
@@ -115,6 +128,7 @@ class App extends React.PureComponent<any, IState> {
 								<TabPanel>
 									<VStack>
 										<CustomInput
+											errors={this.state.errors}
 											seen={seen}
 											placeholder="Email"
 											handleChange={e => {
@@ -122,6 +136,7 @@ class App extends React.PureComponent<any, IState> {
 											}}
 										/>
 										<CustomInput
+											errors={this.state.errors}
 											seen={seen}
 											placeholder="Username"
 											handleChange={e => {
@@ -129,6 +144,7 @@ class App extends React.PureComponent<any, IState> {
 											}}
 										/>
 										<CustomInput
+											errors={this.state.errors}
 											seen={seen}
 											type="password"
 											placeholder="Password"
@@ -149,6 +165,7 @@ class App extends React.PureComponent<any, IState> {
 								<TabPanel>
 									<VStack>
 										<CustomInput
+											errors={this.state.errors}
 											seen={seen}
 											placeholder="Username"
 											handleChange={e => {
@@ -156,6 +173,7 @@ class App extends React.PureComponent<any, IState> {
 											}}
 										/>
 										<CustomInput
+											errors={this.state.errors}
 											seen={seen}
 											type="password"
 											placeholder="Password"

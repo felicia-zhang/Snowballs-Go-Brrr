@@ -90,14 +90,14 @@ class PreloadScene extends AScene {
 		this.load.image("star", star);
 	}
 
-	create(finishLoading: () => any) {
+	create(toggleSignIn: (isSignedIn: boolean, errors?: string[]) => any) {
 		this.time.addEvent({
 			delay: 3500,
 			loop: true,
 			callback: () => {
 				this.cameras.main.fadeOut(500, 0, 0, 0);
 				this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-					finishLoading();
+					toggleSignIn(true);
 					this.scene.start("Signin");
 				});
 			},

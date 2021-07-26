@@ -24,17 +24,17 @@ class Controller extends AScene {
 		this.load.image("light4", light4);
 	}
 
-	create(finishLoading: () => any) {
+	create(toggleSignIn: (isSignedIn: boolean, errors?: string[]) => any) {
 		this.game.input.mouse.disableContextMenu();
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Game", GameScene);
 		this.scene.add("Map", MapScene);
 		this.scene.add("Preload", PreloadScene);
 
-		if (this.registry.has("FinishedSignIn")) {
+		if (this.registry.has("IsSignedIn") && this.registry.get("IsSignedIn")) {
 			console.log("Controller -- has finished sign in");
 		} else {
-			this.scene.start("Preload", finishLoading);
+			this.scene.start("Preload", toggleSignIn);
 		}
 	}
 }
