@@ -16,8 +16,6 @@ import CloseButton from "../utils/closeButton";
 import { wrapStringLong } from "../utils/stringFormat";
 
 abstract class AScene extends Phaser.Scene {
-	toastText: Phaser.GameObjects.Text;
-	toastBackground: RoundRectangle;
 	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
 	currencyContainer: Phaser.GameObjects.Container;
@@ -25,16 +23,6 @@ abstract class AScene extends Phaser.Scene {
 	interactiveObjects: Phaser.GameObjects.GameObject[];
 
 	init() {
-		this.toastBackground = this.add
-			.existing(new RoundRectangle(this, 400, 20, 0, 0, 10, lightBlue))
-			.setAlpha(0)
-			.setDepth(toastDepth);
-		this.toastText = this.add
-			.text(400, 20, "", textStyle)
-			.setAlpha(0)
-			.setDepth(toastDepth)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
 		this.currencyItems = [];
 		this.itemsMap = {};
 		this.bundlesMap = {};
@@ -155,17 +143,26 @@ abstract class AScene extends Phaser.Scene {
 	}
 
 	showToast(message: string, isError: boolean) {
-		this.toastText.setText(wrapStringLong(message));
-		this.toastBackground.setSize(this.toastText.width + 20, this.toastText.height + 20);
-		this.toastBackground.y = (this.toastText.height + 40) / 2;
+		const toastBackground = this.add
+			.existing(new RoundRectangle(this, 400, 20, 0, 0, 10, lightBlue))
+			.setAlpha(0)
+			.setDepth(toastDepth);
+		const toastText = this.add
+			.text(400, 20, wrapStringLong(message), textStyle)
+			.setAlpha(0)
+			.setDepth(toastDepth)
+			.setAlign("center")
+			.setOrigin(0.5, 0);
+		toastBackground.setSize(toastText.width + 20, toastText.height + 20);
+		toastBackground.y = (toastText.height + 40) / 2;
 		if (isError) {
-			this.toastBackground.setFillStyle(error);
+			toastBackground.setFillStyle(error);
 		} else {
-			this.toastBackground.setFillStyle(lightBlue);
+			toastBackground.setFillStyle(lightBlue);
 		}
 
 		this.add.tween({
-			targets: [this.toastBackground, this.toastText],
+			targets: [toastBackground, toastText],
 			ease: "Sine.easeIn",
 			duration: 500,
 			alpha: 1,
@@ -176,6 +173,10 @@ abstract class AScene extends Phaser.Scene {
 					ease: "Sine.easeIn",
 					duration: 300,
 					alpha: 0,
+					onComplete: (tween, targets) => {
+						toastText.destroy(true);
+						toastBackground.destroy(true);
+					},
 				});
 			},
 			callbackScope: this,
