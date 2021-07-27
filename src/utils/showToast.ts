@@ -1,4 +1,4 @@
-import { lightRed, lightBlue, textStyle, toastDepth } from "./constants";
+import { lightRed, lightBlue, normalTextStyle, toastDepth } from "./constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { wrapStringLong } from "./stringFormat";
 
@@ -8,7 +8,7 @@ export const showToast = (scene: Phaser.Scene, message: string, isError: boolean
 		.setAlpha(0)
 		.setDepth(toastDepth);
 	const toastText = scene.add
-		.text(400, 20, wrapStringLong(message), textStyle)
+		.text(400, 20, wrapStringLong(message), normalTextStyle)
 		.setAlpha(0)
 		.setDepth(toastDepth)
 		.setAlign("center")

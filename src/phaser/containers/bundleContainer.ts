@@ -1,7 +1,7 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
-import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
+import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, normalTextStyle } from "../../utils/constants";
 import { BundleDetail } from "../../utils/types";
 import GameScene from "../scenes/game";
 
@@ -20,14 +20,14 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 665, 255, 15, darkBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 665, 255, 15, darkDarkBlue);
 		this.bundleList = new Phaser.GameObjects.Container(scene, 0, 0, []);
 		this.footnote = new Phaser.GameObjects.Text(
 			scene,
 			0,
 			160,
 			"*This is a mock of the payment process. \nNo real transaction will take place in the PlayFab backend.",
-			textStyle
+			normalTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
@@ -58,7 +58,7 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 					0,
 					-145,
 					"ONE TIME OFFER!!\nReceive 10% off ALL in-game items after your first icicle purchase!",
-					textStyle
+					normalTextStyle
 				)
 					.setAlign("center")
 					.setOrigin(0.5, 0.5);
@@ -85,7 +85,7 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 		const usd = storeItem.VirtualCurrencyPrices.RM;
 
 		const x = 160 * index - 240;
-		const background = new RoundRectangle(this.scene, x, 0, 140, 220, 15, lightBackgroundColor);
+		const background = new RoundRectangle(this.scene, x, 0, 140, 220, 15, darkBlue);
 
 		const image = new Phaser.GameObjects.Image(this.scene, x, -10, storeItem.ItemId).setScale(0.7);
 		const nameText = new Phaser.GameObjects.Text(
@@ -93,7 +93,7 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 			x,
 			-90,
 			bundleDetail.DisplayName.toUpperCase(),
-			textStyle
+			normalTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);

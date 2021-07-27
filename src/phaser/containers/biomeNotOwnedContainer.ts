@@ -1,13 +1,12 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../../utils/button";
 import {
-	darkBackgroundColor,
-	fontFamily,
-	lightBackgroundColor,
+	darkDarkBlue,
+	darkBlue,
 	overlayDepth,
 	popupDepth,
-	smallFontSize,
-	textStyle,
+	normalTextStyle,
+	smallTextStyle,
 } from "../../utils/constants";
 import { numberWithCommas, wrapString } from "../../utils/stringFormat";
 import { BiomeDetail } from "../../utils/types";
@@ -33,14 +32,16 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 520, 340, 15, darkBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 520, 340, 15, darkDarkBlue);
 		this.biomeImage = new Phaser.GameObjects.Image(scene, -115, -10, "icebiome").setScale(0.7);
 
-		this.lightBackground = new RoundRectangle(scene, 0, 0, 200, 300, 15, lightBackgroundColor);
-		this.title = new Phaser.GameObjects.Text(scene, 0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		this.lightBackground = new RoundRectangle(scene, 0, 0, 200, 300, 15, darkBlue);
+		this.title = new Phaser.GameObjects.Text(scene, 0, -130, "", normalTextStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5);
 		this.snowballButton = new Button(scene, 0, 70).addIcon("snowball");
 		this.icicleButton = new Button(scene, 0, 120).addIcon("icicle");
-		this.description = new Phaser.GameObjects.Text(scene, -84, -110, "", textStyle)
+		this.description = new Phaser.GameObjects.Text(scene, -84, -110, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0);
 		this.biomeDetail = new Phaser.GameObjects.Container(scene, 140, 0, [
@@ -96,10 +97,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 				-10,
 				20,
 				`${numberWithCommas(biomeDetail.FullSnowballPrice / 100)} x`,
-				{
-					fontSize: smallFontSize,
-					fontFamily: fontFamily,
-				}
+				smallTextStyle
 			)
 				.setAlign("center")
 				.setOrigin(0.5, 0.5);
@@ -108,10 +106,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 				-10,
 				90,
 				`${numberWithCommas(biomeDetail.FullIciclePrice)} x`,
-				{
-					fontSize: smallFontSize,
-					fontFamily: fontFamily,
-				}
+				smallTextStyle
 			)
 				.setAlign("center")
 				.setOrigin(0.5, 0.5);

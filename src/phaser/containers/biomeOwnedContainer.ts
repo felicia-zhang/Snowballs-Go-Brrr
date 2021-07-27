@@ -1,6 +1,6 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../../utils/button";
-import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
+import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, normalTextStyle } from "../../utils/constants";
 import { wrapString } from "../../utils/stringFormat";
 import { BiomeDetail } from "../../utils/types";
 import GameScene from "../scenes/game";
@@ -24,13 +24,15 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 520, 340, 15, darkBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 520, 340, 15, darkDarkBlue);
 		this.biomeImage = new Phaser.GameObjects.Image(scene, -115, -10, "icebiome").setScale(0.7);
 
-		this.lightBackground = new RoundRectangle(scene, 0, 0, 200, 300, 15, lightBackgroundColor);
-		this.title = new Phaser.GameObjects.Text(scene, 0, -130, "", textStyle).setAlign("center").setOrigin(0.5, 0.5);
+		this.lightBackground = new RoundRectangle(scene, 0, 0, 200, 300, 15, darkBlue);
+		this.title = new Phaser.GameObjects.Text(scene, 0, -130, "", normalTextStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5);
 		this.visitButton = new Button(scene, 0, 120).setText("VISIT");
-		this.description = new Phaser.GameObjects.Text(scene, -84, -110, "", textStyle)
+		this.description = new Phaser.GameObjects.Text(scene, -84, -110, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0);
 		this.biomeDetail = new Phaser.GameObjects.Container(scene, 140, 0, [
@@ -74,7 +76,7 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 				0,
 				20 * i,
 				`${this.scene.itemsMap[itemId].DisplayName}: ${this.scene.biomeItems[biome.ItemId][itemId]}`,
-				textStyle
+				normalTextStyle
 			)
 				.setAlign("left")
 				.setOrigin(0, 0);

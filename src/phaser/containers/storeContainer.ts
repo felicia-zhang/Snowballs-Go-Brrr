@@ -2,13 +2,12 @@ import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
 import {
-	darkBackgroundColor,
-	fontFamily,
-	lightBackgroundColor,
+	darkDarkBlue,
+	darkBlue,
 	overlayDepth,
 	popupDepth,
-	smallFontSize,
-	textStyle,
+	normalTextStyle,
+	smallTextStyle,
 } from "../../utils/constants";
 import { numberWithCommas, wrapStringLong } from "../../utils/stringFormat";
 import { ItemDetail } from "../../utils/types";
@@ -30,7 +29,7 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 420, 550, 15, darkBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 420, 550, 15, darkDarkBlue);
 		this.itemList = new Phaser.GameObjects.Container(scene, 0, 0, []);
 		this.closeButton = new Button(scene, 197, -262, false)
 			.addIcon("close")
@@ -71,24 +70,24 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 			-100,
 			y - 27,
 			itemDetail.DisplayName.toUpperCase(),
-			textStyle
+			normalTextStyle
 		)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		const description = itemDetail.Description.split("\n");
-		const descriptionText = new Phaser.GameObjects.Text(this.scene, -100, y + 5, wrapStringLong(description[0]), {
-			fontSize: smallFontSize,
-			fontFamily: fontFamily,
-		})
+		const descriptionText = new Phaser.GameObjects.Text(
+			this.scene,
+			-100,
+			y + 5,
+			wrapStringLong(description[0]),
+			smallTextStyle
+		)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
-		const effectText = new Phaser.GameObjects.Text(this.scene, -100, y + 30, description[2], {
-			fontSize: smallFontSize,
-			fontFamily: fontFamily,
-		})
+		const effectText = new Phaser.GameObjects.Text(this.scene, -100, y + 30, description[2], smallTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
-		const background = new RoundRectangle(this.scene, 0, y, 380, 90, 15, lightBackgroundColor);
+		const background = new RoundRectangle(this.scene, 0, y, 380, 90, 15, darkBlue);
 
 		const button = new Button(this.scene, 170, y)
 			.addIcon("snowball")
@@ -105,10 +104,7 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 				141,
 				y - 25,
 				`${numberWithCommas(storeItem.CustomData.FullPrice / 100)} x`,
-				{
-					fontSize: smallFontSize,
-					fontFamily: fontFamily,
-				}
+				smallTextStyle
 			)
 				.setAlign("right")
 				.setOrigin(1, 0.5);

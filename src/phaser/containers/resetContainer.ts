@@ -1,6 +1,6 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../../utils/button";
-import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
+import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, normalTextStyle } from "../../utils/constants";
 import { numberWithCommas } from "../../utils/stringFormat";
 import GameScene from "../scenes/game";
 
@@ -25,22 +25,22 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 380, 340, 15, darkBackgroundColor);
-		this.lightBackground = new RoundRectangle(scene, 0, 45, 340, 210, 15, lightBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 380, 340, 15, darkDarkBlue);
+		this.lightBackground = new RoundRectangle(scene, 0, 45, 340, 210, 15, darkBlue);
 		this.description = new Phaser.GameObjects.Text(
 			scene,
 			0,
 			-150,
 			`Reset game to earn 0.01 reset bonus\nfor every 10,000 snowballs in your balance.\nThe reset bonus will be applied to\nmanual clicks and item effects.\n\nYour current snowball balance is:\n\n\nReset will award you with:`,
-			textStyle
+			normalTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
-		this.snowballText = new Phaser.GameObjects.Text(scene, 0, -15, "", textStyle)
+		this.snowballText = new Phaser.GameObjects.Text(scene, 0, -15, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		this.snowballIcon = new Phaser.GameObjects.Image(scene, 0, -15, "snowball").setScale(0.15).setOrigin(1, 0.5);
-		this.resetBonusText = new Phaser.GameObjects.Text(scene, 0, 45, "", textStyle)
+		this.resetBonusText = new Phaser.GameObjects.Text(scene, 0, 45, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 		this.resetBonusIcon = new Phaser.GameObjects.Image(scene, 0, 45, "star").setScale(0.15).setOrigin(1, 0.5);
@@ -49,7 +49,7 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 			0,
 			180,
 			"*Reset will NOT affect\nyour in-app purchase history\nor your icicle balance",
-			textStyle
+			normalTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0);

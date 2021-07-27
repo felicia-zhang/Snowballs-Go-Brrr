@@ -1,7 +1,7 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
-import { darkBackgroundColor, overlayDepth, popupDepth } from "../../utils/constants";
+import { darkDarkBlue, overlayDepth, popupDepth } from "../../utils/constants";
 import GameScene from "../scenes/game";
 import BiomeNotOwnedContainer from "./biomeNotOwnedContainer";
 import BiomeOwnedContainer from "./biomeOwnedContainer";
@@ -28,7 +28,7 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 640, 420, 15, darkBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 640, 420, 15, darkDarkBlue);
 		this.icebiome = this.makeBiomeContainer(-200, -100, "icebiome");
 		this.marinebiome = this.makeBiomeContainer(0, -100, "marinebiome");
 		this.savannabiome = this.makeBiomeContainer(200, -100, "savannabiome");

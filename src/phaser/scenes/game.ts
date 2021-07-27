@@ -1,5 +1,5 @@
 import { PlayFabClient } from "playfab-sdk";
-import { textStyle, clickAnimationDepth } from "../../utils/constants";
+import { normalTextStyle, clickAnimationDepth } from "../../utils/constants";
 import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../../utils/types";
 import Button from "../../utils/button";
 import { numberWithCommas, wrapString } from "../../utils/stringFormat";
@@ -153,18 +153,23 @@ class GameScene extends Phaser.Scene {
 			callback: () => this.syncData(() => showToast(this, "Saved", false)),
 		});
 
-		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
+		this.snowballText = this.add.text(
+			50,
+			16,
+			`: ${numberWithCommas(this.registry.get("SB") / 100)}`,
+			normalTextStyle
+		);
 		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(50, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
+		this.icicleText = this.add.text(50, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, normalTextStyle);
 		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
-		this.resetBonusText = this.add.text(50, 96, "", textStyle);
+		this.resetBonusText = this.add.text(50, 96, "", normalTextStyle);
 		this.resetBonusIcon = this.add.image(31, 105, "star").setScale(0.15).setAlpha(0);
 		if (this.resetBonus !== 0) {
 			this.resetBonusText.setText(`: +${numberWithCommas(this.resetBonus / 100)}`);
 			this.resetBonusIcon.setAlpha(1);
 		}
 
-		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
+		this.add.text(400, 16, this.biomeName.toUpperCase(), normalTextStyle).setAlign("center").setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
 			new Button(this, 30, 390)
@@ -230,7 +235,7 @@ class GameScene extends Phaser.Scene {
 		this.interactiveObjects.push(iapButton);
 
 		this.clickPenguinInstruction = this.add
-			.text(150, 300, wrapString("Click on the penguin to generate snowballs"), textStyle)
+			.text(150, 300, wrapString("Click on the penguin to generate snowballs"), normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 1)
 			.setAlpha(0);
@@ -243,7 +248,7 @@ class GameScene extends Phaser.Scene {
 			repeat: -1,
 		});
 		this.clickStoreInstruction = this.add
-			.text(100, 424, wrapString("Purchase your first item"), textStyle)
+			.text(100, 424, wrapString("Purchase your first item"), normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 1)
 			.setAlpha(0);
@@ -529,7 +534,7 @@ class GameScene extends Phaser.Scene {
 				this.totalAddedSnowballs += currentClickMultiplier;
 				this.registry.values.SB += currentClickMultiplier;
 				const amountText = this.add
-					.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), textStyle)
+					.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), normalTextStyle)
 					.setAlpha(0)
 					.setAlign("center")
 					.setOrigin(0.5, 0.5)
@@ -572,7 +577,7 @@ class GameScene extends Phaser.Scene {
 	makeItem(index: number, y: number, snowballGeneration: number, delay: number, imageKey: string) {
 		const snowballsToAdd = snowballGeneration + this.resetBonus;
 		const amountText = this.add
-			.text(220 + index * 100, y, `+${snowballsToAdd / 100}`, textStyle)
+			.text(220 + index * 100, y, `+${snowballsToAdd / 100}`, normalTextStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
