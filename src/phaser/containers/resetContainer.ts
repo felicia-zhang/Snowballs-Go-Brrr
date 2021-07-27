@@ -1,6 +1,6 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../../utils/button";
-import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
+import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
 import { numberWithCommas } from "../../utils/stringFormat";
 import GameScene from "../scenes/game";
 
@@ -25,8 +25,8 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 380, 340, 15, darkBackgroundColor);
-		this.lightBackground = new RoundRectangle(scene, 0, 45, 340, 210, 15, lightBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 380, 340, 15, darkDarkBlue);
+		this.lightBackground = new RoundRectangle(scene, 0, 45, 340, 210, 15, darkBlue);
 		this.description = new Phaser.GameObjects.Text(
 			scene,
 			0,

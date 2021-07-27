@@ -1,7 +1,7 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
-import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
+import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
 import { numberWithCommas } from "../../utils/stringFormat";
 import GameScene from "../scenes/game";
 
@@ -19,7 +19,7 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 440, 420, 15, darkBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 440, 420, 15, darkDarkBlue);
 		this.statList = new Phaser.GameObjects.Container(scene, 0, 0, []);
 		this.closeButton = new Button(scene, 207, -197, false)
 			.addIcon("close")
@@ -36,7 +36,7 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 			(error, result) => {
 				const players = result.data.Leaderboard;
 				players.forEach((player, i) => {
-					const lightBg = new RoundRectangle(this.scene, 0, i * 80 - 160, 400, 60, 15, lightBackgroundColor);
+					const lightBg = new RoundRectangle(this.scene, 0, i * 80 - 160, 400, 60, 15, darkBlue);
 					const rankText = new Phaser.GameObjects.Text(
 						this.scene,
 						-184,

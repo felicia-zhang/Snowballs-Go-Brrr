@@ -10,8 +10,6 @@ const textStyle = { fontFamily: fontFamily, fontSize: normalFontSize };
 
 const lightRedHex = "#d05c4f";
 
-const closeButtonFill = 0xbadff2;
-
 const lightRed = 0xd05c4f;
 
 const normalRed = 0xb94e46;
@@ -24,9 +22,7 @@ const normalBlue = 0x497282;
 
 const darkBlue = 0x2e5768;
 
-const darkBackgroundColor = 0x16252e;
-
-const lightBackgroundColor = 0x2e5767;
+const darkDarkBlue = 0x16252e;
 
 const clickAnimationDepth = 1;
 
@@ -43,15 +39,13 @@ export {
 	smallFontSize,
 	textStyle,
 	lightRedHex,
-	closeButtonFill,
 	lightRed,
 	normalRed,
 	darkRed,
 	lightBlue,
 	normalBlue,
 	darkBlue,
-	darkBackgroundColor,
-	lightBackgroundColor,
+	darkDarkBlue,
 	clickAnimationDepth,
 	overlayDepth,
 	popupDepth,
