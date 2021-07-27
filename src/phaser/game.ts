@@ -1,22 +1,16 @@
 import { PlayFabClient } from "playfab-sdk";
-import {
-	darkBackgroundColor,
-	fontFamily,
-	smallFontSize,
-	textStyle,
-	lightBackgroundColor,
-	overlayDepth,
-	popupDepth,
-	clickAnimationDepth,
-} from "../utils/constants";
-import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import AScene from "./AScene";
-import { BundleDetail, ItemDetail } from "../utils/types";
+import { textStyle, clickAnimationDepth } from "../utils/constants";
+import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
-import CloseButton from "../utils/closeButton";
-import { numberWithCommas, wrapString, wrapStringLong } from "../utils/stringFormat";
+import { numberWithCommas, wrapString } from "../utils/stringFormat";
+import LeaderboardContainer from "./leaderboardContainer";
+import ResetContainer from "./resetContainer";
+import StoreContainer from "./storeContainer";
+import { showToast } from "./showToast";
+import BundleContainer from "./bundleContainer";
+import MapContainer from "./mapContainer";
 
-class GameScene extends AScene {
+class GameScene extends Phaser.Scene {
 	readonly syncDelay = 60000;
 	resetBonus: number;
 	biomeId: string;
@@ -24,7 +18,6 @@ class GameScene extends AScene {
 	clickMultiplier: number;
 	totalAddedSnowballs: number;
 	syncTimer: Phaser.Time.TimerEvent;
-	storeItems: PlayFabClientModels.StoreItem[];
 	inventoryObjects: Phaser.GameObjects.GameObject[];
 	inventoryTimers: Phaser.Time.TimerEvent[];
 	snowballText: Phaser.GameObjects.Text;
@@ -33,11 +26,21 @@ class GameScene extends AScene {
 	icicleIcon: Phaser.GameObjects.Image;
 	resetBonusText: Phaser.GameObjects.Text;
 	resetBonusIcon: Phaser.GameObjects.Image;
-	storeContainer: Phaser.GameObjects.Container;
-	resetConfirmationContainer: Phaser.GameObjects.Container;
-	leaderboardContainer: Phaser.GameObjects.Container;
+
+	mapContainer: MapContainer;
+	storeContainer: StoreContainer;
+	resetContainer: ResetContainer;
+	bundleContainer: BundleContainer;
+	leaderboardContainer: LeaderboardContainer;
+
 	clickPenguinInstruction: Phaser.GameObjects.Text;
 	clickStoreInstruction: Phaser.GameObjects.Text;
+	biomeItems: { [key: number]: ItemCounter };
+	biomeMap: { [key: number]: BiomeDetail };
+	itemsMap: { [key: string]: ItemDetail };
+	bundlesMap: { [key: number]: BundleDetail };
+	interactiveObjects: Phaser.GameObjects.GameObject[];
+	interactiveMapObjects: Phaser.GameObjects.GameObject[];
 	firstItemPrice: number;
 
 	constructor() {
@@ -53,14 +56,16 @@ class GameScene extends AScene {
 		this.biomeName = biomeName;
 		this.clickMultiplier = 100;
 		this.totalAddedSnowballs = 0;
-		this.storeItems = [];
 		this.inventoryObjects = [];
 		this.inventoryTimers = [];
 		this.firstItemPrice = undefined;
+		this.biomeItems = {};
+		this.biomeMap = {};
+		this.itemsMap = {};
+		this.bundlesMap = {};
+		this.interactiveObjects = [];
+		this.interactiveMapObjects = [];
 		this.makePenguin();
-		this.makeStoreContainer();
-		this.makeResetConfirmationContainer();
-		this.makeLeaderboardContainer();
 
 		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
 			const mittens: PlayFabClientModels.StoreItem = result.data.Store.find(
@@ -69,33 +74,52 @@ class GameScene extends AScene {
 			this.firstItemPrice = mittens.VirtualCurrencyPrices.SB;
 		});
 
-		this.registry
-			.get("CatalogItems")
-			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "biome")
-			.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				if (item.ItemClass === "item") {
-					this.itemsMap[item.ItemId] = {
-						ItemId: item.ItemId,
-						DisplayName: item.DisplayName,
-						Description: item.Description,
-						Instances: {},
-					} as ItemDetail;
-				} else if (item.ItemClass === "bundle") {
-					this.bundlesMap[item.ItemId] = {
-						ItemId: item.ItemId,
-						DisplayName: item.DisplayName,
-						Icicles: item.Bundle.BundledVirtualCurrencies.IC,
-					} as BundleDetail;
+		this.registry.get("CatalogItems").forEach((item: PlayFabClientModels.CatalogItem, i) => {
+			if (item.ItemClass === "biome") {
+				this.biomeMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					FullSnowballPrice: item.VirtualCurrencyPrices.SB,
+					FullIciclePrice: item.VirtualCurrencyPrices.IC,
+					DisplayName: item.DisplayName,
+					Description: item.Description,
+				} as BiomeDetail;
+			} else if (item.ItemClass === "item") {
+				this.itemsMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					DisplayName: item.DisplayName,
+					Description: item.Description,
+					Instances: {},
+				} as ItemDetail;
+			} else if (item.ItemClass === "bundle") {
+				this.bundlesMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					DisplayName: item.DisplayName,
+					Icicles: item.Bundle.BundledVirtualCurrencies.IC,
+				} as BundleDetail;
+			}
+		});
+
+		const inventories: PlayFabClientModels.ItemInstance[] = this.registry.get("Inventories");
+		inventories
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass === "biome")
+			.forEach(
+				biome =>
+					(this.biomeItems[biome.ItemId] = {
+						mittens: 0,
+						bonfire: 0,
+						snowman: 0,
+						igloo: 0,
+						vault: 0,
+					} as ItemCounter)
+			);
+		inventories
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.CustomData !== undefined)
+			.forEach((inventory: PlayFabClientModels.ItemInstance) => {
+				this.biomeItems[inventory.CustomData.BiomeId][inventory.ItemId] += 1;
+				if (inventory.CustomData.BiomeId === this.biomeId) {
+					this.inventoryItemFactory(inventory);
 				}
 			});
-
-		this.registry
-			.get("Inventories")
-			.filter(
-				(inventory: PlayFabClientModels.ItemInstance) =>
-					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeId
-			)
-			.forEach(inventory => this.inventoryItemFactory(inventory));
 
 		PlayFabClient.GetUserData({ Keys: [`${this.biomeId}LastUpdated`] }, (error, result) => {
 			if (result.data.Data[`${this.biomeId}LastUpdated`] !== undefined) {
@@ -115,9 +139,9 @@ class GameScene extends AScene {
 
 				this.registry.values.SB += sb;
 				this.totalAddedSnowballs += sb;
-				this.showToast(`${numberWithCommas(sb / 100)} snowballs added while player was away`, false);
+				showToast(this, `${numberWithCommas(sb / 100)} snowballs added while player was away`, false);
 			} else {
-				this.showToast(`Welcome to ${this.biomeName}`, false);
+				showToast(this, `Welcome to ${this.biomeName}`, false);
 			}
 		});
 
@@ -126,7 +150,7 @@ class GameScene extends AScene {
 		this.syncTimer = this.time.addEvent({
 			delay: this.syncDelay,
 			loop: true,
-			callback: () => this.syncData(() => this.showToast("Saved", false)),
+			callback: () => this.syncData(() => showToast(this, "Saved", false)),
 		});
 
 		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
@@ -148,7 +172,15 @@ class GameScene extends AScene {
 				.addHoverText("Store")
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showStoreContainer();
+					if (this.clickStoreInstruction.alpha === 1) {
+						this.registry.set("hasShownClickStoreInstruction", true);
+						this.add.tween({
+							targets: [this.clickStoreInstruction],
+							duration: 200,
+							alpha: 0,
+						});
+					}
+					this.storeContainer.show();
 				})
 		);
 		this.interactiveObjects.push(storeButton);
@@ -158,12 +190,8 @@ class GameScene extends AScene {
 				.addIcon("map")
 				.addHoverText("Map")
 				.addCallback(() => {
-					this.syncData(() => {
-						this.cameras.main.fadeOut(500, 0, 0, 0);
-						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-							this.scene.start("Map");
-						});
-					});
+					this.interactiveObjects.forEach(object => object.disableInteractive());
+					this.mapContainer.show();
 				})
 		);
 		this.interactiveObjects.push(mapButton);
@@ -174,7 +202,7 @@ class GameScene extends AScene {
 				.addHoverText("Leaderboard")
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showLeaderboardContainer();
+					this.leaderboardContainer.show();
 				})
 		);
 		this.interactiveObjects.push(leaderboardButton);
@@ -185,7 +213,7 @@ class GameScene extends AScene {
 				.addHoverText("Reset")
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showResetConfirmationContainer();
+					this.resetContainer.show();
 				})
 		);
 		this.interactiveObjects.push(resetButton);
@@ -196,7 +224,7 @@ class GameScene extends AScene {
 				.addHoverText("In-app Purchase")
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.showCurrencyContainer();
+					this.bundleContainer.show();
 				})
 		);
 		this.interactiveObjects.push(iapButton);
@@ -227,6 +255,12 @@ class GameScene extends AScene {
 			yoyo: true,
 			repeat: -1,
 		});
+
+		this.mapContainer = this.add.existing(new MapContainer(this, 400, 300));
+		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
+		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
+		this.bundleContainer = this.add.existing(new BundleContainer(this, 400, 300));
+		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
 	}
 
 	updateData(parent, key, data) {
@@ -267,135 +301,126 @@ class GameScene extends AScene {
 		}
 	}
 
-	showResetConfirmationContainer() {
-		const snowballBalance = this.registry.get("SB");
-		const resetBonus = Math.floor(snowballBalance / 1000000);
-
-		const snowballText = this.resetConfirmationContainer.getAt(4) as Phaser.GameObjects.Text;
-		snowballText.setText(`${numberWithCommas(snowballBalance / 100)} x`);
-
-		const snowballIcon = this.resetConfirmationContainer.getAt(5) as Phaser.GameObjects.Image;
-		const snowballX = (snowballText.width + snowballIcon.displayWidth + 6) / 2;
-		snowballText.setX(-snowballX);
-		snowballIcon.setX(snowballX);
-
-		const resetBonusText = this.resetConfirmationContainer.getAt(6) as Phaser.GameObjects.Text;
-		resetBonusText.setText(`${numberWithCommas(resetBonus / 100)} x`);
-
-		const resetBonusIcon = this.resetConfirmationContainer.getAt(7) as Phaser.GameObjects.Image;
-		const resetX = (resetBonusText.width + 36) / 2;
-		resetBonusText.setX(-resetX);
-		resetBonusIcon.setX(resetX + 7.5);
-
-		this.add.tween({
-			targets: [this.resetConfirmationContainer],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 1,
-			callbackScope: this,
+	purchaseBiome(
+		biomeDetail: BiomeDetail,
+		maybeDiscountPrice: number,
+		currencyType: string,
+		button: Button,
+		storeId: string
+	) {
+		button.toggleLoading(true);
+		this.syncData(() => {
+			PlayFabClient.PurchaseItem(
+				{
+					ItemId: biomeDetail.ItemId,
+					Price: maybeDiscountPrice,
+					StoreId: storeId,
+					VirtualCurrency: currencyType,
+				},
+				(e, r) => {
+					if (e !== null) {
+						this.time.addEvent({
+							delay: 400,
+							callback: () => {
+								button.toggleLoading(false);
+								currencyType === "SB"
+									? showToast(this, "Not enough snowballs", true)
+									: showToast(this, "Not enough icicles", true);
+							},
+						});
+					} else {
+						this.time.addEvent({
+							delay: 400,
+							callback: () => {
+								button.toggleLoading(false);
+								currencyType === "SB"
+									? (this.registry.values.SB -= maybeDiscountPrice)
+									: (this.registry.values.IC -= maybeDiscountPrice);
+								this.registry.values.Inventories.push(...r.data.Items);
+								this.cameras.main.fadeOut(500, 0, 0, 0);
+								this.cameras.main.once(
+									Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+									(cam, effect) => {
+										this.scene.start("Game", {
+											biomeId: biomeDetail.ItemId,
+											biomeName: biomeDetail.DisplayName,
+										});
+									}
+								);
+							},
+						});
+					}
+				}
+			);
 		});
 	}
 
-	makeLeaderboardContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 440, 420, 15, darkBackgroundColor));
-		const statList = this.add.container(0, 0, []);
-
-		this.leaderboardContainer = this.add
-			.container(400, 300, [overlay, darkBg, statList])
-			.setDepth(popupDepth)
-			.setAlpha(0);
-
-		const closeButton = this.add.existing(
-			new CloseButton(this, 207.5, -197.5).addCallback(this.leaderboardContainer, () => {
-				const statList = this.leaderboardContainer.getAt(2) as Phaser.GameObjects.Container;
-				statList.removeAll(true);
-			})
-		);
-		this.leaderboardContainer.add(closeButton);
-	}
-
-	showLeaderboardContainer() {
-		const statList = this.leaderboardContainer.getAt(2) as Phaser.GameObjects.Container;
-
-		PlayFabClient.GetLeaderboard(
-			{ StatisticName: "snowballs", StartPosition: 0, MaxResultsCount: 5 },
+	purchaseBundle(bundleDetail: BundleDetail, usd: number, button: Button) {
+		button.toggleLoading(true);
+		PlayFabClient.ExecuteCloudScript(
+			{
+				FunctionName: "grantIcicleBundle",
+				FunctionParameter: { itemId: bundleDetail.ItemId, usd: usd },
+			},
 			(error, result) => {
-				const players = result.data.Leaderboard;
-				players.forEach((player, i) => {
-					const lightBg = this.add.existing(
-						new RoundRectangle(this, 0, i * 80 - 160, 400, 60, 15, lightBackgroundColor)
-					);
-					const rankText = this.add
-						.text(-184, i * 80 - 160, `#${(i + 1).toString()}`, textStyle)
-						.setOrigin(0, 0.5)
-						.setAlign("left");
-					const playerText = this.add
-						.text(0, i * 80 - 160, player.DisplayName, textStyle)
-						.setAlign("Center")
-						.setOrigin(0.5, 0.5);
-					const statText = this.add
-						.text(184, i * 80 - 160, `${numberWithCommas(player.StatValue / 100)}`, textStyle)
-						.setOrigin(1, 0.5)
-						.setAlign("right");
-					statList.add([lightBg, rankText, playerText, statText]);
+				this.time.addEvent({
+					delay: 200,
+					callback: () => {
+						button.toggleLoading(false);
+						this.registry.values.IC += bundleDetail.Icicles;
+						showToast(this, `${bundleDetail.DisplayName} successfully purchased`, false);
+					},
 				});
 			}
 		);
-		this.add.tween({
-			targets: [this.leaderboardContainer],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 1,
-			callbackScope: this,
-		});
 	}
 
-	makeResetConfirmationContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const darkBg = this.add.existing(new RoundRectangle(this, 0, 0, 380, 340, 15, darkBackgroundColor));
-		const lightBg = this.add.existing(new RoundRectangle(this, 0, 45, 340, 210, 15, lightBackgroundColor));
-		const description = this.add
-			.text(
-				0,
-				-150,
-				`Reset game to earn 0.01 reset bonus\nfor every 10,000 snowballs in your balance.\nThe reset bonus will be applied to\nmanual clicks and item effects.\n\nYour current snowball balance is:\n\n\nReset will award you with:`,
-				textStyle
-			)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
-		const snowballText = this.add.text(0, -15, "", textStyle).setAlign("left").setOrigin(0, 0.5);
-		const snowballIcon = this.add.image(0, -15, "snowball").setScale(0.15).setOrigin(1, 0.5);
-		const resetBonusText = this.add.text(0, 45, "", textStyle).setAlign("left").setOrigin(0, 0.5);
-		const resetBonusIcon = this.add.image(0, 45, "star").setScale(0.15).setOrigin(1, 0.5);
-		const footnote = this.add
-			.text(0, 180, "*Reset will NOT affect\nyour in-app purchase history\nor your icicle balance", textStyle)
-			.setAlign("center")
-			.setOrigin(0.5, 0);
-		this.resetConfirmationContainer = this.add
-			.container(400, 300, [
-				overlay,
-				darkBg,
-				lightBg,
-				description,
-				snowballText,
-				snowballIcon,
-				resetBonusText,
-				resetBonusIcon,
-				footnote,
-			])
-			.setDepth(popupDepth)
-			.setAlpha(0);
-
-		const resetButton = this.add.existing(
-			new Button(this, 0, 114).setText("RESET").addCallback(() => this.reset(resetButton))
-		);
-		const closeButton = this.add.existing(
-			new CloseButton(this, 177.5, -157.5).addCallback(this.resetConfirmationContainer, () => {
-				resetButton.resetButton();
-			})
-		);
-		this.resetConfirmationContainer.add([resetButton, closeButton]);
+	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, button: Button) {
+		if (Object.keys(itemDetail.Instances).length === 6) {
+			showToast(this, "Not enough room", true);
+		} else {
+			button.toggleLoading(true);
+			this.syncData(() => {
+				PlayFabClient.PurchaseItem(
+					{
+						ItemId: itemDetail.ItemId,
+						Price: maybeItemDiscountPrice,
+						StoreId: storeId,
+						VirtualCurrency: "SB",
+					},
+					(e, r) => {
+						if (e !== null) {
+							this.time.addEvent({
+								delay: 400,
+								callback: () => {
+									button.toggleLoading(false);
+									showToast(this, "Not enough snowballs", true);
+								},
+							});
+						} else {
+							PlayFabClient.ExecuteCloudScript(
+								{
+									FunctionName: "updateInventoryCustomData",
+									FunctionParameter: {
+										instanceId: r.data.Items[0].ItemInstanceId,
+										biomeId: this.biomeId,
+									},
+								},
+								(error, result) => {
+									button.toggleLoading(false);
+									this.registry.values.SB -= maybeItemDiscountPrice;
+									const inventory: PlayFabClientModels.ItemInstance = result.data.FunctionResult;
+									this.registry.values.Inventories.push(inventory); // mutating array does not invoke `changedata`
+									this.biomeItems[this.biomeId][inventory.ItemId] += 1;
+									this.inventoryItemFactory(inventory);
+									showToast(this, `1 ${itemDetail.DisplayName} successfully purchased`, false);
+								}
+							);
+						}
+					}
+				);
+			});
+		}
 	}
 
 	reset(button: Button) {
@@ -448,13 +473,13 @@ class GameScene extends AScene {
 					console.log("Revoked all snowballs: ", result.subtractSBResult);
 					button.toggleLoading(false);
 					this.add.tween({
-						targets: [this.resetConfirmationContainer],
+						targets: [this.resetContainer],
 						ease: "Sine.easeIn",
 						duration: 300,
 						alpha: 0,
 						onComplete: () => {
 							this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-							this.showToast("Reset Game", false);
+							showToast(this, "Reset Game", false);
 
 							if (this.biomeId !== "icebiome") {
 								this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -470,49 +495,6 @@ class GameScene extends AScene {
 					});
 				}
 			);
-		});
-	}
-
-	makeStoreContainer() {
-		const overlay = this.add.rectangle(0, 0, 800, 600, 0x000000).setDepth(overlayDepth).setAlpha(0.6);
-		const mainBackground = this.add.existing(new RoundRectangle(this, 0, 0, 420, 550, 15, darkBackgroundColor));
-		const itemList = this.add.container(0, 0, []);
-		this.storeContainer = this.add
-			.container(400, 300, [overlay, mainBackground, itemList])
-			.setAlpha(0)
-			.setDepth(popupDepth);
-		const closeButton = this.add.existing(
-			new CloseButton(this, 197.5, -262.5).addCallback(this.storeContainer, () => {
-				const itemList = this.storeContainer.getAt(2) as Phaser.GameObjects.Container;
-				itemList.removeAll(true);
-				this.storeItems = [];
-			})
-		);
-		this.storeContainer.add(closeButton);
-	}
-
-	showStoreContainer() {
-		if (this.clickStoreInstruction.alpha === 1) {
-			this.registry.set("hasShownClickStoreInstruction", true);
-			this.add.tween({
-				targets: [this.clickStoreInstruction],
-				duration: 200,
-				alpha: 0,
-			});
-		}
-
-		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
-			const storeId = result.data.StoreId;
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem, storeId);
-			});
-		});
-		this.add.tween({
-			targets: [this.storeContainer],
-			ease: "Sine.easeIn",
-			duration: 500,
-			alpha: 1,
-			callbackScope: this,
 		});
 	}
 
@@ -561,103 +543,6 @@ class GameScene extends AScene {
 		return sprite;
 	}
 
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, storeId: string) {
-		const itemDetail: ItemDetail = this.itemsMap[storeItem.ItemId];
-		const maybeItemDiscountPrice = storeItem.VirtualCurrencyPrices.SB;
-
-		const index = this.storeItems.length;
-		const y = -210 + index * 105;
-		this.storeItems.push(storeItem);
-		const image = this.add.image(-145, y, storeItem.ItemId).setScale(0.35);
-		const nameText = this.add
-			.text(-100, y - 27, itemDetail.DisplayName.toUpperCase(), textStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		const description = itemDetail.Description.split("\n");
-		const descriptionText = this.add
-			.text(-100, y + 5, wrapStringLong(description[0]), { fontSize: smallFontSize, fontFamily: fontFamily })
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		const effectText = this.add
-			.text(-100, y + 30, description[2], { fontSize: smallFontSize, fontFamily: fontFamily })
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		const background = this.add.existing(new RoundRectangle(this, 0, y, 380, 90, 15, lightBackgroundColor));
-
-		const button = this.add.existing(
-			new Button(this, 170, y)
-				.addIcon("snowball")
-				.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
-				.addCallback(() => this.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button))
-		);
-		button.setX(180 - button.background.width / 2);
-		const itemList = this.storeContainer.getAt(2) as Phaser.GameObjects.Container;
-		itemList.add([background, image, nameText, descriptionText, effectText, button]);
-
-		if (storeId === `${this.biomeId}WithDiscount`) {
-			button.setY(y + 10);
-
-			const fullPriceText = this.add
-				.text(141, y - 25, `${numberWithCommas(storeItem.CustomData.FullPrice / 100)} x`, {
-					fontSize: smallFontSize,
-					fontFamily: fontFamily,
-				})
-				.setAlign("right")
-				.setOrigin(1, 0.5);
-			const oldSnowballIcon = this.add.image(155, y - 25, "snowball").setScale(0.09);
-			const line = this.add
-				.line(0, 0, 170, y - 25, 205 + fullPriceText.width, y - 25, 0xffffff)
-				.setOrigin(1, 0.5);
-			itemList.add([fullPriceText, oldSnowballIcon, line]);
-		}
-	}
-
-	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, button: Button) {
-		if (Object.keys(itemDetail.Instances).length === 6) {
-			this.showToast("Not enough room", true);
-		} else {
-			button.toggleLoading(true);
-			this.syncData(() => {
-				PlayFabClient.PurchaseItem(
-					{
-						ItemId: itemDetail.ItemId,
-						Price: maybeItemDiscountPrice,
-						StoreId: storeId,
-						VirtualCurrency: "SB",
-					},
-					(e, r) => {
-						if (e !== null) {
-							this.time.addEvent({
-								delay: 400,
-								callback: () => {
-									button.toggleLoading(false);
-									this.showToast("Not enough snowballs", true);
-								},
-							});
-						} else {
-							PlayFabClient.ExecuteCloudScript(
-								{
-									FunctionName: "updateInventoryCustomData",
-									FunctionParameter: {
-										instanceId: r.data.Items[0].ItemInstanceId,
-										biomeId: this.biomeId,
-									},
-								},
-								(error, result) => {
-									button.toggleLoading(false);
-									this.registry.values.SB -= maybeItemDiscountPrice;
-									this.registry.values.Inventories.push(result.data.FunctionResult);
-									this.inventoryItemFactory(result.data.FunctionResult);
-									this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
-								}
-							);
-						}
-					}
-				);
-			});
-		}
-	}
-
 	inventoryItemFactory(inventory: PlayFabClientModels.ItemInstance) {
 		const itemDetail: ItemDetail = this.itemsMap[inventory.ItemId];
 		const index = Object.keys(itemDetail.Instances).length;
@@ -679,7 +564,9 @@ class GameScene extends AScene {
 
 	makeMittens(index: number) {
 		this.clickMultiplier += 100;
-		return this.add.sprite(170 + index * 100, 50, "mittens");
+		const sprite = this.add.sprite(170 + index * 100, 50, "mittens");
+		this.inventoryObjects.push(sprite);
+		return sprite;
 	}
 
 	makeItem(index: number, y: number, snowballGeneration: number, delay: number, imageKey: string) {

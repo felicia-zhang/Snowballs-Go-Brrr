@@ -27,10 +27,9 @@ import iap from "../assets/iap.png";
 import store from "../assets/store.png";
 import map from "../assets/map.png";
 import star from "../assets/star.png";
-import AScene from "./AScene";
 import { fontFamily, largeFontSize } from "../utils/constants";
 
-class PreloadScene extends AScene {
+class PreloadScene extends Phaser.Scene {
 	constructor() {
 		super("Preload");
 	}

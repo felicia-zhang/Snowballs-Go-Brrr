@@ -1,7 +1,6 @@
-import AScene from "./AScene";
 import { PlayFabClient } from "playfab-sdk";
 
-class SigninScene extends AScene {
+class SigninScene extends Phaser.Scene {
 	updateCounter: number;
 	mountain3: Phaser.GameObjects.Image;
 	mountain2: Phaser.GameObjects.Image;

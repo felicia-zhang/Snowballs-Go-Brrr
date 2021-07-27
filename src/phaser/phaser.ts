@@ -4,6 +4,7 @@ import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import InputTextPlugin from "phaser3-rex-plugins/plugins/inputtext-plugin.js";
 import SigninScene from "./signin";
+import { showToast } from "./showToast";
 
 const config = {
 	type: Phaser.AUTO,
@@ -79,7 +80,7 @@ export class PhaserGame extends Phaser.Game {
 			if (this.scene.isActive("Signin")) {
 				const scene = this.scene.getScene("Signin") as SigninScene;
 				const errorMessage = error.errorDetails ? Object.values(error.errorDetails)[0] : error.errorMessage;
-				scene.showToast(`${errorMessage}`, true);
+				showToast(scene, `${errorMessage}`, true);
 				const errorFields = error.errorDetails ? Object.keys(error.errorDetails) : ["Password"];
 				toggleSignIn(false, errorFields);
 			}
@@ -99,7 +100,7 @@ export class PhaserGame extends Phaser.Game {
 			if (this.scene.isActive("Signin")) {
 				const scene = this.scene.getScene("Signin") as SigninScene;
 				const errorMessage = error.errorDetails ? Object.values(error.errorDetails)[0] : error.errorMessage;
-				scene.showToast(`${errorMessage}`, true);
+				showToast(scene, `${errorMessage}`, true);
 				const errorFields = error.errorDetails ? Object.keys(error.errorDetails) : ["Password"];
 				toggleSignIn(false, errorFields);
 			}

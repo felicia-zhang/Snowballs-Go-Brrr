@@ -1,7 +1,5 @@
 import GameScene from "./game";
 import SigninScene from "./signin";
-import AScene from "./AScene";
-import MapScene from "./map";
 import sky from "../assets/sky.png";
 import title from "../assets/title.png";
 import light1 from "../assets/light1.png";
@@ -10,7 +8,7 @@ import light3 from "../assets/light3.png";
 import light4 from "../assets/light4.png";
 import PreloadScene from "./preload";
 
-class Controller extends AScene {
+class Controller extends Phaser.Scene {
 	constructor() {
 		super("Controller");
 	}
@@ -28,7 +26,6 @@ class Controller extends AScene {
 		this.game.input.mouse.disableContextMenu();
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Game", GameScene);
-		this.scene.add("Map", MapScene);
 		this.scene.add("Preload", PreloadScene);
 
 		if (this.registry.has("IsSignedIn") && this.registry.get("IsSignedIn")) {
