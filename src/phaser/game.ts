@@ -7,7 +7,7 @@ import LeaderboardContainer from "./leaderboardContainer";
 import ResetContainer from "./resetContainer";
 import StoreContainer from "./storeContainer";
 import { showToast } from "./showToast";
-import CurrencyContainer from "./currencyContainer";
+import BundleContainer from "./bundleContainer";
 import MapContainer from "./mapContainer";
 
 class GameScene extends Phaser.Scene {
@@ -30,7 +30,7 @@ class GameScene extends Phaser.Scene {
 	mapContainer: MapContainer;
 	storeContainer: StoreContainer;
 	resetContainer: ResetContainer;
-	currencyContainer: CurrencyContainer;
+	bundleContainer: BundleContainer;
 	leaderboardContainer: LeaderboardContainer;
 
 	clickPenguinInstruction: Phaser.GameObjects.Text;
@@ -224,7 +224,7 @@ class GameScene extends Phaser.Scene {
 				.addHoverText("In-app Purchase")
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
-					this.currencyContainer.show();
+					this.bundleContainer.show();
 				})
 		);
 		this.interactiveObjects.push(iapButton);
@@ -259,7 +259,7 @@ class GameScene extends Phaser.Scene {
 		this.mapContainer = this.add.existing(new MapContainer(this, 400, 300));
 		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
 		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
-		this.currencyContainer = this.add.existing(new CurrencyContainer(this, 400, 300));
+		this.bundleContainer = this.add.existing(new BundleContainer(this, 400, 300));
 		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
 	}
 
@@ -355,7 +355,7 @@ class GameScene extends Phaser.Scene {
 		});
 	}
 
-	purchaseCurrency(bundleDetail: BundleDetail, usd: number, button: Button) {
+	purchaseBundle(bundleDetail: BundleDetail, usd: number, button: Button) {
 		button.toggleLoading(true);
 		PlayFabClient.ExecuteCloudScript(
 			{

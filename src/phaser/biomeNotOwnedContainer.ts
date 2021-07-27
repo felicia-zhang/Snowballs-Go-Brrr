@@ -1,7 +1,6 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
-import { PlayFabClient } from "playfab-sdk";
 import {
 	darkBackgroundColor,
 	fontFamily,
@@ -14,7 +13,6 @@ import {
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
 import { BiomeDetail } from "../utils/types";
 import GameScene from "./game";
-import { showToast } from "./showToast";
 
 export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;

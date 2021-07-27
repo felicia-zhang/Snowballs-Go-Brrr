@@ -6,25 +6,25 @@ import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, te
 import { BundleDetail } from "../utils/types";
 import GameScene from "./game";
 
-export default class CurrencyContainer extends Phaser.GameObjects.Container {
+export default class BundleContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;
 	background: RoundRectangle;
-	currencyList: Phaser.GameObjects.Container;
+	bundleList: Phaser.GameObjects.Container;
 	footnote: Phaser.GameObjects.Text;
 	closeButton: CloseButton;
 	scene: GameScene;
-	currencyItems: PlayFabClientModels.StoreItem[];
+	bundleItems: PlayFabClientModels.StoreItem[];
 
 	constructor(scene: GameScene, x: number, y: number) {
 		super(scene, x, y, []);
 
 		this.scene = scene;
-		this.currencyItems = [];
+		this.bundleItems = [];
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
 		this.background = new RoundRectangle(scene, 0, 0, 665, 255, 15, darkBackgroundColor);
-		this.currencyList = new Phaser.GameObjects.Container(scene, 0, 0, []);
+		this.bundleList = new Phaser.GameObjects.Container(scene, 0, 0, []);
 		this.footnote = new Phaser.GameObjects.Text(
 			scene,
 			0,
@@ -35,11 +35,11 @@ export default class CurrencyContainer extends Phaser.GameObjects.Container {
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
 		this.closeButton = new CloseButton(scene, 320, -115).addCallback(this, this.scene.interactiveObjects, () => {
-			this.currencyList.removeAll(true);
-			this.currencyItems = [];
+			this.bundleList.removeAll(true);
+			this.bundleItems = [];
 		});
 
-		this.add([this.overlay, this.background, this.currencyList, this.footnote, this.closeButton])
+		this.add([this.overlay, this.background, this.bundleList, this.footnote, this.closeButton])
 			.setDepth(popupDepth)
 			.setAlpha(0);
 	}
@@ -47,7 +47,7 @@ export default class CurrencyContainer extends Phaser.GameObjects.Container {
 	show() {
 		PlayFabClient.GetStoreItems({ StoreId: "CurrenciesWithDiscount" }, (error, result) => {
 			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeCurrency(storeItem);
+				this.makeBundle(storeItem);
 			});
 			if (result.data.StoreId === "CurrenciesWithDiscount") {
 				this.overlay.setY(-25);
@@ -64,7 +64,7 @@ export default class CurrencyContainer extends Phaser.GameObjects.Container {
 				)
 					.setAlign("center")
 					.setOrigin(0.5, 0.5);
-				this.currencyList.add(discountText);
+				this.bundleList.add(discountText);
 			} else {
 				this.overlay.setY(0);
 				this.background.height = 255;
@@ -82,13 +82,13 @@ export default class CurrencyContainer extends Phaser.GameObjects.Container {
 		});
 	}
 
-	makeCurrency(storeItem: PlayFabClientModels.StoreItem) {
+	makeBundle(storeItem: PlayFabClientModels.StoreItem) {
 		const bundleDetail: BundleDetail = this.scene.bundlesMap[storeItem.ItemId];
 		const usd = storeItem.VirtualCurrencyPrices.RM;
 
-		const index = this.currencyItems.length;
+		const index = this.bundleItems.length;
 		const x = 160 * index - 240;
-		this.currencyItems.push(storeItem);
+		this.bundleItems.push(storeItem);
 		const background = new RoundRectangle(this.scene, x, 0, 140, 220, 15, lightBackgroundColor);
 
 		const image = new Phaser.GameObjects.Image(this.scene, x, -10, storeItem.ItemId).setScale(0.7);
@@ -103,7 +103,7 @@ export default class CurrencyContainer extends Phaser.GameObjects.Container {
 			.setOrigin(0.5, 0.5);
 		const button = new Button(this.scene, x, 80)
 			.setText(`$ ${usd}.00`)
-			.addCallback(() => this.scene.purchaseCurrency(bundleDetail, usd, button));
-		this.currencyList.add([background, image, nameText, button]);
+			.addCallback(() => this.scene.purchaseBundle(bundleDetail, usd, button));
+		this.bundleList.add([background, image, nameText, button]);
 	}
 }
