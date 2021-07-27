@@ -434,8 +434,8 @@ class GameScene extends Phaser.Scene {
 		});
 		this.inventoryTimers = [];
 
-		this.syncData(() => {
-			const bonus = Math.floor(this.registry.get("SB") / 1000000);
+		this.syncData(syncedSnowballBalance => {
+			const bonus = Math.floor(syncedSnowballBalance / 1000000);
 			const inventoryGroupsToRevoke: string[][] = [];
 			let i = 0;
 			const inventoryIds: string[] = this.registry
@@ -452,7 +452,7 @@ class GameScene extends Phaser.Scene {
 					FunctionParameter: {
 						inventoryGroupsToRevoke: inventoryGroupsToRevoke,
 						bonus: bonus,
-						snowballsToRevoke: this.registry.get("SB"),
+						snowballsToRevoke: syncedSnowballBalance,
 					},
 				},
 				(e, r) => {
@@ -616,7 +616,7 @@ class GameScene extends Phaser.Scene {
 		});
 	}
 
-	syncData(func: () => any) {
+	syncData(func: (syncedSnowballBalance: number) => any) {
 		PlayFabClient.UpdateUserData(
 			{ Data: { [`${this.biomeId}LastUpdated`]: new Date().valueOf().toString() } },
 			() => {}
@@ -626,7 +626,7 @@ class GameScene extends Phaser.Scene {
 		if (totalAdded === 0) {
 			console.log("No change to snowballs since last sync");
 			if (func !== undefined) {
-				func();
+				func(0);
 			}
 		} else {
 			PlayFabClient.ExecuteCloudScript(
@@ -635,6 +635,7 @@ class GameScene extends Phaser.Scene {
 					FunctionParameter: { amount: totalAdded },
 				},
 				(error, result) => {
+					const syncedSnowballBalance = result.data.FunctionResult;
 					console.log("Amount of snowballs added:", totalAdded);
 					this.totalAddedSnowballs -= totalAdded;
 					PlayFabClient.ExecuteCloudScript(
@@ -646,7 +647,7 @@ class GameScene extends Phaser.Scene {
 						},
 						() => {
 							if (func !== undefined) {
-								func();
+								func(syncedSnowballBalance);
 							}
 						}
 					);

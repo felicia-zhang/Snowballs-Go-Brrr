@@ -4,8 +4,7 @@ handlers.addSnowballs = function (args, context) {
 		VirtualCurrency: "SB",
 		Amount: args.amount,
 	};
-	server.AddUserVirtualCurrency(request);
-	return;
+	return server.AddUserVirtualCurrency(request).Balance;
 };
 
 handlers.grantIcicleBundle = function (args, context) {
