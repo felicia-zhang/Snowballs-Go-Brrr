@@ -1,6 +1,5 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../utils/button";
-import CloseButton from "../utils/closeButton";
 import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../utils/constants";
 import { numberWithCommas } from "../utils/stringFormat";
 import GameScene from "./game";
@@ -10,7 +9,7 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 	background: RoundRectangle;
 	lightBackground: RoundRectangle;
 	description: Phaser.GameObjects.Text;
-	closeButton: CloseButton;
+	closeButton: Button;
 	snowballText: Phaser.GameObjects.Text;
 	snowballIcon: Phaser.GameObjects.Image;
 	resetBonusText: Phaser.GameObjects.Text;
@@ -55,13 +54,11 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 			.setAlign("center")
 			.setOrigin(0.5, 0);
 		this.resetButton = new Button(scene, 0, 114).setText("RESET").addCallback(() => scene.reset(this.resetButton));
-		this.closeButton = new CloseButton(scene, 177.5, -157.5).addCallback(
-			this,
-			this.scene.interactiveObjects,
-			() => {
+		this.closeButton = new Button(scene, 177, -157, false)
+			.addIcon("close")
+			.addCloseCallback(this, this.scene.interactiveObjects, () => {
 				this.resetButton.resetButton();
-			}
-		);
+			});
 
 		this.add([
 			this.overlay,

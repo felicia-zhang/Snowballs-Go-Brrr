@@ -1,6 +1,5 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../utils/button";
-import CloseButton from "../utils/closeButton";
 import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../utils/constants";
 import { wrapString } from "../utils/stringFormat";
 import { BiomeDetail } from "../utils/types";
@@ -15,7 +14,7 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 	description: Phaser.GameObjects.Text;
 	visitButton: Button;
 	biomeDetail: Phaser.GameObjects.Container;
-	closeButton: CloseButton;
+	closeButton: Button;
 	scene: GameScene;
 
 	constructor(scene: GameScene, x: number, y: number) {
@@ -41,16 +40,13 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 			new Phaser.GameObjects.Container(scene, -84, -15, []),
 			this.description,
 		]);
-
-		this.closeButton = new CloseButton(scene, 247.5, -157.5).addCallback(
-			this,
-			this.scene.interactiveMapObjects,
-			() => {
+		this.closeButton = new Button(scene, 247, -157, false)
+			.addIcon("close")
+			.addCloseCallback(this, this.scene.interactiveObjects, () => {
 				this.visitButton.removeListener("pointerup").resetButton();
 				const counterText = this.biomeDetail.getAt(3) as Phaser.GameObjects.Container;
 				counterText.removeAll(true);
-			}
-		);
+			});
 
 		this.add([this.overlay, this.background, this.biomeImage, this.biomeDetail, this.closeButton])
 			.setDepth(popupDepth)

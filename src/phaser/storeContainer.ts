@@ -32,7 +32,7 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 			.setAlpha(0.6);
 		this.background = new RoundRectangle(scene, 0, 0, 420, 550, 15, darkBackgroundColor);
 		this.itemList = new Phaser.GameObjects.Container(scene, 0, 0, []);
-		this.closeButton = new Button(scene, 197, -263, false)
+		this.closeButton = new Button(scene, 197, -262, false)
 			.addIcon("close")
 			.addCloseCallback(this, this.scene.interactiveObjects, () => {
 				this.itemList.removeAll(true);

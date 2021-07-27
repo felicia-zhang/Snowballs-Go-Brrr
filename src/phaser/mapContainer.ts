@@ -1,15 +1,15 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import CloseButton from "../utils/closeButton";
 import { PlayFabClient } from "playfab-sdk";
 import { darkBackgroundColor, overlayDepth, popupDepth } from "../utils/constants";
 import GameScene from "./game";
 import BiomeOwnedContainer from "./biomeOwnedContainer";
 import BiomeNotOwnedContainer from "./biomeNotOwnedContainer";
+import Button from "../utils/button";
 
 export default class MapContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;
 	background: RoundRectangle;
-	closeButton: CloseButton;
+	closeButton: Button;
 	icebiome: Phaser.GameObjects.Container;
 	marinebiome: Phaser.GameObjects.Container;
 	savannabiome: Phaser.GameObjects.Container;
@@ -34,11 +34,9 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		this.savannabiome = this.makeBiomeContainer(200, -100, "savannabiome");
 		this.tropicalbiome = this.makeBiomeContainer(-110, 100, "tropicalbiome");
 		this.magmabiome = this.makeBiomeContainer(110, 100, "magmabiome");
-		this.closeButton = new CloseButton(scene, 307.5, -197.5).addCallback(
-			this,
-			[...this.scene.interactiveObjects, ...this.scene.interactiveMapObjects],
-			() => {}
-		);
+		this.closeButton = new Button(scene, 307, -197, false)
+			.addIcon("close")
+			.addCloseCallback(this, [...this.scene.interactiveObjects, ...this.scene.interactiveMapObjects], () => {});
 
 		this.add([
 			this.overlay,

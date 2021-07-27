@@ -1,6 +1,6 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
-import CloseButton from "../utils/closeButton";
+import Button from "../utils/button";
 import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../utils/constants";
 import { numberWithCommas } from "../utils/stringFormat";
 import GameScene from "./game";
@@ -9,7 +9,7 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;
 	background: RoundRectangle;
 	statList: Phaser.GameObjects.Container;
-	closeButton: CloseButton;
+	closeButton: Button;
 	scene: GameScene;
 
 	constructor(scene: GameScene, x: number, y: number) {
@@ -21,13 +21,11 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 			.setAlpha(0.6);
 		this.background = new RoundRectangle(scene, 0, 0, 440, 420, 15, darkBackgroundColor);
 		this.statList = new Phaser.GameObjects.Container(scene, 0, 0, []);
-		this.closeButton = new CloseButton(scene, 207.5, -197.5).addCallback(
-			this,
-			this.scene.interactiveObjects,
-			() => {
+		this.closeButton = new Button(scene, 207, -197, false)
+			.addIcon("close")
+			.addCloseCallback(this, this.scene.interactiveObjects, () => {
 				this.statList.removeAll(true);
-			}
-		);
+			});
 
 		this.add([this.overlay, this.background, this.statList, this.closeButton]).setDepth(popupDepth).setAlpha(0);
 	}
