@@ -21,9 +21,13 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 			.setAlpha(0.6);
 		this.background = new RoundRectangle(scene, 0, 0, 440, 420, 15, darkBackgroundColor);
 		this.statList = new Phaser.GameObjects.Container(scene, 0, 0, []);
-		this.closeButton = new CloseButton(scene, 207.5, -197.5).addCallback(this, () => {
-			this.statList.removeAll(true);
-		});
+		this.closeButton = new CloseButton(scene, 207.5, -197.5).addCallback(
+			this,
+			this.scene.interactiveObjects,
+			() => {
+				this.statList.removeAll(true);
+			}
+		);
 
 		this.add([this.overlay, this.background, this.statList, this.closeButton]).setDepth(popupDepth).setAlpha(0);
 	}

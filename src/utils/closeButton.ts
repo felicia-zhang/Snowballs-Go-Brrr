@@ -32,7 +32,11 @@ export default class CloseButton extends Phaser.GameObjects.Container {
 		this.add([this.background, this.line1, this.line2]);
 	}
 
-	addCallback(container: Phaser.GameObjects.Container, callback: () => any): this {
+	addCallback(
+		container: Phaser.GameObjects.Container,
+		interactiveObjects: Phaser.GameObjects.GameObject[],
+		callback: () => any
+	): this {
 		this.background.on("pointerup", () => {
 			this.scene.add.tween({
 				targets: [container],
@@ -41,7 +45,7 @@ export default class CloseButton extends Phaser.GameObjects.Container {
 				alpha: 0,
 				onComplete: () => {
 					this.background.setStrokeStyle(6, lightBlue, 1);
-					this.scene.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+					interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
 					callback();
 				},
 			});

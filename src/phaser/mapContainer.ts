@@ -15,7 +15,6 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 	savannabiome: Phaser.GameObjects.Container;
 	tropicalbiome: Phaser.GameObjects.Container;
 	magmabiome: Phaser.GameObjects.Container;
-	interactiveMapObjects: Phaser.GameObjects.GameObject[];
 	biomeOwnedContainer: BiomeOwnedContainer;
 	biomeNotOwnedContainer: BiomeNotOwnedContainer;
 	scene: GameScene;
@@ -24,7 +23,6 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		super(scene, x, y, []);
 
 		this.scene = scene;
-		this.interactiveMapObjects = [];
 		this.biomeOwnedContainer = new BiomeOwnedContainer(scene, 0, 0);
 		this.biomeNotOwnedContainer = new BiomeNotOwnedContainer(scene, 0, 0);
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
@@ -36,7 +34,11 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		this.savannabiome = this.makeBiomeContainer(200, -100, "savannabiome");
 		this.tropicalbiome = this.makeBiomeContainer(-110, 100, "tropicalbiome");
 		this.magmabiome = this.makeBiomeContainer(110, 100, "magmabiome");
-		this.closeButton = new CloseButton(scene, 207.5, -197.5).addCallback(this, () => {});
+		this.closeButton = new CloseButton(scene, 207.5, -197.5).addCallback(
+			this,
+			[...this.scene.interactiveObjects, ...this.scene.interactiveMapObjects],
+			() => {}
+		);
 
 		this.add([
 			this.overlay,
@@ -60,7 +62,7 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", () => {
 				PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
-					this.interactiveMapObjects.forEach(object => object.disableInteractive());
+					this.scene.interactiveMapObjects.forEach(object => object.disableInteractive());
 					const biome = result.data.Store.find(
 						(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === biomeId
 					);
@@ -69,7 +71,7 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 						: this.biomeNotOwnedContainer.show(biome, biomeId, result.data.StoreId);
 				});
 			});
-		this.interactiveMapObjects.push(image);
+		this.scene.interactiveMapObjects.push(image);
 
 		const container = new Phaser.GameObjects.Container(this.scene, x, y, [image]);
 		if (!(biomeId in this.scene.biomeItems)) {

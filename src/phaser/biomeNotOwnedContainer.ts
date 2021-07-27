@@ -55,12 +55,16 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 			this.description,
 		]);
 
-		this.closeButton = new CloseButton(scene, 247.5, -157.5).addCallback(this, () => {
-			this.snowballButton.removeListener("pointerup").resetButton();
-			this.icicleButton.removeListener("pointerup").resetButton();
-			const discounts = this.biomeDetail.getAt(4) as Phaser.GameObjects.Container;
-			discounts.removeAll(true);
-		});
+		this.closeButton = new CloseButton(scene, 247.5, -157.5).addCallback(
+			this,
+			this.scene.interactiveMapObjects,
+			() => {
+				this.snowballButton.removeListener("pointerup").resetButton();
+				this.icicleButton.removeListener("pointerup").resetButton();
+				const discounts = this.biomeDetail.getAt(4) as Phaser.GameObjects.Container;
+				discounts.removeAll(true);
+			}
+		);
 
 		this.add([this.overlay, this.background, this.biomeImage, this.biomeDetail, this.closeButton])
 			.setDepth(popupDepth)

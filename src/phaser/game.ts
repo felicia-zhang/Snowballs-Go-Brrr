@@ -40,6 +40,7 @@ class GameScene extends Phaser.Scene {
 	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
 	interactiveObjects: Phaser.GameObjects.GameObject[];
+	interactiveMapObjects: Phaser.GameObjects.GameObject[];
 	firstItemPrice: number;
 
 	constructor() {
@@ -63,6 +64,7 @@ class GameScene extends Phaser.Scene {
 		this.itemsMap = {};
 		this.bundlesMap = {};
 		this.interactiveObjects = [];
+		this.interactiveMapObjects = [];
 		this.makePenguin();
 
 		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
@@ -164,12 +166,6 @@ class GameScene extends Phaser.Scene {
 
 		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
 
-		this.mapContainer = this.add.existing(new MapContainer(this, 400, 300));
-		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
-		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
-		this.currencyContainer = this.add.existing(new CurrencyContainer(this, 400, 300));
-		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
-
 		const storeButton = this.add.existing(
 			new Button(this, 30, 390)
 				.addIcon("store")
@@ -260,6 +256,12 @@ class GameScene extends Phaser.Scene {
 			yoyo: true,
 			repeat: -1,
 		});
+
+		this.mapContainer = this.add.existing(new MapContainer(this, 400, 300));
+		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
+		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
+		this.currencyContainer = this.add.existing(new CurrencyContainer(this, 400, 300));
+		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
 	}
 
 	updateData(parent, key, data) {

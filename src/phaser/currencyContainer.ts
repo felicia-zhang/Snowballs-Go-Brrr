@@ -34,7 +34,7 @@ export default class CurrencyContainer extends Phaser.GameObjects.Container {
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
-		this.closeButton = new CloseButton(scene, 320, -115).addCallback(this, () => {
+		this.closeButton = new CloseButton(scene, 320, -115).addCallback(this, this.scene.interactiveObjects, () => {
 			this.currencyList.removeAll(true);
 			this.currencyItems = [];
 		});
