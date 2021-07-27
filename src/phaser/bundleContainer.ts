@@ -13,13 +13,11 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 	footnote: Phaser.GameObjects.Text;
 	closeButton: CloseButton;
 	scene: GameScene;
-	bundleItems: PlayFabClientModels.StoreItem[];
 
 	constructor(scene: GameScene, x: number, y: number) {
 		super(scene, x, y, []);
 
 		this.scene = scene;
-		this.bundleItems = [];
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
@@ -36,7 +34,6 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 			.setOrigin(0.5, 0.5);
 		this.closeButton = new CloseButton(scene, 320, -115).addCallback(this, this.scene.interactiveObjects, () => {
 			this.bundleList.removeAll(true);
-			this.bundleItems = [];
 		});
 
 		this.add([this.overlay, this.background, this.bundleList, this.footnote, this.closeButton])
@@ -46,8 +43,8 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 
 	show() {
 		PlayFabClient.GetStoreItems({ StoreId: "CurrenciesWithDiscount" }, (error, result) => {
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeBundle(storeItem);
+			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem, index: number) => {
+				this.makeBundle(storeItem, index);
 			});
 			if (result.data.StoreId === "CurrenciesWithDiscount") {
 				this.overlay.setY(-25);
@@ -82,13 +79,11 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 		});
 	}
 
-	makeBundle(storeItem: PlayFabClientModels.StoreItem) {
+	makeBundle(storeItem: PlayFabClientModels.StoreItem, index: number) {
 		const bundleDetail: BundleDetail = this.scene.bundlesMap[storeItem.ItemId];
 		const usd = storeItem.VirtualCurrencyPrices.RM;
 
-		const index = this.bundleItems.length;
 		const x = 160 * index - 240;
-		this.bundleItems.push(storeItem);
 		const background = new RoundRectangle(this.scene, x, 0, 140, 220, 15, lightBackgroundColor);
 
 		const image = new Phaser.GameObjects.Image(this.scene, x, -10, storeItem.ItemId).setScale(0.7);
