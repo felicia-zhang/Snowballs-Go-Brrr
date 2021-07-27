@@ -8,7 +8,7 @@ import {
 	overlayDepth,
 	popupDepth,
 } from "../utils/constants";
-import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../utils/types";
+import { BiomeDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
@@ -31,7 +31,6 @@ class MapScene extends Phaser.Scene {
 	tropicalbiome: Phaser.GameObjects.Image;
 	magmabiome: Phaser.GameObjects.Image;
 	itemsMap: { [key: string]: ItemDetail };
-	bundlesMap: { [key: number]: BundleDetail };
 	interactiveObjects: Phaser.GameObjects.GameObject[];
 
 	constructor() {
@@ -42,7 +41,6 @@ class MapScene extends Phaser.Scene {
 		this.cameras.main.fadeIn(500, 0, 0, 0);
 		this.add.image(400, 300, "sky");
 		this.itemsMap = {};
-		this.bundlesMap = {};
 		this.interactiveObjects = [];
 		this.biomeMap = {};
 		this.biomeItems = {};
@@ -67,12 +65,6 @@ class MapScene extends Phaser.Scene {
 					Description: item.Description,
 					Instances: {},
 				} as ItemDetail;
-			} else if (item.ItemClass === "bundle") {
-				this.bundlesMap[item.ItemId] = {
-					ItemId: item.ItemId,
-					DisplayName: item.DisplayName,
-					Icicles: item.Bundle.BundledVirtualCurrencies.IC,
-				} as BundleDetail;
 			}
 		});
 

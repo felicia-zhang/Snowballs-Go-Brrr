@@ -1,20 +1,11 @@
 import { PlayFabClient } from "playfab-sdk";
-import {
-	textStyle,
-	clickAnimationDepth,
-	popupDepth,
-	overlayDepth,
-	darkBackgroundColor,
-	lightBackgroundColor,
-} from "../utils/constants";
+import { textStyle, clickAnimationDepth } from "../utils/constants";
 import { BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
-import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import LeaderboardContainer from "./leaderboardContainer";
 import ResetContainer from "./resetContainer";
 import StoreContainer from "./storeContainer";
-import CloseButton from "../utils/closeButton";
 import { showToast } from "./showToast";
 import CurrencyContainer from "./currencyContainer";
 

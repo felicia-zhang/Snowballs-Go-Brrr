@@ -3,7 +3,6 @@ import { PlayFabClient } from "playfab-sdk";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../utils/constants";
-import { numberWithCommas } from "../utils/stringFormat";
 import { BundleDetail } from "../utils/types";
 import GameScene from "./game";
 
