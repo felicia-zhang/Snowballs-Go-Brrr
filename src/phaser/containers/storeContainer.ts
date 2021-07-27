@@ -1,6 +1,6 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
-import Button from "../utils/button";
+import Button from "../../utils/button";
 import {
 	darkBackgroundColor,
 	fontFamily,
@@ -9,10 +9,10 @@ import {
 	popupDepth,
 	smallFontSize,
 	textStyle,
-} from "../utils/constants";
-import { numberWithCommas, wrapStringLong } from "../utils/stringFormat";
-import { ItemDetail } from "../utils/types";
-import GameScene from "./game";
+} from "../../utils/constants";
+import { numberWithCommas, wrapStringLong } from "../../utils/stringFormat";
+import { ItemDetail } from "../../utils/types";
+import GameScene from "../scenes/game";
 
 export default class StoreContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;

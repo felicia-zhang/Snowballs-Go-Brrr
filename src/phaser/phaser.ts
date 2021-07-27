@@ -1,10 +1,10 @@
 import Phaser from "phaser";
-import Controller from "./controller";
+import Controller from "./scenes/controller";
 import * as PlayFab from "playfab-sdk/Scripts/PlayFab/PlayFabClient.js";
 import { PlayFabClient } from "playfab-sdk";
 import InputTextPlugin from "phaser3-rex-plugins/plugins/inputtext-plugin.js";
-import SigninScene from "./signin";
-import { showToast } from "./showToast";
+import SigninScene from "./scenes/signin";
+import { showToast } from "../utils/showToast";
 
 const config = {
 	type: Phaser.AUTO,

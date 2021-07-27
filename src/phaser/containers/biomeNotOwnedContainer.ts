@@ -1,5 +1,5 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import Button from "../utils/button";
+import Button from "../../utils/button";
 import {
 	darkBackgroundColor,
 	fontFamily,
@@ -8,10 +8,10 @@ import {
 	popupDepth,
 	smallFontSize,
 	textStyle,
-} from "../utils/constants";
-import { numberWithCommas, wrapString } from "../utils/stringFormat";
-import { BiomeDetail } from "../utils/types";
-import GameScene from "./game";
+} from "../../utils/constants";
+import { numberWithCommas, wrapString } from "../../utils/stringFormat";
+import { BiomeDetail } from "../../utils/types";
+import GameScene from "../scenes/game";
 
 export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;
@@ -54,7 +54,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 
 		this.closeButton = new Button(scene, 247, -157, false)
 			.addIcon("close")
-			.addCloseCallback(this, this.scene.interactiveObjects, () => {
+			.addCloseCallback(this, this.scene.interactiveMapObjects, () => {
 				this.snowballButton.removeListener("pointerup").resetButton();
 				this.icicleButton.removeListener("pointerup").resetButton();
 				const discounts = this.biomeDetail.getAt(4) as Phaser.GameObjects.Container;

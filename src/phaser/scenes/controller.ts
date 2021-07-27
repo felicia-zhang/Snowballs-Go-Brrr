@@ -1,11 +1,11 @@
 import GameScene from "./game";
 import SigninScene from "./signin";
-import sky from "../assets/sky.png";
-import title from "../assets/title.png";
-import light1 from "../assets/light1.png";
-import light2 from "../assets/light2.png";
-import light3 from "../assets/light3.png";
-import light4 from "../assets/light4.png";
+import sky from "../../assets/sky.png";
+import title from "../../assets/title.png";
+import light1 from "../../assets/light1.png";
+import light2 from "../../assets/light2.png";
+import light3 from "../../assets/light3.png";
+import light4 from "../../assets/light4.png";
 import PreloadScene from "./preload";
 
 class Controller extends Phaser.Scene {

@@ -1,14 +1,14 @@
 import { PlayFabClient } from "playfab-sdk";
-import { textStyle, clickAnimationDepth } from "../utils/constants";
-import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../utils/types";
-import Button from "../utils/button";
-import { numberWithCommas, wrapString } from "../utils/stringFormat";
-import LeaderboardContainer from "./leaderboardContainer";
-import ResetContainer from "./resetContainer";
-import StoreContainer from "./storeContainer";
-import { showToast } from "./showToast";
-import BundleContainer from "./bundleContainer";
-import MapContainer from "./mapContainer";
+import { textStyle, clickAnimationDepth } from "../../utils/constants";
+import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../../utils/types";
+import Button from "../../utils/button";
+import { numberWithCommas, wrapString } from "../../utils/stringFormat";
+import LeaderboardContainer from "../containers/leaderboardContainer";
+import ResetContainer from "../containers/resetContainer";
+import StoreContainer from "../containers/storeContainer";
+import { showToast } from "../../utils/showToast";
+import MapContainer from "../containers/mapContainer";
+import BundleContainer from "../containers/bundleContainer";
 
 class GameScene extends Phaser.Scene {
 	readonly syncDelay = 60000;

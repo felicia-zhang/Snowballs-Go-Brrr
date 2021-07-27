@@ -1,6 +1,6 @@
-import { lightRed, lightBlue, textStyle, toastDepth } from "../utils/constants";
+import { lightRed, lightBlue, textStyle, toastDepth } from "./constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import { wrapStringLong } from "../utils/stringFormat";
+import { wrapStringLong } from "./stringFormat";
 
 export const showToast = (scene: Phaser.Scene, message: string, isError: boolean) => {
 	const toastBackground = scene.add
