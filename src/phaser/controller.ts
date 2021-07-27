@@ -1,6 +1,5 @@
 import GameScene from "./game";
 import SigninScene from "./signin";
-import MapScene from "./map";
 import sky from "../assets/sky.png";
 import title from "../assets/title.png";
 import light1 from "../assets/light1.png";
@@ -27,7 +26,6 @@ class Controller extends Phaser.Scene {
 		this.game.input.mouse.disableContextMenu();
 		this.scene.add("Signin", SigninScene);
 		this.scene.add("Game", GameScene);
-		this.scene.add("Map", MapScene);
 		this.scene.add("Preload", PreloadScene);
 
 		if (this.registry.has("IsSignedIn") && this.registry.get("IsSignedIn")) {

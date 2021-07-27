@@ -8,6 +8,7 @@ import ResetContainer from "./resetContainer";
 import StoreContainer from "./storeContainer";
 import { showToast } from "./showToast";
 import CurrencyContainer from "./currencyContainer";
+import MapContainer from "./mapContainer";
 
 class GameScene extends Phaser.Scene {
 	readonly syncDelay = 60000;
@@ -25,10 +26,13 @@ class GameScene extends Phaser.Scene {
 	icicleIcon: Phaser.GameObjects.Image;
 	resetBonusText: Phaser.GameObjects.Text;
 	resetBonusIcon: Phaser.GameObjects.Image;
+
+	mapContainer: MapContainer;
 	storeContainer: StoreContainer;
 	resetContainer: ResetContainer;
 	currencyContainer: CurrencyContainer;
 	leaderboardContainer: LeaderboardContainer;
+
 	clickPenguinInstruction: Phaser.GameObjects.Text;
 	clickStoreInstruction: Phaser.GameObjects.Text;
 	itemsMap: { [key: string]: ItemDetail };
@@ -56,6 +60,7 @@ class GameScene extends Phaser.Scene {
 		this.bundlesMap = {};
 		this.interactiveObjects = [];
 		this.makePenguin();
+		this.mapContainer = this.add.existing(new MapContainer(this, 400, 300));
 		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
 		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
 		this.currencyContainer = this.add.existing(new CurrencyContainer(this, 400, 300));
@@ -165,12 +170,7 @@ class GameScene extends Phaser.Scene {
 				.addIcon("map")
 				.addHoverText("Map")
 				.addCallback(() => {
-					this.syncData(() => {
-						this.cameras.main.fadeOut(500, 0, 0, 0);
-						this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-							this.scene.start("Map");
-						});
-					});
+					this.syncData(() => {});
 				})
 		);
 		this.interactiveObjects.push(mapButton);
