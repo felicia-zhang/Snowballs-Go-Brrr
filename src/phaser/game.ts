@@ -1,6 +1,6 @@
 import { PlayFabClient } from "playfab-sdk";
 import { textStyle, clickAnimationDepth } from "../utils/constants";
-import { BiomeDetail, BundleDetail, ItemDetail } from "../utils/types";
+import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
 import LeaderboardContainer from "./leaderboardContainer";
@@ -35,6 +35,7 @@ class GameScene extends Phaser.Scene {
 
 	clickPenguinInstruction: Phaser.GameObjects.Text;
 	clickStoreInstruction: Phaser.GameObjects.Text;
+	biomeItems: { [key: number]: ItemCounter };
 	biomeMap: { [key: number]: BiomeDetail };
 	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
@@ -57,16 +58,12 @@ class GameScene extends Phaser.Scene {
 		this.inventoryObjects = [];
 		this.inventoryTimers = [];
 		this.firstItemPrice = undefined;
+		this.biomeItems = {};
 		this.biomeMap = {};
 		this.itemsMap = {};
 		this.bundlesMap = {};
 		this.interactiveObjects = [];
 		this.makePenguin();
-		this.mapContainer = this.add.existing(new MapContainer(this, 400, 300));
-		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
-		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
-		this.currencyContainer = this.add.existing(new CurrencyContainer(this, 400, 300));
-		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
 
 		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {
 			const mittens: PlayFabClientModels.StoreItem = result.data.Store.find(
@@ -75,41 +72,52 @@ class GameScene extends Phaser.Scene {
 			this.firstItemPrice = mittens.VirtualCurrencyPrices.SB;
 		});
 
-		this.registry
-			.get("CatalogItems")
-			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "biome")
-			.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				if (item.ItemClass === "biome") {
-					this.biomeMap[item.ItemId] = {
-						ItemId: item.ItemId,
-						FullSnowballPrice: item.VirtualCurrencyPrices.SB,
-						FullIciclePrice: item.VirtualCurrencyPrices.IC,
-						DisplayName: item.DisplayName,
-						Description: item.Description,
-					} as BiomeDetail;
-				} else if (item.ItemClass === "item") {
-					this.itemsMap[item.ItemId] = {
-						ItemId: item.ItemId,
-						DisplayName: item.DisplayName,
-						Description: item.Description,
-						Instances: {},
-					} as ItemDetail;
-				} else if (item.ItemClass === "bundle") {
-					this.bundlesMap[item.ItemId] = {
-						ItemId: item.ItemId,
-						DisplayName: item.DisplayName,
-						Icicles: item.Bundle.BundledVirtualCurrencies.IC,
-					} as BundleDetail;
+		this.registry.get("CatalogItems").forEach((item: PlayFabClientModels.CatalogItem, i) => {
+			if (item.ItemClass === "biome") {
+				this.biomeMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					FullSnowballPrice: item.VirtualCurrencyPrices.SB,
+					FullIciclePrice: item.VirtualCurrencyPrices.IC,
+					DisplayName: item.DisplayName,
+					Description: item.Description,
+				} as BiomeDetail;
+			} else if (item.ItemClass === "item") {
+				this.itemsMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					DisplayName: item.DisplayName,
+					Description: item.Description,
+					Instances: {},
+				} as ItemDetail;
+			} else if (item.ItemClass === "bundle") {
+				this.bundlesMap[item.ItemId] = {
+					ItemId: item.ItemId,
+					DisplayName: item.DisplayName,
+					Icicles: item.Bundle.BundledVirtualCurrencies.IC,
+				} as BundleDetail;
+			}
+		});
+
+		const inventories: PlayFabClientModels.ItemInstance[] = this.registry.get("Inventories");
+		inventories
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass === "biome")
+			.forEach(
+				biome =>
+					(this.biomeItems[biome.ItemId] = {
+						mittens: 0,
+						bonfire: 0,
+						snowman: 0,
+						igloo: 0,
+						vault: 0,
+					} as ItemCounter)
+			);
+		inventories
+			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.CustomData !== undefined)
+			.forEach((inventory: PlayFabClientModels.ItemInstance) => {
+				this.biomeItems[inventory.CustomData.BiomeId][inventory.ItemId] += 1;
+				if (inventory.CustomData.BiomeId === this.biomeId) {
+					this.inventoryItemFactory(inventory);
 				}
 			});
-
-		this.registry
-			.get("Inventories")
-			.filter(
-				(inventory: PlayFabClientModels.ItemInstance) =>
-					inventory.CustomData !== undefined && inventory.CustomData.BiomeId === this.biomeId
-			)
-			.forEach(inventory => this.inventoryItemFactory(inventory));
 
 		PlayFabClient.GetUserData({ Keys: [`${this.biomeId}LastUpdated`] }, (error, result) => {
 			if (result.data.Data[`${this.biomeId}LastUpdated`] !== undefined) {
@@ -156,6 +164,12 @@ class GameScene extends Phaser.Scene {
 
 		this.add.text(400, 16, this.biomeName.toUpperCase(), textStyle).setAlign("center").setOrigin(0.5, 0);
 
+		this.mapContainer = this.add.existing(new MapContainer(this, 400, 300));
+		this.storeContainer = this.add.existing(new StoreContainer(this, 400, 300));
+		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
+		this.currencyContainer = this.add.existing(new CurrencyContainer(this, 400, 300));
+		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
+
 		const storeButton = this.add.existing(
 			new Button(this, 30, 390)
 				.addIcon("store")
@@ -180,7 +194,9 @@ class GameScene extends Phaser.Scene {
 				.addIcon("map")
 				.addHoverText("Map")
 				.addCallback(() => {
-					this.syncData(() => {});
+					// this.syncData(() => {});
+					this.interactiveObjects.forEach(object => object.disableInteractive());
+					this.mapContainer.show();
 				})
 		);
 		this.interactiveObjects.push(mapButton);
