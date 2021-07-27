@@ -1,5 +1,4 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import AScene from "../phaser/AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../utils/constants";
@@ -18,7 +17,7 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 	resetBonusIcon: Phaser.GameObjects.Image;
 	footnote: Phaser.GameObjects.Text;
 	resetButton: Button;
-	scene: AScene;
+	scene: GameScene;
 
 	constructor(scene: GameScene, x: number, y: number) {
 		super(scene, x, y, []);

@@ -10,12 +10,12 @@ import {
 } from "../utils/constants";
 import { BiomeDetail, BundleDetail, ItemCounter, ItemDetail } from "../utils/types";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import AScene from "./AScene";
 import Button from "../utils/button";
 import CloseButton from "../utils/closeButton";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
+import { showToast } from "./showToast";
 
-class MapScene extends AScene {
+class MapScene extends Phaser.Scene {
 	biomeMap: { [key: number]: BiomeDetail };
 	biomeItems: { [key: number]: ItemCounter };
 	snowballText: Phaser.GameObjects.Text;
@@ -327,8 +327,8 @@ class MapScene extends AScene {
 						callback: () => {
 							button.toggleLoading(false);
 							currencyType === "SB"
-								? this.showToast("Not enough snowballs", true)
-								: this.showToast("Not enough icicles", true);
+								? showToast(this, "Not enough snowballs", true)
+								: showToast(this, "Not enough icicles", true);
 						},
 					});
 				} else {

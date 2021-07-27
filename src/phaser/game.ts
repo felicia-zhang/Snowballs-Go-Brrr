@@ -7,7 +7,6 @@ import {
 	darkBackgroundColor,
 	lightBackgroundColor,
 } from "../utils/constants";
-import AScene from "./AScene";
 import { BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
@@ -16,8 +15,9 @@ import LeaderboardContainer from "./leaderboardContainer";
 import ResetContainer from "./resetContainer";
 import StoreContainer from "./storeContainer";
 import CloseButton from "../utils/closeButton";
+import { showToast } from "./showToast";
 
-class GameScene extends AScene {
+class GameScene extends Phaser.Scene {
 	readonly syncDelay = 60000;
 	resetBonus: number;
 	biomeId: string;
@@ -124,9 +124,9 @@ class GameScene extends AScene {
 
 				this.registry.values.SB += sb;
 				this.totalAddedSnowballs += sb;
-				this.showToast(`${numberWithCommas(sb / 100)} snowballs added while player was away`, false);
+				showToast(this, `${numberWithCommas(sb / 100)} snowballs added while player was away`, false);
 			} else {
-				this.showToast(`Welcome to ${this.biomeName}`, false);
+				showToast(this, `Welcome to ${this.biomeName}`, false);
 			}
 		});
 
@@ -135,7 +135,7 @@ class GameScene extends AScene {
 		this.syncTimer = this.time.addEvent({
 			delay: this.syncDelay,
 			loop: true,
-			callback: () => this.syncData(() => this.showToast("Saved", false)),
+			callback: () => this.syncData(() => showToast(this, "Saved", false)),
 		});
 
 		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
@@ -389,7 +389,7 @@ class GameScene extends AScene {
 					callback: () => {
 						button.toggleLoading(false);
 						this.registry.values.IC += bundleDetail.Icicles;
-						this.showToast(`${bundleDetail.DisplayName} successfully purchased`, false);
+						showToast(this, `${bundleDetail.DisplayName} successfully purchased`, false);
 					},
 				});
 			}
@@ -452,7 +452,7 @@ class GameScene extends AScene {
 						alpha: 0,
 						onComplete: () => {
 							this.interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-							this.showToast("Reset Game", false);
+							showToast(this, "Reset Game", false);
 
 							if (this.biomeId !== "icebiome") {
 								this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -518,7 +518,7 @@ class GameScene extends AScene {
 
 	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, button: Button) {
 		if (Object.keys(itemDetail.Instances).length === 6) {
-			this.showToast("Not enough room", true);
+			showToast(this, "Not enough room", true);
 		} else {
 			button.toggleLoading(true);
 			this.syncData(() => {
@@ -535,7 +535,7 @@ class GameScene extends AScene {
 								delay: 400,
 								callback: () => {
 									button.toggleLoading(false);
-									this.showToast("Not enough snowballs", true);
+									showToast(this, "Not enough snowballs", true);
 								},
 							});
 						} else {
@@ -552,7 +552,7 @@ class GameScene extends AScene {
 									this.registry.values.SB -= maybeItemDiscountPrice;
 									this.registry.values.Inventories.push(result.data.FunctionResult);
 									this.inventoryItemFactory(result.data.FunctionResult);
-									this.showToast(`1 ${itemDetail.DisplayName} successfully purchased`, false);
+									showToast(this, `1 ${itemDetail.DisplayName} successfully purchased`, false);
 								}
 							);
 						}
