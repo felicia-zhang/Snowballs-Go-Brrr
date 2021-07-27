@@ -409,8 +409,10 @@ class GameScene extends Phaser.Scene {
 								(error, result) => {
 									button.toggleLoading(false);
 									this.registry.values.SB -= maybeItemDiscountPrice;
-									this.registry.values.Inventories.push(result.data.FunctionResult);
-									this.inventoryItemFactory(result.data.FunctionResult);
+									const inventory: PlayFabClientModels.ItemInstance = result.data.FunctionResult;
+									this.registry.values.Inventories.push(inventory); // mutating array does not invoke `changedata`
+									this.biomeItems[this.biomeId][inventory.ItemId] += 1;
+									this.inventoryItemFactory(inventory);
 									showToast(this, `1 ${itemDetail.DisplayName} successfully purchased`, false);
 								}
 							);

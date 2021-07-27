@@ -62,9 +62,11 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 
 		this.title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		this.visitButton.addCallback(() => {
-			this.scene.cameras.main.fadeOut(500, 0, 0, 0);
-			this.scene.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-				this.scene.scene.start("Game", { biomeId: biomeDetail.ItemId, biomeName: biomeDetail.DisplayName });
+			this.scene.syncData(() => {
+				this.scene.cameras.main.fadeOut(500, 0, 0, 0);
+				this.scene.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+					this.scene.scene.start("Game", { biomeId: biomeDetail.ItemId, biomeName: biomeDetail.DisplayName });
+				});
 			});
 		});
 		this.biomeImage.setTexture(imageKey);
