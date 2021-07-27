@@ -1,14 +1,15 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import AScene from "../phaser/AScene";
+import GameScene from "../phaser/game";
+import MapScene from "../phaser/map";
 import { closeButtonFill, darkBlue, lightBlue, normalBlue } from "./constants";
 
 export default class CloseButton extends Phaser.GameObjects.Container {
 	background: RoundRectangle;
 	line1: Phaser.GameObjects.Line;
 	line2: Phaser.GameObjects.Line;
-	scene: AScene;
+	scene: GameScene | MapScene;
 
-	constructor(scene: AScene, x: number, y: number) {
+	constructor(scene: GameScene | MapScene, x: number, y: number) {
 		super(scene, x, y, []);
 
 		this.scene = scene;

@@ -30,6 +30,9 @@ class MapScene extends AScene {
 	savannabiome: Phaser.GameObjects.Image;
 	tropicalbiome: Phaser.GameObjects.Image;
 	magmabiome: Phaser.GameObjects.Image;
+	itemsMap: { [key: string]: ItemDetail };
+	bundlesMap: { [key: number]: BundleDetail };
+	interactiveObjects: Phaser.GameObjects.GameObject[];
 
 	constructor() {
 		super("Map");
@@ -38,6 +41,9 @@ class MapScene extends AScene {
 	create() {
 		this.cameras.main.fadeIn(500, 0, 0, 0);
 		this.add.image(400, 300, "sky");
+		this.itemsMap = {};
+		this.bundlesMap = {};
+		this.interactiveObjects = [];
 		this.biomeMap = {};
 		this.biomeItems = {};
 		this.add.text(400, 16, "MAP", textStyle).setAlign("center").setOrigin(0.5, 0);

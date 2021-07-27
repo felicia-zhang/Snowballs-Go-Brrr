@@ -1,18 +1,18 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
-import AScene from "../phaser/AScene";
 import CloseButton from "../utils/closeButton";
 import { darkBackgroundColor, lightBackgroundColor, overlayDepth, popupDepth, textStyle } from "../utils/constants";
 import { numberWithCommas } from "../utils/stringFormat";
+import GameScene from "./game";
 
 export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;
 	background: RoundRectangle;
 	statList: Phaser.GameObjects.Container;
 	closeButton: CloseButton;
-	scene: AScene;
+	scene: GameScene;
 
-	constructor(scene: AScene, x: number, y: number) {
+	constructor(scene: GameScene, x: number, y: number) {
 		super(scene, x, y, []);
 
 		this.scene = scene;
