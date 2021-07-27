@@ -81,7 +81,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 		});
 
 		this.biomeImage.setTexture(imageKey);
-		this.description.setText(wrapString(biomeDetail.Description));
+		this.description.setText(wrapString(biomeDetail.Description, 21));
 		this.scene.add.tween({
 			targets: [this],
 			ease: "Sine.easeIn",

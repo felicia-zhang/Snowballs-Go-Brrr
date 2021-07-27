@@ -9,7 +9,7 @@ import {
 	normalTextStyle,
 	smallTextStyle,
 } from "../../utils/constants";
-import { numberWithCommas, wrapStringLong } from "../../utils/stringFormat";
+import { numberWithCommas, wrapString } from "../../utils/stringFormat";
 import { ItemDetail } from "../../utils/types";
 import GameScene from "../scenes/game";
 
@@ -79,7 +79,7 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 			this.scene,
 			-100,
 			y + 5,
-			wrapStringLong(description[0]),
+			wrapString(description[0], 28),
 			smallTextStyle
 		)
 			.setAlign("left")

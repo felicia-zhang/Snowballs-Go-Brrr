@@ -68,7 +68,7 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 			});
 		});
 		this.biomeImage.setTexture(imageKey);
-		this.description.setText(wrapString(biomeDetail.Description));
+		this.description.setText(wrapString(biomeDetail.Description, 21));
 		const counterText = this.biomeDetail.getAt(3) as Phaser.GameObjects.Container;
 		Object.keys(this.scene.biomeItems[biome.ItemId]).forEach((itemId: string, i: number) => {
 			const text = new Phaser.GameObjects.Text(
