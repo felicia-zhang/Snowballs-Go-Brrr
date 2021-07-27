@@ -1,7 +1,7 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
-import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
+import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, normalTextStyle } from "../../utils/constants";
 import { BundleDetail } from "../../utils/types";
 import GameScene from "../scenes/game";
 
@@ -27,7 +27,7 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 			0,
 			160,
 			"*This is a mock of the payment process. \nNo real transaction will take place in the PlayFab backend.",
-			textStyle
+			normalTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
@@ -58,7 +58,7 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 					0,
 					-145,
 					"ONE TIME OFFER!!\nReceive 10% off ALL in-game items after your first icicle purchase!",
-					textStyle
+					normalTextStyle
 				)
 					.setAlign("center")
 					.setOrigin(0.5, 0.5);
@@ -93,7 +93,7 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 			x,
 			-90,
 			bundleDetail.DisplayName.toUpperCase(),
-			textStyle
+			normalTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);

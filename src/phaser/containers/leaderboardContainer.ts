@@ -1,7 +1,7 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
-import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, textStyle } from "../../utils/constants";
+import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, normalTextStyle } from "../../utils/constants";
 import { numberWithCommas } from "../../utils/stringFormat";
 import GameScene from "../scenes/game";
 
@@ -42,7 +42,7 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 						-184,
 						i * 80 - 160,
 						`#${(i + 1).toString()}`,
-						textStyle
+						normalTextStyle
 					)
 						.setOrigin(0, 0.5)
 						.setAlign("left");
@@ -51,7 +51,7 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 						0,
 						i * 80 - 160,
 						player.DisplayName,
-						textStyle
+						normalTextStyle
 					)
 						.setAlign("Center")
 						.setOrigin(0.5, 0.5);
@@ -60,7 +60,7 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 						184,
 						i * 80 - 160,
 						`${numberWithCommas(player.StatValue / 100)}`,
-						textStyle
+						normalTextStyle
 					)
 						.setOrigin(1, 0.5)
 						.setAlign("right");

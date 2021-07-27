@@ -6,4 +6,4 @@ const numberWithCommas = (num: number) => stringWithCommas(num.toString());
 
 const stringWithCommas = (s: string) => s.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-export { wrapString, wrapStringLong, numberWithCommas, stringWithCommas };
+export { wrapString, wrapStringLong, numberWithCommas };

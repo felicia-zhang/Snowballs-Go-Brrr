@@ -6,7 +6,9 @@ const normalFontSize = "18px";
 
 const smallFontSize = "14px";
 
-const textStyle = { fontFamily: fontFamily, fontSize: normalFontSize };
+const normalTextStyle = { fontFamily: fontFamily, fontSize: normalFontSize };
+
+const smallTextStyle = { fontFamily: fontFamily, fontSize: smallFontSize };
 
 const lightRedHex = "#d05c4f";
 
@@ -36,8 +38,8 @@ export {
 	fontFamily,
 	largeFontSize,
 	normalFontSize,
-	smallFontSize,
-	textStyle,
+	normalTextStyle,
+	smallTextStyle,
 	lightRedHex,
 	lightRed,
 	normalRed,

@@ -7,9 +7,9 @@ import {
 	lightRed,
 	normalBlue,
 	normalRed,
-	smallFontSize,
-	textStyle,
+	normalTextStyle,
 	toastDepth,
+	smallTextStyle,
 } from "./constants";
 
 export default class Button extends Phaser.GameObjects.Container {
@@ -27,7 +27,7 @@ export default class Button extends Phaser.GameObjects.Container {
 
 		this.text = "";
 		this.isBlue = isBlue;
-		this.textObject = new Phaser.GameObjects.Text(this.scene, 0, 0, "", textStyle)
+		this.textObject = new Phaser.GameObjects.Text(this.scene, 0, 0, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 
@@ -35,10 +35,7 @@ export default class Button extends Phaser.GameObjects.Container {
 		this.hoverBackground = new RoundRectangle(scene, 0, 0, 0, 0, 5, isBlue ? darkBlue : darkRed)
 			.setAlpha(0)
 			.setDepth(toastDepth);
-		this.hoverText = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {
-			fontFamily: fontFamily,
-			fontSize: smallFontSize,
-		})
+		this.hoverText = new Phaser.GameObjects.Text(this.scene, 0, 0, "", smallTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5)
 			.setAlpha(0)
@@ -209,7 +206,7 @@ export default class Button extends Phaser.GameObjects.Container {
 			this.textObject
 				.setText(this.text)
 				.setOrigin(0, 0.5)
-				.setStyle({ ...textStyle, strokeThickness: 0 });
+				.setStyle({ ...normalTextStyle, strokeThickness: 0 });
 			if (this.icon !== undefined) {
 				const textX = (this.textObject.width + 36) / 2;
 				this.textObject.setX(-textX);
