@@ -1,7 +1,14 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
-import { darkDarkBlue, darkBlue, overlayDepth, popupDepth, normalTextStyle } from "../../utils/constants";
+import {
+	darkDarkBlue,
+	darkBlue,
+	overlayDepth,
+	popupDepth,
+	normalTextStyle,
+	smallTextStyle,
+} from "../../utils/constants";
 import { BundleDetail } from "../../utils/types";
 import GameScene from "../scenes/game";
 
@@ -20,18 +27,18 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 665, 255, 15, darkDarkBlue);
+		this.background = new RoundRectangle(scene, 0, 0, 665, 270, 15, darkDarkBlue);
 		this.bundleList = new Phaser.GameObjects.Container(scene, 0, 0, []);
 		this.footnote = new Phaser.GameObjects.Text(
 			scene,
 			0,
-			160,
-			"*This is a mock of the payment process. \nNo real transaction will take place in the PlayFab backend.",
-			normalTextStyle
+			125,
+			"*This is a mock of the payment process. No real transaction will take place in the PlayFab backend.",
+			smallTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
-		this.closeButton = new Button(scene, 319.5, -114.5, false)
+		this.closeButton = new Button(scene, 319.5, -122, false)
 			.addIcon("close")
 			.addCloseCallback(this, this.scene.interactiveObjects, () => {
 				this.bundleList.removeAll(true);
@@ -48,15 +55,14 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 				this.makeBundle(storeItem, index);
 			});
 			if (result.data.StoreId === "CurrenciesWithDiscount") {
-				this.overlay.setY(-25);
-				this.background.height = 305;
-				this.background.y = -25;
-				this.closeButton.setY(-165);
-				this.setY(325);
+				this.background.height = 320;
+				this.bundleList.setY(15);
+				this.footnote.setY(140);
+				this.closeButton.setY(-147);
 				const discountText = new Phaser.GameObjects.Text(
 					this.scene,
 					0,
-					-145,
+					-140,
 					"ONE TIME OFFER!!\nReceive 10% off ALL in-game items after your first icicle purchase!",
 					normalTextStyle
 				)
@@ -64,11 +70,10 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 					.setOrigin(0.5, 0.5);
 				this.bundleList.add(discountText);
 			} else {
-				this.overlay.setY(0);
-				this.background.height = 255;
-				this.background.y = 0;
-				this.closeButton.setY(-115);
-				this.setY(300);
+				this.background.height = 270;
+				this.bundleList.setY(-5);
+				this.footnote.setY(120);
+				this.closeButton.setY(-122);
 			}
 		});
 		this.scene.add.tween({
