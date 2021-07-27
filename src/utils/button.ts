@@ -1,5 +1,16 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
-import { darkBlue, fontFamily, lightBlue, normalBlue, smallFontSize, textStyle, toastDepth } from "./constants";
+import {
+	darkBlue,
+	darkRed,
+	fontFamily,
+	lightBlue,
+	lightRed,
+	normalBlue,
+	normalRed,
+	smallFontSize,
+	textStyle,
+	toastDepth,
+} from "./constants";
 
 export default class Button extends Phaser.GameObjects.Container {
 	highlight: RoundRectangle;
@@ -9,17 +20,21 @@ export default class Button extends Phaser.GameObjects.Container {
 	textObject: Phaser.GameObjects.Text;
 	text: string;
 	icon?: Phaser.GameObjects.Image;
+	isBlue: boolean;
 
-	constructor(scene: Phaser.Scene, x: number, y: number) {
+	constructor(scene: Phaser.Scene, x: number, y: number, isBlue: boolean = true) {
 		super(scene, x, y, []);
 
 		this.text = "";
+		this.isBlue = isBlue;
 		this.textObject = new Phaser.GameObjects.Text(this.scene, 0, 0, "", textStyle)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
 
 		this.highlight = new RoundRectangle(scene, 0, 0, 0, 0, 10, 0xffffff).setAlpha(0);
-		this.hoverBackground = new RoundRectangle(scene, 0, 0, 0, 0, 5, darkBlue).setAlpha(0).setDepth(toastDepth);
+		this.hoverBackground = new RoundRectangle(scene, 0, 0, 0, 0, 5, isBlue ? darkBlue : darkRed)
+			.setAlpha(0)
+			.setDepth(toastDepth);
 		this.hoverText = new Phaser.GameObjects.Text(this.scene, 0, 0, "", {
 			fontFamily: fontFamily,
 			fontSize: smallFontSize,
@@ -28,12 +43,12 @@ export default class Button extends Phaser.GameObjects.Container {
 			.setOrigin(0, 0.5)
 			.setAlpha(0)
 			.setDepth(toastDepth);
-		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, lightBlue)
+		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, isBlue ? lightBlue : lightRed)
 			.setInteractive({ useHandCursor: true })
-			.on("pointerover", () => this.background.setFillStyle(normalBlue, 1))
+			.on("pointerover", () => this.background.setFillStyle(isBlue ? normalBlue : normalRed, 1))
 			.on("pointerout", () => this.resetButton())
 			.on("pointerdown", () => {
-				this.background.setFillStyle(darkBlue, 1);
+				this.background.setFillStyle(isBlue ? darkBlue : darkRed, 1);
 				scene.add.tween({
 					targets: [this.highlight],
 					ease: "Sine.easeIn",
@@ -61,7 +76,7 @@ export default class Button extends Phaser.GameObjects.Container {
 	}
 
 	resetButton(): this {
-		this.background.setFillStyle(lightBlue, 1);
+		this.background.setFillStyle(this.isBlue ? lightBlue : lightRed, 1);
 		this.highlight.setAlpha(0);
 		this.highlight.width = this.background.width;
 		this.highlight.height = this.background.height;
@@ -120,6 +135,28 @@ export default class Button extends Phaser.GameObjects.Container {
 		return this;
 	}
 
+	addCloseCallback(
+		container: Phaser.GameObjects.Container,
+		interactiveObjects: Phaser.GameObjects.GameObject[],
+		callback: () => any
+	): this {
+		this.background.on("pointerup", () => {
+			this.scene.add.tween({
+				targets: [container],
+				ease: "Sine.easeIn",
+				duration: 300,
+				alpha: 0,
+				onComplete: () => {
+					interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+					this.resetButton();
+					callback();
+				},
+			});
+		});
+
+		return this;
+	}
+
 	addHoverText(text: string): this {
 		this.hoverText.setText(text).setX(30);
 		this.hoverBackground.setSize(this.hoverText.width + 8, this.hoverText.height + 8);
@@ -162,7 +199,7 @@ export default class Button extends Phaser.GameObjects.Container {
 			const textX = this.textObject.width / 2;
 			this.textObject.setX(-textX);
 
-			this.background.setFillStyle(darkBlue, 1);
+			this.background.setFillStyle(this.isBlue ? darkBlue : darkRed, 1);
 			this.background.disableInteractive().removeListener("pointerout");
 
 			if (this.icon !== undefined) {
@@ -182,7 +219,7 @@ export default class Button extends Phaser.GameObjects.Container {
 				this.textObject.setX(-textX);
 			}
 
-			this.background.setFillStyle(lightBlue, 1);
+			this.background.setFillStyle(this.isBlue ? lightBlue : lightRed, 1);
 			this.background.setInteractive({ useHandCursor: true }).on("pointerout", () => this.resetButton());
 
 			this.scene.add.tween({

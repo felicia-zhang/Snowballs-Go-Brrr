@@ -1,4 +1,4 @@
-import { error, lightBlue, textStyle, toastDepth } from "../utils/constants";
+import { lightRed, lightBlue, textStyle, toastDepth } from "../utils/constants";
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { wrapStringLong } from "../utils/stringFormat";
 
@@ -16,7 +16,7 @@ export const showToast = (scene: Phaser.Scene, message: string, isError: boolean
 	toastBackground.setSize(toastText.width + 20, toastText.height + 20);
 	toastBackground.y = (toastText.height + 40) / 2;
 	if (isError) {
-		toastBackground.setFillStyle(error);
+		toastBackground.setFillStyle(lightRed);
 	} else {
 		toastBackground.setFillStyle(lightBlue);
 	}

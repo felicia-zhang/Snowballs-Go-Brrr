@@ -26,6 +26,7 @@ import reset from "../assets/reset.png";
 import iap from "../assets/iap.png";
 import store from "../assets/store.png";
 import map from "../assets/map.png";
+import close from "../assets/close.png";
 import star from "../assets/star.png";
 import { fontFamily, largeFontSize } from "../utils/constants";
 
@@ -96,6 +97,7 @@ class PreloadScene extends Phaser.Scene {
 		this.load.image("iap", iap);
 		this.load.image("store", store);
 		this.load.image("map", map);
+		this.load.image("close", close);
 		this.load.image("star", star);
 	}
 
