@@ -25,8 +25,8 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 
 		this.scene = scene;
 		this.interactiveMapObjects = [];
-		this.biomeOwnedContainer = new BiomeOwnedContainer(scene, 400, 300);
-		this.biomeNotOwnedContainer = new BiomeNotOwnedContainer(scene, 400, 300);
+		this.biomeOwnedContainer = new BiomeOwnedContainer(scene, 0, 0);
+		this.biomeNotOwnedContainer = new BiomeNotOwnedContainer(scene, 0, 0);
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
