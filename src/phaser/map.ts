@@ -16,57 +16,12 @@ import { numberWithCommas, wrapString } from "../utils/stringFormat";
 import { showToast } from "./showToast";
 
 class MapScene extends Phaser.Scene {
-	biomeMap: { [key: number]: BiomeDetail };
-	biomeItems: { [key: number]: ItemCounter };
-	snowballText: Phaser.GameObjects.Text;
-	snowballIcon: Phaser.GameObjects.Image;
-	icicleText: Phaser.GameObjects.Text;
-	icicleIcon: Phaser.GameObjects.Image;
 	biomeOwnedContainer: Phaser.GameObjects.Container;
 	biomeNotOwnedContainer: Phaser.GameObjects.Container;
-	storeId: string;
-	icebiome: Phaser.GameObjects.Image;
-	marinebiome: Phaser.GameObjects.Image;
-	savannabiome: Phaser.GameObjects.Image;
-	tropicalbiome: Phaser.GameObjects.Image;
-	magmabiome: Phaser.GameObjects.Image;
-	itemsMap: { [key: string]: ItemDetail };
-	interactiveObjects: Phaser.GameObjects.GameObject[];
-
-	constructor() {
-		super("Map");
-	}
 
 	create() {
-		this.cameras.main.fadeIn(500, 0, 0, 0);
-		this.add.image(400, 300, "sky");
-		this.itemsMap = {};
-		this.interactiveObjects = [];
-		this.biomeMap = {};
-		this.biomeItems = {};
-		this.add.text(400, 16, "MAP", textStyle).setAlign("center").setOrigin(0.5, 0);
-		this.storeId = "";
 		this.makeBiomeOwnedContainer();
 		this.makeBiomeNotOwnedContainer();
-
-		this.registry.get("CatalogItems").forEach((item: PlayFabClientModels.CatalogItem) => {
-			if (item.ItemClass === "biome") {
-				this.biomeMap[item.ItemId] = {
-					ItemId: item.ItemId,
-					FullSnowballPrice: item.VirtualCurrencyPrices.SB,
-					FullIciclePrice: item.VirtualCurrencyPrices.IC,
-					DisplayName: item.DisplayName,
-					Description: item.Description,
-				} as BiomeDetail;
-			} else if (item.ItemClass === "item") {
-				this.itemsMap[item.ItemId] = {
-					ItemId: item.ItemId,
-					DisplayName: item.DisplayName,
-					Description: item.Description,
-					Instances: {},
-				} as ItemDetail;
-			}
-		});
 
 		const inventories: PlayFabClientModels.ItemInstance[] = this.registry.get("Inventories");
 		inventories
@@ -87,56 +42,6 @@ class MapScene extends Phaser.Scene {
 				(inventory: PlayFabClientModels.ItemInstance) =>
 					(this.biomeItems[inventory.CustomData.BiomeId][inventory.ItemId] += 1)
 			);
-
-		this.icebiome = this.makeBiomeImage(200, 200, "icebiome");
-		this.marinebiome = this.makeBiomeImage(400, 200, "marinebiome");
-		this.savannabiome = this.makeBiomeImage(600, 200, "savannabiome");
-		this.tropicalbiome = this.makeBiomeImage(290, 400, "tropicalbiome");
-		this.magmabiome = this.makeBiomeImage(490, 400, "magmabiome");
-
-		this.registry.events.on("changedata", this.updateData, this);
-
-		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(this.registry.get("SB") / 100)}`, textStyle);
-		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
-		this.icicleText = this.add.text(50, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, textStyle);
-		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
-
-		if (this.registry.get("ResetBonus") !== 0) {
-			this.add.text(50, 96, `: +${numberWithCommas(this.registry.get("ResetBonus") / 100)}`, textStyle);
-			this.add.image(31, 105, "star").setScale(0.15);
-		}
-	}
-
-	updateData(parent, key, data) {
-		if (this.scene.isActive()) {
-			key === "SB"
-				? this.snowballText.setText(`: ${numberWithCommas(data / 100)}`)
-				: this.icicleText.setText(`: ${numberWithCommas(data)}`);
-		}
-	}
-
-	makeBiomeImage(x: number, y: number, biomeId: string) {
-		const image = this.add
-			.image(x, y, biomeId)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
-					this.storeId = result.data.StoreId;
-					this.interactiveObjects.forEach(object => object.disableInteractive());
-					const biome = result.data.Store.find(
-						(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === biomeId
-					);
-					biomeId in this.biomeItems
-						? this.showBiomeOwnedContainer(biome, biomeId)
-						: this.showBiomeNotOwnedContainer(biome, biomeId);
-				});
-			});
-		this.interactiveObjects.push(image);
-		if (!(biomeId in this.biomeItems)) {
-			this.add.image(x, y, "lock").setScale(0.5);
-		}
-		return image;
 	}
 
 	makeBiomeOwnedContainer() {

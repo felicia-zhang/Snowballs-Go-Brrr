@@ -1,6 +1,6 @@
 import { PlayFabClient } from "playfab-sdk";
 import { textStyle, clickAnimationDepth } from "../utils/constants";
-import { BundleDetail, ItemDetail } from "../utils/types";
+import { BiomeDetail, BundleDetail, ItemDetail } from "../utils/types";
 import Button from "../utils/button";
 import { numberWithCommas, wrapString } from "../utils/stringFormat";
 import LeaderboardContainer from "./leaderboardContainer";
@@ -35,6 +35,7 @@ class GameScene extends Phaser.Scene {
 
 	clickPenguinInstruction: Phaser.GameObjects.Text;
 	clickStoreInstruction: Phaser.GameObjects.Text;
+	biomeMap: { [key: number]: BiomeDetail };
 	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
 	interactiveObjects: Phaser.GameObjects.GameObject[];
@@ -56,6 +57,7 @@ class GameScene extends Phaser.Scene {
 		this.inventoryObjects = [];
 		this.inventoryTimers = [];
 		this.firstItemPrice = undefined;
+		this.biomeMap = {};
 		this.itemsMap = {};
 		this.bundlesMap = {};
 		this.interactiveObjects = [];
@@ -77,7 +79,15 @@ class GameScene extends Phaser.Scene {
 			.get("CatalogItems")
 			.filter((item: PlayFabClientModels.CatalogItem) => item.ItemClass !== "biome")
 			.forEach((item: PlayFabClientModels.CatalogItem, i) => {
-				if (item.ItemClass === "item") {
+				if (item.ItemClass === "biome") {
+					this.biomeMap[item.ItemId] = {
+						ItemId: item.ItemId,
+						FullSnowballPrice: item.VirtualCurrencyPrices.SB,
+						FullIciclePrice: item.VirtualCurrencyPrices.IC,
+						DisplayName: item.DisplayName,
+						Description: item.Description,
+					} as BiomeDetail;
+				} else if (item.ItemClass === "item") {
 					this.itemsMap[item.ItemId] = {
 						ItemId: item.ItemId,
 						DisplayName: item.DisplayName,
