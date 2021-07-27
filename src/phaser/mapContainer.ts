@@ -28,13 +28,13 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 440, 420, 15, darkBackgroundColor);
+		this.background = new RoundRectangle(scene, 0, 0, 640, 420, 15, darkBackgroundColor);
 		this.icebiome = this.makeBiomeContainer(-200, -100, "icebiome");
 		this.marinebiome = this.makeBiomeContainer(0, -100, "marinebiome");
 		this.savannabiome = this.makeBiomeContainer(200, -100, "savannabiome");
 		this.tropicalbiome = this.makeBiomeContainer(-110, 100, "tropicalbiome");
 		this.magmabiome = this.makeBiomeContainer(110, 100, "magmabiome");
-		this.closeButton = new CloseButton(scene, 207.5, -197.5).addCallback(
+		this.closeButton = new CloseButton(scene, 307.5, -197.5).addCallback(
 			this,
 			[...this.scene.interactiveObjects, ...this.scene.interactiveMapObjects],
 			() => {}

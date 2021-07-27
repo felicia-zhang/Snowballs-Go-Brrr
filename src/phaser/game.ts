@@ -190,7 +190,6 @@ class GameScene extends Phaser.Scene {
 				.addIcon("map")
 				.addHoverText("Map")
 				.addCallback(() => {
-					// this.syncData(() => {});
 					this.interactiveObjects.forEach(object => object.disableInteractive());
 					this.mapContainer.show();
 				})
@@ -302,6 +301,60 @@ class GameScene extends Phaser.Scene {
 		}
 	}
 
+	purchaseBiome(
+		biomeDetail: BiomeDetail,
+		maybeDiscountPrice: number,
+		currencyType: string,
+		button: Button,
+		storeId: string
+	) {
+		button.toggleLoading(true);
+		this.syncData(() => {
+			PlayFabClient.PurchaseItem(
+				{
+					ItemId: biomeDetail.ItemId,
+					Price: maybeDiscountPrice,
+					StoreId: storeId,
+					VirtualCurrency: currencyType,
+				},
+				(e, r) => {
+					if (e !== null) {
+						this.time.addEvent({
+							delay: 400,
+							callback: () => {
+								button.toggleLoading(false);
+								currencyType === "SB"
+									? showToast(this, "Not enough snowballs", true)
+									: showToast(this, "Not enough icicles", true);
+							},
+						});
+					} else {
+						this.time.addEvent({
+							delay: 400,
+							callback: () => {
+								button.toggleLoading(false);
+								currencyType === "SB"
+									? (this.registry.values.SB -= maybeDiscountPrice)
+									: (this.registry.values.IC -= maybeDiscountPrice);
+								this.registry.values.Inventories.push(...r.data.Items);
+								this.cameras.main.fadeOut(500, 0, 0, 0);
+								this.cameras.main.once(
+									Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+									(cam, effect) => {
+										this.scene.start("Game", {
+											biomeId: biomeDetail.ItemId,
+											biomeName: biomeDetail.DisplayName,
+										});
+									}
+								);
+							},
+						});
+					}
+				}
+			);
+		});
+	}
+
 	purchaseCurrency(bundleDetail: BundleDetail, usd: number, button: Button) {
 		button.toggleLoading(true);
 		PlayFabClient.ExecuteCloudScript(
@@ -320,6 +373,52 @@ class GameScene extends Phaser.Scene {
 				});
 			}
 		);
+	}
+
+	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, button: Button) {
+		if (Object.keys(itemDetail.Instances).length === 6) {
+			showToast(this, "Not enough room", true);
+		} else {
+			button.toggleLoading(true);
+			this.syncData(() => {
+				PlayFabClient.PurchaseItem(
+					{
+						ItemId: itemDetail.ItemId,
+						Price: maybeItemDiscountPrice,
+						StoreId: storeId,
+						VirtualCurrency: "SB",
+					},
+					(e, r) => {
+						if (e !== null) {
+							this.time.addEvent({
+								delay: 400,
+								callback: () => {
+									button.toggleLoading(false);
+									showToast(this, "Not enough snowballs", true);
+								},
+							});
+						} else {
+							PlayFabClient.ExecuteCloudScript(
+								{
+									FunctionName: "updateInventoryCustomData",
+									FunctionParameter: {
+										instanceId: r.data.Items[0].ItemInstanceId,
+										biomeId: this.biomeId,
+									},
+								},
+								(error, result) => {
+									button.toggleLoading(false);
+									this.registry.values.SB -= maybeItemDiscountPrice;
+									this.registry.values.Inventories.push(result.data.FunctionResult);
+									this.inventoryItemFactory(result.data.FunctionResult);
+									showToast(this, `1 ${itemDetail.DisplayName} successfully purchased`, false);
+								}
+							);
+						}
+					}
+				);
+			});
+		}
 	}
 
 	reset(button: Button) {
@@ -440,52 +539,6 @@ class GameScene extends Phaser.Scene {
 			});
 		this.interactiveObjects.push(sprite);
 		return sprite;
-	}
-
-	purchaseItem(itemDetail: ItemDetail, maybeItemDiscountPrice: number, storeId: string, button: Button) {
-		if (Object.keys(itemDetail.Instances).length === 6) {
-			showToast(this, "Not enough room", true);
-		} else {
-			button.toggleLoading(true);
-			this.syncData(() => {
-				PlayFabClient.PurchaseItem(
-					{
-						ItemId: itemDetail.ItemId,
-						Price: maybeItemDiscountPrice,
-						StoreId: storeId,
-						VirtualCurrency: "SB",
-					},
-					(e, r) => {
-						if (e !== null) {
-							this.time.addEvent({
-								delay: 400,
-								callback: () => {
-									button.toggleLoading(false);
-									showToast(this, "Not enough snowballs", true);
-								},
-							});
-						} else {
-							PlayFabClient.ExecuteCloudScript(
-								{
-									FunctionName: "updateInventoryCustomData",
-									FunctionParameter: {
-										instanceId: r.data.Items[0].ItemInstanceId,
-										biomeId: this.biomeId,
-									},
-								},
-								(error, result) => {
-									button.toggleLoading(false);
-									this.registry.values.SB -= maybeItemDiscountPrice;
-									this.registry.values.Inventories.push(result.data.FunctionResult);
-									this.inventoryItemFactory(result.data.FunctionResult);
-									showToast(this, `1 ${itemDetail.DisplayName} successfully purchased`, false);
-								}
-							);
-						}
-					}
-				);
-			});
-		}
 	}
 
 	inventoryItemFactory(inventory: PlayFabClientModels.ItemInstance) {

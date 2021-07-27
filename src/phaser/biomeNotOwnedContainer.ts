@@ -78,10 +78,10 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 
 		this.title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
 		this.snowballButton.setText(`${numberWithCommas(maybeDiscountSnowballPrice / 100)} x`).addCallback(() => {
-			this.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", this.snowballButton, storeId);
+			this.scene.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", this.snowballButton, storeId);
 		});
 		this.icicleButton.setText(`${numberWithCommas(maybeDiscountIciclePrice)} x`).addCallback(() => {
-			this.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", this.icicleButton, storeId);
+			this.scene.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", this.icicleButton, storeId);
 		});
 
 		this.biomeImage.setTexture(imageKey);
@@ -162,57 +162,5 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 				icicleLine,
 			]);
 		}
-	}
-
-	purchaseBiome(
-		biomeDetail: BiomeDetail,
-		maybeDiscountPrice: number,
-		currencyType: string,
-		button: Button,
-		storeId: string
-	) {
-		button.toggleLoading(true);
-		PlayFabClient.PurchaseItem(
-			{
-				ItemId: biomeDetail.ItemId,
-				Price: maybeDiscountPrice,
-				StoreId: storeId,
-				VirtualCurrency: currencyType,
-			},
-			(e, r) => {
-				if (e !== null) {
-					this.scene.time.addEvent({
-						delay: 400,
-						callback: () => {
-							button.toggleLoading(false);
-							currencyType === "SB"
-								? showToast(this.scene, "Not enough snowballs", true)
-								: showToast(this.scene, "Not enough icicles", true);
-						},
-					});
-				} else {
-					this.scene.time.addEvent({
-						delay: 400,
-						callback: () => {
-							button.toggleLoading(false);
-							currencyType === "SB"
-								? (this.scene.registry.values.SB -= maybeDiscountPrice)
-								: (this.scene.registry.values.IC -= maybeDiscountPrice);
-							this.scene.registry.values.Inventories.push(...r.data.Items);
-							this.scene.cameras.main.fadeOut(500, 0, 0, 0);
-							this.scene.cameras.main.once(
-								Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
-								(cam, effect) => {
-									this.scene.scene.start("Game", {
-										biomeId: biomeDetail.ItemId,
-										biomeName: biomeDetail.DisplayName,
-									});
-								}
-							);
-						},
-					});
-				}
-			}
-		);
 	}
 }
