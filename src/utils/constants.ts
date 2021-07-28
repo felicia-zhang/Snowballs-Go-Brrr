@@ -6,6 +6,8 @@ const normalFontSize = "18px";
 
 const smallFontSize = "14px";
 
+const largeTextStyle = { fontFamily: fontFamily, fontSize: largeFontSize };
+
 const normalTextStyle = { fontFamily: fontFamily, fontSize: normalFontSize };
 
 const smallTextStyle = { fontFamily: fontFamily, fontSize: smallFontSize };
@@ -38,6 +40,7 @@ export {
 	fontFamily,
 	largeFontSize,
 	normalFontSize,
+	largeTextStyle,
 	normalTextStyle,
 	smallTextStyle,
 	lightRedHex,

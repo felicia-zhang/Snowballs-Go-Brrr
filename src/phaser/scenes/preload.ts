@@ -28,7 +28,7 @@ import store from "../../assets/store.png";
 import map from "../../assets/map.png";
 import close from "../../assets/close.png";
 import star from "../../assets/star.png";
-import { fontFamily, largeFontSize } from "../../utils/constants";
+import { largeTextStyle } from "../../utils/constants";
 
 class PreloadScene extends Phaser.Scene {
 	constructor() {
@@ -38,10 +38,7 @@ class PreloadScene extends Phaser.Scene {
 	preload() {
 		this.add.image(400, 300, "sky");
 		this.add.image(400, 220, "title").setScale(0.75);
-		this.add
-			.text(400, 350, "LOADING", { fontFamily: fontFamily, fontSize: largeFontSize })
-			.setOrigin(0.5, 0.5)
-			.setAlign("center");
+		this.add.text(400, 350, "LOADING", largeTextStyle).setOrigin(0.5, 0.5).setAlign("center");
 		this.anims.create({
 			key: "flash",
 			yoyo: true,

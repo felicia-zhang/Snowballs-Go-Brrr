@@ -7,8 +7,7 @@ import {
 	popupDepth,
 	normalTextStyle,
 	smallTextStyle,
-	largeFontSize,
-	fontFamily,
+	largeTextStyle,
 } from "../../utils/constants";
 import GameScene from "../scenes/game";
 
@@ -49,20 +48,14 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 			.setAlign("center")
 			.setOrigin(0.5, 0);
 
-		this.snowballText = new Phaser.GameObjects.Text(scene, 48, 25, "", {
-			fontFamily: fontFamily,
-			fontSize: largeFontSize,
-		});
+		this.snowballText = new Phaser.GameObjects.Text(scene, 48, 25, "", largeTextStyle);
 		this.snowballIcon = new Phaser.GameObjects.Image(scene, 22, 39, "snowball").setScale(0.22);
 		this.snowballContainer = new Phaser.GameObjects.Container(scene, -215, -50, [
 			this.snowballText,
 			this.snowballIcon,
 		]);
 
-		this.resetBonusText = new Phaser.GameObjects.Text(scene, 48, 25, "", {
-			fontFamily: fontFamily,
-			fontSize: largeFontSize,
-		});
+		this.resetBonusText = new Phaser.GameObjects.Text(scene, 48, 25, "", largeTextStyle);
 		this.resetBonusIcon = new Phaser.GameObjects.Image(scene, 22, 36, "star").setScale(0.22);
 		this.resetBonusContainer = new Phaser.GameObjects.Container(scene, 70, -50, [
 			this.resetBonusText,
