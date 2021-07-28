@@ -272,6 +272,12 @@ class GameScene extends Phaser.Scene {
 		if (this.scene.isActive()) {
 			if (key === "SB") {
 				this.snowballText.setText(`: ${numberWithCommas(data / 100)}`);
+
+				const resetBonus = Math.floor(data / 1000000);
+				this.resetContainer.snowballText.setText(`${numberWithCommas(data / 100)} x`);
+				this.resetContainer.snowballIcon.setX(this.resetContainer.snowballText.width + 6);
+				this.resetContainer.resetBonusText.setText(`${numberWithCommas(resetBonus / 100)} x`);
+				this.resetContainer.resetBonusIcon.setX(this.resetContainer.resetBonusText.width - 1.5);
 			} else if (key === "IC") {
 				this.icicleText.setText(`: ${numberWithCommas(data)}`);
 			} else if (key === "ResetBonus") {

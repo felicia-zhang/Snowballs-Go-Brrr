@@ -10,7 +10,6 @@ import {
 	largeFontSize,
 	fontFamily,
 } from "../../utils/constants";
-import { numberWithCommas } from "../../utils/stringFormat";
 import GameScene from "../scenes/game";
 
 export default class ResetContainer extends Phaser.GameObjects.Container {
@@ -114,15 +113,6 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 	}
 
 	show() {
-		const snowballBalance = this.scene.registry.get("SB");
-		const resetBonus = Math.floor(snowballBalance / 1000000);
-
-		this.snowballText.setText(`${numberWithCommas(snowballBalance / 100)} x`);
-		this.snowballIcon.setX(this.snowballText.width + 6);
-
-		this.resetBonusText.setText(`${numberWithCommas(resetBonus / 100)} x`);
-		this.resetBonusIcon.setX(this.resetBonusText.width - 1.5);
-
 		this.scene.add.tween({
 			targets: [this],
 			ease: "Sine.easeIn",
