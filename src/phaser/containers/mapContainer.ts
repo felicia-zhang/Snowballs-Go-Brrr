@@ -27,9 +27,9 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 410, 570, 15, darkDarkBlue);
+		this.background = new RoundRectangle(scene, 0, 0, 540, 570, 15, darkDarkBlue);
 		this.biomeList = new Phaser.GameObjects.Container(scene, 0, 0, []);
-		this.closeButton = new Button(scene, 192, -272, false)
+		this.closeButton = new Button(scene, 257, -272, false)
 			.addIcon("close")
 			.addCloseCallback(this, this.scene.interactiveObjects, () => {
 				this.biomeList.removeAll(true);
@@ -59,10 +59,10 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		const biomeDetail: BiomeDetail = this.scene.biomeMap[biomeItem.ItemId];
 
 		const y = -220 + index * 110;
-		const image = new Phaser.GameObjects.Image(this.scene, -142, y, biomeItem.ItemId).setScale(0.2);
+		const image = new Phaser.GameObjects.Image(this.scene, -200, y, biomeItem.ItemId).setScale(0.25);
 		const nameText = new Phaser.GameObjects.Text(
 			this.scene,
-			-95,
+			-130,
 			y - 20,
 			biomeDetail.DisplayName.toUpperCase(),
 			normalTextStyle
@@ -71,14 +71,14 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 			.setOrigin(0, 0.5);
 		const descriptionText = new Phaser.GameObjects.Text(
 			this.scene,
-			-95,
+			-130,
 			y + 30,
-			wrapString(biomeDetail.Description, 50),
+			biomeDetail.Description,
 			smallTextStyle
 		)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
-		const background = new RoundRectangle(this.scene, 0, y, 380, 95, 15, darkBlue);
+		const background = new RoundRectangle(this.scene, 0, y, 510, 95, 15, darkBlue);
 		const visitButton = new Button(this.scene, 170, y - 12).setText("VISIT").addCallback(() => {
 			this.scene.syncData(() => {
 				this.scene.cameras.main.fadeOut(500, 0, 0, 0);
@@ -110,10 +110,10 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		const maybeDiscountIciclePrice = biomeItem.VirtualCurrencyPrices.IC;
 
 		const y = -220 + index * 110;
-		const image = new Phaser.GameObjects.Image(this.scene, -142, y, biomeItem.ItemId).setScale(0.2);
+		const image = new Phaser.GameObjects.Image(this.scene, -200, y, biomeItem.ItemId).setScale(0.25);
 		const nameText = new Phaser.GameObjects.Text(
 			this.scene,
-			-95,
+			-130,
 			y - 20,
 			biomeDetail.DisplayName.toUpperCase(),
 			normalTextStyle
@@ -122,14 +122,14 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 			.setOrigin(0, 0.5);
 		const descriptionText = new Phaser.GameObjects.Text(
 			this.scene,
-			-95,
+			-130,
 			y + 30,
-			wrapString(biomeDetail.Description, 50),
+			biomeDetail.Description,
 			smallTextStyle
 		)
 			.setAlign("left")
 			.setOrigin(0, 0.5);
-		const background = new RoundRectangle(this.scene, 0, y, 380, 95, 15, darkBlue);
+		const background = new RoundRectangle(this.scene, 0, y, 510, 95, 15, darkBlue);
 		const snowballButton = new Button(this.scene, 170, y - 12)
 			.addIcon("snowball")
 			.setText(`${numberWithCommas(maybeDiscountSnowballPrice / 100)} x`)
@@ -144,7 +144,7 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 				this.scene.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", icicleButton, storeId)
 			);
 		icicleButton.setX(270 - icicleButton.background.width / 2);
-		const lock = new Phaser.GameObjects.Image(this.scene, -142, y, "lock").setScale(0.2);
+		const lock = new Phaser.GameObjects.Image(this.scene, -200, y, "lock").setScale(0.2);
 		this.biomeList.add([background, image, nameText, descriptionText, snowballButton, icicleButton, lock]);
 
 		if (storeId === "BiomeWithDiscount") {
