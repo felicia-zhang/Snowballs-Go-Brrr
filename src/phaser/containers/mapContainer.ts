@@ -9,7 +9,7 @@ import {
 	normalTextStyle,
 	smallTextStyle,
 } from "../../utils/constants";
-import { wrapString } from "../../utils/stringFormat";
+import { numberWithCommas, wrapString } from "../../utils/stringFormat";
 import { BiomeDetail } from "../../utils/types";
 import GameScene from "../scenes/game";
 
@@ -104,5 +104,103 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		// });
 	}
 
-	makeNotOwnedBiome(biomeItem: PlayFabClientModels.StoreItem, storeId: string, index: number) {}
+	makeNotOwnedBiome(biomeItem: PlayFabClientModels.StoreItem, storeId: string, index: number) {
+		const biomeDetail: BiomeDetail = this.scene.biomeMap[biomeItem.ItemId];
+		const maybeDiscountSnowballPrice = biomeItem.VirtualCurrencyPrices.SB;
+		const maybeDiscountIciclePrice = biomeItem.VirtualCurrencyPrices.IC;
+
+		const y = -220 + index * 110;
+		const image = new Phaser.GameObjects.Image(this.scene, -142, y, biomeItem.ItemId).setScale(0.2);
+		const nameText = new Phaser.GameObjects.Text(
+			this.scene,
+			-95,
+			y - 20,
+			biomeDetail.DisplayName.toUpperCase(),
+			normalTextStyle
+		)
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const descriptionText = new Phaser.GameObjects.Text(
+			this.scene,
+			-95,
+			y + 30,
+			wrapString(biomeDetail.Description, 50),
+			smallTextStyle
+		)
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const background = new RoundRectangle(this.scene, 0, y, 380, 95, 15, darkBlue);
+		const snowballButton = new Button(this.scene, 170, y - 12)
+			.addIcon("snowball")
+			.setText(`${numberWithCommas(maybeDiscountSnowballPrice / 100)} x`)
+			.addCallback(() =>
+				this.scene.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", snowballButton, storeId)
+			);
+		snowballButton.setX(170 - snowballButton.background.width / 2);
+		const icicleButton = new Button(this.scene, 170, y - 12)
+			.addIcon("icicle")
+			.setText(`${numberWithCommas(maybeDiscountIciclePrice)} x`)
+			.addCallback(() =>
+				this.scene.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", icicleButton, storeId)
+			);
+		icicleButton.setX(270 - icicleButton.background.width / 2);
+		const lock = new Phaser.GameObjects.Image(this.scene, -142, y, "lock").setScale(0.2);
+		this.biomeList.add([background, image, nameText, descriptionText, snowballButton, icicleButton, lock]);
+
+		if (storeId === "BiomeWithDiscount") {
+			snowballButton.setY(y - 2);
+			icicleButton.setY(y - 2);
+
+			const fullSnowballPriceText = new Phaser.GameObjects.Text(
+				this.scene,
+				131,
+				y - 32,
+				`${numberWithCommas(biomeDetail.FullSnowballPrice / 100)} x`,
+				smallTextStyle
+			)
+				.setAlign("right")
+				.setOrigin(1, 0.5);
+			const fullIciclePriceText = new Phaser.GameObjects.Text(
+				this.scene,
+				230,
+				y - 32,
+				`${numberWithCommas(biomeDetail.FullIciclePrice)} x`,
+				smallTextStyle
+			)
+				.setAlign("right")
+				.setOrigin(1, 0.5);
+
+			const oldSnowballIcon = new Phaser.GameObjects.Image(this.scene, 145, y - 32, "snowball").setScale(0.09);
+			const oldIcicleIcon = new Phaser.GameObjects.Image(this.scene, 250, y - 32, "icicle").setScale(0.09);
+
+			const snowballLine = new Phaser.GameObjects.Line(
+				this.scene,
+				0,
+				0,
+				165,
+				y - 32,
+				205 + fullSnowballPriceText.width,
+				y - 32,
+				0xffffff
+			).setOrigin(1, 0.5);
+			const icicleLine = new Phaser.GameObjects.Line(
+				this.scene,
+				0,
+				0,
+				250,
+				y - 32,
+				300 + fullIciclePriceText.width,
+				y - 32,
+				0xffffff
+			).setOrigin(1, 0.5);
+			this.biomeList.add([
+				fullSnowballPriceText,
+				oldSnowballIcon,
+				snowballLine,
+				fullIciclePriceText,
+				oldIcicleIcon,
+				icicleLine,
+			]);
+		}
+	}
 }
