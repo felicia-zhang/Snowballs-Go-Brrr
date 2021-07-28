@@ -1,84 +1,51 @@
 import RoundRectangle from "phaser3-rex-plugins/plugins/roundrectangle.js";
 import { PlayFabClient } from "playfab-sdk";
 import Button from "../../utils/button";
-import { darkDarkBlue, overlayDepth, popupDepth } from "../../utils/constants";
+import {
+	darkDarkBlue,
+	darkBlue,
+	overlayDepth,
+	popupDepth,
+	normalTextStyle,
+	smallTextStyle,
+} from "../../utils/constants";
+import { wrapString } from "../../utils/stringFormat";
+import { BiomeDetail } from "../../utils/types";
 import GameScene from "../scenes/game";
-import BiomeNotOwnedContainer from "./biomeNotOwnedContainer";
-import BiomeOwnedContainer from "./biomeOwnedContainer";
 
 export default class MapContainer extends Phaser.GameObjects.Container {
 	overlay: Phaser.GameObjects.Rectangle;
 	background: RoundRectangle;
+	biomeList: Phaser.GameObjects.Container;
 	closeButton: Button;
-	icebiome: Phaser.GameObjects.Container;
-	marinebiome: Phaser.GameObjects.Container;
-	savannabiome: Phaser.GameObjects.Container;
-	tropicalbiome: Phaser.GameObjects.Container;
-	magmabiome: Phaser.GameObjects.Container;
-	biomeOwnedContainer: BiomeOwnedContainer;
-	biomeNotOwnedContainer: BiomeNotOwnedContainer;
 	scene: GameScene;
 
 	constructor(scene: GameScene, x: number, y: number) {
 		super(scene, x, y, []);
 
 		this.scene = scene;
-		this.biomeOwnedContainer = new BiomeOwnedContainer(scene, 0, 0);
-		this.biomeNotOwnedContainer = new BiomeNotOwnedContainer(scene, 0, 0);
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
-		this.background = new RoundRectangle(scene, 0, 0, 640, 420, 15, darkDarkBlue);
-		this.icebiome = this.makeBiomeContainer(-200, -100, "icebiome");
-		this.marinebiome = this.makeBiomeContainer(0, -100, "marinebiome");
-		this.savannabiome = this.makeBiomeContainer(200, -100, "savannabiome");
-		this.tropicalbiome = this.makeBiomeContainer(-110, 100, "tropicalbiome");
-		this.magmabiome = this.makeBiomeContainer(110, 100, "magmabiome");
-		this.closeButton = new Button(scene, 307, -197, false)
+		this.background = new RoundRectangle(scene, 0, 0, 410, 570, 15, darkDarkBlue);
+		this.biomeList = new Phaser.GameObjects.Container(scene, 0, 0, []);
+		this.closeButton = new Button(scene, 192, -272, false)
 			.addIcon("close")
-			.addCloseCallback(this, [...this.scene.interactiveObjects, ...this.scene.interactiveMapObjects], () => {});
-
-		this.add([
-			this.overlay,
-			this.background,
-			this.icebiome,
-			this.marinebiome,
-			this.savannabiome,
-			this.tropicalbiome,
-			this.magmabiome,
-			this.closeButton,
-			this.biomeOwnedContainer,
-			this.biomeNotOwnedContainer,
-		])
-			.setDepth(popupDepth)
-			.setAlpha(0);
-	}
-
-	makeBiomeContainer(x: number, y: number, biomeId: string) {
-		const image = new Phaser.GameObjects.Image(this.scene, 0, 0, biomeId)
-			.setScale(0.5)
-			.setInteractive({ useHandCursor: true })
-			.on("pointerup", () => {
-				PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
-					this.scene.interactiveMapObjects.forEach(object => object.disableInteractive());
-					const biome = result.data.Store.find(
-						(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === biomeId
-					);
-					biomeId in this.scene.biomeItems
-						? this.biomeOwnedContainer.show(biome, biomeId)
-						: this.biomeNotOwnedContainer.show(biome, biomeId, result.data.StoreId);
-				});
+			.addCloseCallback(this, this.scene.interactiveObjects, () => {
+				this.biomeList.removeAll(true);
 			});
-		this.scene.interactiveMapObjects.push(image);
 
-		const container = new Phaser.GameObjects.Container(this.scene, x, y, [image]);
-		if (!(biomeId in this.scene.biomeItems)) {
-			container.add(new Phaser.GameObjects.Image(this.scene, 0, 0, "lock").setScale(0.5));
-		}
-		return container;
+		this.add([this.overlay, this.background, this.biomeList, this.closeButton]).setDepth(popupDepth).setAlpha(0);
 	}
 
 	show() {
+		PlayFabClient.GetStoreItems({ StoreId: "Biome" }, (error, result) => {
+			result.data.Store.forEach((biomeItem: PlayFabClientModels.StoreItem, index: number) => {
+				biomeItem.ItemId in this.scene.biomeItems
+					? this.makeOwnedBiome(biomeItem, result.data.StoreId, index)
+					: this.makeNotOwnedBiome(biomeItem, result.data.StoreId, index);
+			});
+		});
 		this.scene.add.tween({
 			targets: [this],
 			ease: "Sine.easeIn",
@@ -87,4 +54,55 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 			callbackScope: this,
 		});
 	}
+
+	makeOwnedBiome(biomeItem: PlayFabClientModels.StoreItem, storeId: string, index: number) {
+		const biomeDetail: BiomeDetail = this.scene.biomeMap[biomeItem.ItemId];
+
+		const y = -220 + index * 110;
+		const image = new Phaser.GameObjects.Image(this.scene, -142, y, biomeItem.ItemId).setScale(0.2);
+		const nameText = new Phaser.GameObjects.Text(
+			this.scene,
+			-95,
+			y - 20,
+			biomeDetail.DisplayName.toUpperCase(),
+			normalTextStyle
+		)
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const descriptionText = new Phaser.GameObjects.Text(
+			this.scene,
+			-95,
+			y + 30,
+			wrapString(biomeDetail.Description, 50),
+			smallTextStyle
+		)
+			.setAlign("left")
+			.setOrigin(0, 0.5);
+		const background = new RoundRectangle(this.scene, 0, y, 380, 95, 15, darkBlue);
+		const visitButton = new Button(this.scene, 170, y - 12).setText("VISIT").addCallback(() => {
+			this.scene.syncData(() => {
+				this.scene.cameras.main.fadeOut(500, 0, 0, 0);
+				this.scene.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+					this.scene.scene.start("Game", { biomeId: biomeDetail.ItemId, biomeName: biomeDetail.DisplayName });
+				});
+			});
+		});
+		visitButton.setX(170 - visitButton.background.width / 2);
+		this.biomeList.add([background, image, nameText, descriptionText, visitButton]);
+
+		// Object.keys(this.scene.biomeItems[biomeItem.ItemId]).forEach((itemId: string, i: number) => {
+		// 	const text = new Phaser.GameObjects.Text(
+		// 		this.scene,
+		// 		0,
+		// 		20 * i,
+		// 		`${this.scene.itemsMap[itemId].DisplayName}: ${this.scene.biomeItems[biomeItem.ItemId][itemId]}`,
+		// 		normalTextStyle
+		// 	)
+		// 		.setAlign("left")
+		// 		.setOrigin(0, 0);
+		// 	this.itemCounter.add(text);
+		// });
+	}
+
+	makeNotOwnedBiome(biomeItem: PlayFabClientModels.StoreItem, storeId: string, index: number) {}
 }

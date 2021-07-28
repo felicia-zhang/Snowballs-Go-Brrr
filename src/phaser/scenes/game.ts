@@ -40,7 +40,6 @@ class GameScene extends Phaser.Scene {
 	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
 	interactiveObjects: Phaser.GameObjects.GameObject[];
-	interactiveMapObjects: Phaser.GameObjects.GameObject[];
 	firstItemPrice: number;
 
 	constructor() {
@@ -64,7 +63,6 @@ class GameScene extends Phaser.Scene {
 		this.itemsMap = {};
 		this.bundlesMap = {};
 		this.interactiveObjects = [];
-		this.interactiveMapObjects = [];
 		this.makePenguin();
 
 		PlayFabClient.GetStoreItems({ StoreId: this.biomeId }, (error, result) => {

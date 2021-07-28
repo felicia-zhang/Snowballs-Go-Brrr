@@ -19,13 +19,11 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 	itemList: Phaser.GameObjects.Container;
 	closeButton: Button;
 	scene: GameScene;
-	storeItems: PlayFabClientModels.StoreItem[];
 
 	constructor(scene: GameScene, x: number, y: number) {
 		super(scene, x, y, []);
 
 		this.scene = scene;
-		this.storeItems = [];
 		this.overlay = new Phaser.GameObjects.Rectangle(scene, 0, 0, 800, 600, 0x000000)
 			.setDepth(overlayDepth)
 			.setAlpha(0.6);
@@ -35,7 +33,6 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 			.addIcon("close")
 			.addCloseCallback(this, this.scene.interactiveObjects, () => {
 				this.itemList.removeAll(true);
-				this.storeItems = [];
 			});
 
 		this.add([this.overlay, this.background, this.itemList, this.closeButton]).setDepth(popupDepth).setAlpha(0);
@@ -43,9 +40,8 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 
 	show() {
 		PlayFabClient.GetStoreItems({ StoreId: this.scene.biomeId }, (error, result) => {
-			const storeId = result.data.StoreId;
-			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem) => {
-				this.makeStoreItem(storeItem, storeId);
+			result.data.Store.forEach((storeItem: PlayFabClientModels.StoreItem, index: number) => {
+				this.makeStoreItem(storeItem, result.data.StoreId, index);
 			});
 		});
 		this.scene.add.tween({
@@ -57,13 +53,11 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 		});
 	}
 
-	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, storeId: string) {
+	makeStoreItem(storeItem: PlayFabClientModels.StoreItem, storeId: string, index: number) {
 		const itemDetail: ItemDetail = this.scene.itemsMap[storeItem.ItemId];
 		const maybeItemDiscountPrice = storeItem.VirtualCurrencyPrices.SB;
 
-		const index = this.storeItems.length;
 		const y = -220 + index * 110;
-		this.storeItems.push(storeItem);
 		const image = new Phaser.GameObjects.Image(this.scene, -142, y, storeItem.ItemId).setScale(0.35);
 		const nameText = new Phaser.GameObjects.Text(
 			this.scene,
