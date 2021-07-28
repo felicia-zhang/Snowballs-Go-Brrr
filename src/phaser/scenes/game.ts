@@ -165,7 +165,7 @@ class GameScene extends Phaser.Scene {
 		this.resetBonusText = this.add.text(50, 96, "", normalTextStyle);
 		this.resetBonusIcon = this.add.image(31, 105, "star").setScale(0.15).setAlpha(0);
 		if (this.resetBonus !== 0) {
-			this.resetBonusText.setText(`: +${numberWithCommas(this.resetBonus / 100)}`);
+			this.resetBonusText.setText(`: ${numberWithCommas(this.resetBonus / 100)}`);
 			this.resetBonusIcon.setAlpha(1);
 		}
 
@@ -277,7 +277,7 @@ class GameScene extends Phaser.Scene {
 			} else if (key === "ResetBonus") {
 				if (data !== 0) {
 					this.resetBonus = data;
-					this.resetBonusText.setText(`: +${numberWithCommas(data / 100)}`);
+					this.resetBonusText.setText(`: ${numberWithCommas(data / 100)}`);
 					this.resetBonusIcon.setAlpha(1);
 				}
 			}
