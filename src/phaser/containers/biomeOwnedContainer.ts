@@ -12,6 +12,7 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 	biomeImage: Phaser.GameObjects.Image;
 	title: Phaser.GameObjects.Text;
 	description: Phaser.GameObjects.Text;
+	itemCounter: Phaser.GameObjects.Container;
 	visitButton: Button;
 	biomeDetail: Phaser.GameObjects.Container;
 	closeButton: Button;
@@ -35,19 +36,19 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 		this.description = new Phaser.GameObjects.Text(scene, -84, -110, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0);
+		this.itemCounter = new Phaser.GameObjects.Container(scene, -84, -15, []);
 		this.biomeDetail = new Phaser.GameObjects.Container(scene, 140, 0, [
 			this.lightBackground,
 			this.title,
 			this.visitButton,
-			new Phaser.GameObjects.Container(scene, -84, -15, []),
+			this.itemCounter,
 			this.description,
 		]);
 		this.closeButton = new Button(scene, 247, -157, false)
 			.addIcon("close")
 			.addCloseCallback(this, this.scene.interactiveMapObjects, () => {
 				this.visitButton.removeListener("pointerup").resetButton();
-				const counterText = this.biomeDetail.getAt(3) as Phaser.GameObjects.Container;
-				counterText.removeAll(true);
+				this.itemCounter.removeAll(true);
 			});
 
 		this.add([this.overlay, this.background, this.biomeImage, this.biomeDetail, this.closeButton])
@@ -69,7 +70,6 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 		});
 		this.biomeImage.setTexture(imageKey);
 		this.description.setText(wrapString(biomeDetail.Description, 21));
-		const counterText = this.biomeDetail.getAt(3) as Phaser.GameObjects.Container;
 		Object.keys(this.scene.biomeItems[biome.ItemId]).forEach((itemId: string, i: number) => {
 			const text = new Phaser.GameObjects.Text(
 				this.scene,
@@ -80,7 +80,7 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 			)
 				.setAlign("left")
 				.setOrigin(0, 0);
-			counterText.add(text);
+			this.itemCounter.add(text);
 		});
 		this.scene.add.tween({
 			targets: [this],

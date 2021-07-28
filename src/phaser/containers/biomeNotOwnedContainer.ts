@@ -21,6 +21,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 	description: Phaser.GameObjects.Text;
 	snowballButton: Button;
 	icicleButton: Button;
+	discounts: Phaser.GameObjects.Container;
 	biomeDetail: Phaser.GameObjects.Container;
 	closeButton: Button;
 	scene: GameScene;
@@ -44,12 +45,13 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 		this.description = new Phaser.GameObjects.Text(scene, -84, -110, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0);
+		this.discounts = new Phaser.GameObjects.Container(scene, 0, 0, []);
 		this.biomeDetail = new Phaser.GameObjects.Container(scene, 140, 0, [
 			this.lightBackground,
 			this.title,
 			this.snowballButton,
 			this.icicleButton,
-			new Phaser.GameObjects.Container(scene, 0, 0, []),
+			this.discounts,
 			this.description,
 		]);
 
@@ -58,8 +60,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 			.addCloseCallback(this, this.scene.interactiveMapObjects, () => {
 				this.snowballButton.removeListener("pointerup").resetButton();
 				this.icicleButton.removeListener("pointerup").resetButton();
-				const discounts = this.biomeDetail.getAt(4) as Phaser.GameObjects.Container;
-				discounts.removeAll(true);
+				this.discounts.removeAll(true);
 			});
 
 		this.add([this.overlay, this.background, this.biomeImage, this.biomeDetail, this.closeButton])
@@ -142,8 +143,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 				45,
 				0xffffff
 			).setOrigin(0.5, 0.5);
-			const discounts = this.biomeDetail.getAt(4) as Phaser.GameObjects.Container;
-			discounts.add([
+			this.discounts.add([
 				fullSnowballPriceText,
 				fullIciclePriceText,
 				oldSnowballIcon,
