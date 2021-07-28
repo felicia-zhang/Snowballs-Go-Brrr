@@ -172,7 +172,7 @@ class GameScene extends Phaser.Scene {
 		this.add.text(400, 16, this.biomeName.toUpperCase(), normalTextStyle).setAlign("center").setOrigin(0.5, 0);
 
 		const storeButton = this.add.existing(
-			new Button(this, 30, 390)
+			new Button(this, 310, 575)
 				.addIcon("store")
 				.addHoverText("Store")
 				.addCallback(() => {
@@ -191,7 +191,7 @@ class GameScene extends Phaser.Scene {
 		this.interactiveObjects.push(storeButton);
 
 		const mapButton = this.add.existing(
-			new Button(this, 30, 435)
+			new Button(this, 355, 575)
 				.addIcon("map")
 				.addHoverText("Map")
 				.addCallback(() => {
@@ -202,7 +202,7 @@ class GameScene extends Phaser.Scene {
 		this.interactiveObjects.push(mapButton);
 
 		const leaderboardButton = this.add.existing(
-			new Button(this, 30, 480)
+			new Button(this, 400, 575)
 				.addIcon("leaderboard")
 				.addHoverText("Leaderboard")
 				.addCallback(() => {
@@ -213,7 +213,7 @@ class GameScene extends Phaser.Scene {
 		this.interactiveObjects.push(leaderboardButton);
 
 		const resetButton = this.add.existing(
-			new Button(this, 30, 525)
+			new Button(this, 445, 575)
 				.addIcon("reset")
 				.addHoverText("Reset")
 				.addCallback(() => {
@@ -224,7 +224,7 @@ class GameScene extends Phaser.Scene {
 		this.interactiveObjects.push(resetButton);
 
 		const iapButton = this.add.existing(
-			new Button(this, 30, 570)
+			new Button(this, 490, 575)
 				.addIcon("iap")
 				.addHoverText("In-app Purchase")
 				.addCallback(() => {
@@ -520,9 +520,9 @@ class GameScene extends Phaser.Scene {
 		});
 
 		const sprite = this.add
-			.sprite(35, 300, "penguin1")
+			.sprite(16, 300, "penguin1")
 			.setOrigin(0, 0.5)
-			.setScale(0.5)
+			.setScale(0.7)
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (this.clickPenguinInstruction.alpha === 1) {

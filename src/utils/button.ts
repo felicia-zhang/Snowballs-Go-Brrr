@@ -36,8 +36,8 @@ export default class Button extends Phaser.GameObjects.Container {
 			.setAlpha(0)
 			.setDepth(toastDepth);
 		this.hoverText = new Phaser.GameObjects.Text(this.scene, 0, 0, "", smallTextStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5)
 			.setAlpha(0)
 			.setDepth(toastDepth);
 		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, isBlue ? lightBlue : lightRed)
@@ -155,9 +155,9 @@ export default class Button extends Phaser.GameObjects.Container {
 	}
 
 	addHoverText(text: string): this {
-		this.hoverText.setText(text).setX(30);
+		this.hoverText.setText(text).setY(-32);
 		this.hoverBackground.setSize(this.hoverText.width + 8, this.hoverText.height + 8);
-		this.hoverBackground.x = this.hoverBackground.width / 2 + 25;
+		this.hoverBackground.y = -32;
 
 		this.background
 			.on("pointerover", () => {
