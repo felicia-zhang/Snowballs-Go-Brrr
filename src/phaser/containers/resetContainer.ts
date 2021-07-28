@@ -43,40 +43,28 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 			scene,
 			0,
 			-100,
-			"Earn 0.01 reset bonus per 10,000 snowballs\nReset bonus will be applied to clicks and item effects.",
+			"Earn 0.01 reset bonus per 10,000 snowballs.\nReset bonus will be applied to clicks and item effects.",
 			normalTextStyle
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
 
-		this.snowballLable = new Phaser.GameObjects.Text(scene, 0, 0, "Snowball Balance", smallTextStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		this.snowballText = new Phaser.GameObjects.Text(scene, 0, 30, "", {
+		this.snowballText = new Phaser.GameObjects.Text(scene, 48, 25, "", {
 			fontFamily: fontFamily,
 			fontSize: largeFontSize,
-		})
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		this.snowballIcon = new Phaser.GameObjects.Image(scene, 0, 30, "snowball").setScale(0.15).setOrigin(0, 0.5);
-		this.snowballContainer = new Phaser.GameObjects.Container(scene, -200, -30, [
-			this.snowballLable,
+		});
+		this.snowballIcon = new Phaser.GameObjects.Image(scene, 22, 39, "snowball").setScale(0.22);
+		this.snowballContainer = new Phaser.GameObjects.Container(scene, -215, -50, [
 			this.snowballText,
 			this.snowballIcon,
 		]);
 
-		this.resetBonusLable = new Phaser.GameObjects.Text(scene, 0, 0, "Reset Bonus", smallTextStyle)
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		this.resetBonusText = new Phaser.GameObjects.Text(scene, 0, 30, "", {
+		this.resetBonusText = new Phaser.GameObjects.Text(scene, 48, 25, "", {
 			fontFamily: fontFamily,
 			fontSize: largeFontSize,
-		})
-			.setAlign("left")
-			.setOrigin(0, 0.5);
-		this.resetBonusIcon = new Phaser.GameObjects.Image(scene, 0, 30, "star").setScale(0.15).setOrigin(0, 0.5);
-		this.resetBonusContainer = new Phaser.GameObjects.Container(scene, 80, -30, [
-			this.resetBonusLable,
+		});
+		this.resetBonusIcon = new Phaser.GameObjects.Image(scene, 22, 36, "star").setScale(0.22);
+		this.resetBonusContainer = new Phaser.GameObjects.Container(scene, 70, -50, [
 			this.resetBonusText,
 			this.resetBonusIcon,
 		]);
