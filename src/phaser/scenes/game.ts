@@ -537,7 +537,7 @@ class GameScene extends Phaser.Scene {
 				this.totalAddedSnowballs += currentClickMultiplier;
 				this.registry.values.SB += currentClickMultiplier;
 				const amountText = this.add
-					.text(pointer.x, pointer.y, (currentClickMultiplier / 100).toString(), normalTextStyle)
+					.text(pointer.x, pointer.y, `+${currentClickMultiplier / 100}`, normalTextStyle)
 					.setAlpha(0)
 					.setAlign("center")
 					.setOrigin(0.5, 0.5)
@@ -580,7 +580,7 @@ class GameScene extends Phaser.Scene {
 	makeItem(index: number, y: number, snowballGeneration: number, delay: number, imageKey: string) {
 		const snowballsToAdd = snowballGeneration + this.resetBonus;
 		const amountText = this.add
-			.text(220 + index * 100, y, `+${snowballsToAdd / 100}`, normalTextStyle)
+			.text(220 + index * 100, y + 10, `+${snowballsToAdd / 100}`, normalTextStyle)
 			.setAlpha(0)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5)
@@ -589,7 +589,7 @@ class GameScene extends Phaser.Scene {
 			delay: delay,
 			loop: true,
 			callback: () => {
-				amountText.setY(y);
+				amountText.setY(y + 10);
 				this.registry.values.SB += snowballsToAdd;
 				this.totalAddedSnowballs += snowballsToAdd;
 				this.showClickAnimation(amountText);
@@ -607,14 +607,14 @@ class GameScene extends Phaser.Scene {
 			targets: [amountText],
 			props: {
 				y: {
-					value: startingY - 100,
-					duration: 500,
+					value: startingY - 30,
+					duration: 750,
 					ease: "Sine.easeIn",
 				},
 				alpha: {
 					value: 0,
-					duration: 500,
-					ease: "Sine.easeIn",
+					duration: 750,
+					ease: "Cubic.easeIn",
 				},
 			},
 			onStart: () => {
