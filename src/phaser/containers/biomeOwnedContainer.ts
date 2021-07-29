@@ -56,7 +56,7 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 			.setAlpha(0);
 	}
 
-	show(biome: PlayFabClientModels.StoreItem, imageKey: string) {
+	show(biome: PlayFabClientModels.StoreItem) {
 		const biomeDetail: BiomeDetail = this.scene.biomeMap[biome.ItemId];
 
 		this.title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
@@ -68,14 +68,14 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 				});
 			});
 		});
-		this.biomeImage.setTexture(imageKey);
+		this.biomeImage.setTexture(biome.ItemId);
 		this.description.setText(wrapString(biomeDetail.Description, 21));
-		Object.keys(this.scene.biomeItems[biome.ItemId]).forEach((itemId: string, i: number) => {
+		Object.keys(this.scene.inventories[biome.ItemId]).forEach((itemId: string, i: number) => {
 			const text = new Phaser.GameObjects.Text(
 				this.scene,
 				0,
 				20 * i,
-				`${this.scene.itemsMap[itemId].DisplayName}: ${this.scene.biomeItems[biome.ItemId][itemId]}`,
+				`${this.scene.itemsMap[itemId].DisplayName}: ${this.scene.inventories[biome.ItemId][itemId]}`,
 				normalTextStyle
 			)
 				.setAlign("left")

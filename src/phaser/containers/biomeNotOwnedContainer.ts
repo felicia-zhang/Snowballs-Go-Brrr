@@ -68,7 +68,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 			.setAlpha(0);
 	}
 
-	show(biome: PlayFabClientModels.StoreItem, imageKey: string, storeId: string) {
+	show(biome: PlayFabClientModels.StoreItem, storeId: string) {
 		const biomeDetail: BiomeDetail = this.scene.biomeMap[biome.ItemId];
 		const maybeDiscountSnowballPrice = biome.VirtualCurrencyPrices.SB;
 		const maybeDiscountIciclePrice = biome.VirtualCurrencyPrices.IC;
@@ -81,7 +81,7 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 			this.scene.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", this.icicleButton, storeId);
 		});
 
-		this.biomeImage.setTexture(imageKey);
+		this.biomeImage.setTexture(biome.ItemId);
 		this.description.setText(wrapString(biomeDetail.Description, 21));
 		this.scene.add.tween({
 			targets: [this],

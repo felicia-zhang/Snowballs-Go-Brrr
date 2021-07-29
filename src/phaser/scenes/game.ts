@@ -35,7 +35,7 @@ class GameScene extends Phaser.Scene {
 
 	clickPenguinInstruction: Phaser.GameObjects.Text;
 	clickStoreInstruction: Phaser.GameObjects.Text;
-	biomeItems: { [key: number]: ItemCounter };
+	inventories: { [key: string]: ItemCounter };
 	biomeMap: { [key: number]: BiomeDetail };
 	itemsMap: { [key: string]: ItemDetail };
 	bundlesMap: { [key: number]: BundleDetail };
@@ -59,7 +59,7 @@ class GameScene extends Phaser.Scene {
 		this.inventoryObjects = [];
 		this.inventoryTimers = [];
 		this.firstItemPrice = undefined;
-		this.biomeItems = {};
+		this.inventories = {};
 		this.biomeMap = {};
 		this.itemsMap = {};
 		this.bundlesMap = {};
@@ -104,7 +104,7 @@ class GameScene extends Phaser.Scene {
 			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.ItemClass === "biome")
 			.forEach(
 				biome =>
-					(this.biomeItems[biome.ItemId] = {
+					(this.inventories[biome.ItemId] = {
 						mittens: 0,
 						bonfire: 0,
 						snowman: 0,
@@ -115,7 +115,7 @@ class GameScene extends Phaser.Scene {
 		inventories
 			.filter((inventory: PlayFabClientModels.ItemInstance) => inventory.CustomData !== undefined)
 			.forEach((inventory: PlayFabClientModels.ItemInstance) => {
-				this.biomeItems[inventory.CustomData.BiomeId][inventory.ItemId] += 1;
+				this.inventories[inventory.CustomData.BiomeId][inventory.ItemId] += 1;
 				if (inventory.CustomData.BiomeId === this.biomeId) {
 					this.inventoryItemFactory(inventory);
 				}
@@ -418,7 +418,7 @@ class GameScene extends Phaser.Scene {
 									this.registry.values.SB -= maybeItemDiscountPrice;
 									const inventory: PlayFabClientModels.ItemInstance = result.data.FunctionResult;
 									this.registry.values.Inventories.push(inventory); // mutating array does not invoke `changedata`
-									this.biomeItems[this.biomeId][inventory.ItemId] += 1;
+									this.inventories[this.biomeId][inventory.ItemId] += 1;
 									this.inventoryItemFactory(inventory);
 									showToast(this, `1 ${itemDetail.DisplayName} successfully purchased`, false);
 								}

@@ -64,15 +64,15 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 					const biome = result.data.Store.find(
 						(storeItem: PlayFabClientModels.StoreItem) => storeItem.ItemId === biomeId
 					);
-					biomeId in this.scene.biomeItems
-						? this.biomeOwnedContainer.show(biome, biomeId)
-						: this.biomeNotOwnedContainer.show(biome, biomeId, result.data.StoreId);
+					biomeId in this.scene.inventories
+						? this.biomeOwnedContainer.show(biome)
+						: this.biomeNotOwnedContainer.show(biome, result.data.StoreId);
 				});
 			});
 		this.scene.interactiveMapObjects.push(image);
 
 		const container = new Phaser.GameObjects.Container(this.scene, x, y, [image]);
-		if (!(biomeId in this.scene.biomeItems)) {
+		if (!(biomeId in this.scene.inventories)) {
 			container.add(new Phaser.GameObjects.Image(this.scene, 0, 0, "lock").setScale(0.5));
 		}
 		return container;
