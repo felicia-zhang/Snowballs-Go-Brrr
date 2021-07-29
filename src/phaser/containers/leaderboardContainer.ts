@@ -65,6 +65,14 @@ export default class LeaderboardContainer extends Phaser.GameObjects.Container {
 						.setOrigin(1, 0.5)
 						.setAlign("right");
 					this.statList.add([lightBg, rankText, playerText, statText]);
+
+					if (i < 3) {
+						this.statList.add(
+							new Phaser.GameObjects.Image(this.scene, -190, i * 80 - 195, `number${i + 1}`)
+								.setScale(0.4)
+								.setRotation(-0.55)
+						);
+					}
 				});
 			}
 		);
