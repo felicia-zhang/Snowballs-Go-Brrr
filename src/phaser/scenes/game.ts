@@ -235,7 +235,7 @@ class GameScene extends Phaser.Scene {
 		this.interactiveObjects.push(iapButton);
 
 		this.clickPenguinInstruction = this.add
-			.text(150, 300, wrapString("Click on the penguin to generate snowballs", 21), normalTextStyle)
+			.text(170, 300, wrapString("Click the penguin to generate snowballs", 21), normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 1)
 			.setAlpha(0);
@@ -243,20 +243,20 @@ class GameScene extends Phaser.Scene {
 			targets: [this.clickPenguinInstruction],
 			ease: "Sine.easeIn",
 			duration: 500,
-			x: 140,
+			x: 160,
 			yoyo: true,
 			repeat: -1,
 		});
 		this.clickStoreInstruction = this.add
-			.text(100, 424, wrapString("Purchase your first item", 21), normalTextStyle)
-			.setAlign("left")
-			.setOrigin(0, 1)
+			.text(310, 515, wrapString("Purchase your first item", 18), normalTextStyle)
+			.setAlign("center")
+			.setOrigin(0.5, 0.5)
 			.setAlpha(0);
 		this.add.tween({
 			targets: [this.clickStoreInstruction],
 			ease: "Sine.easeIn",
 			duration: 500,
-			x: 90,
+			y: 525,
 			yoyo: true,
 			repeat: -1,
 		});
