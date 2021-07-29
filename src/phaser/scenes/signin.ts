@@ -81,7 +81,25 @@ class SigninScene extends Phaser.Scene {
 						this.registry.set("IC", result.data.VirtualCurrency.IC);
 						this.registry.set("Inventories", result.data.Inventory);
 
-						this.scene.start("Game", { biomeId: "icebiome", biomeName: "Ice Biome" });
+						PlayFabClient.GetUserData(
+							{ Keys: ["hasClickedStore", "hasClickedPenguin"] },
+							(error, result) => {
+								if (!result.data.Data.hasClickedStore) {
+									this.registry.set("hasClickedStore", false);
+								} else {
+									// this data will never be set to false
+									this.registry.set("hasClickedStore", true);
+								}
+
+								if (!result.data.Data.hasClickedPenguin) {
+									this.registry.set("hasClickedPenguin", false);
+								} else {
+									this.registry.set("hasClickedPenguin", true);
+								}
+
+								this.scene.start("Game", { biomeId: "icebiome", biomeName: "Ice Biome" });
+							}
+						);
 					});
 				});
 			});

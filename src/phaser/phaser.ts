@@ -38,9 +38,6 @@ export class PhaserGame extends Phaser.Game {
 	}
 
 	grantInitialItemAndTutorialToNewPlayer(toggleSignIn: (isSignedIn: boolean, errors?: string[]) => void) {
-		this.registry.set("isNewPlayer", true);
-		this.registry.set("hasShownClickPenguinInstruction", false);
-		this.registry.set("hasShownClickStoreInstruction", false);
 		PlayFabClient.ExecuteCloudScript(
 			{ FunctionName: "grantInitialItemsToUser", FunctionParameter: {} },
 			(error, result) => {

@@ -178,7 +178,8 @@ class GameScene extends Phaser.Scene {
 				.addCallback(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
 					if (this.clickStoreInstruction.alpha === 1) {
-						this.registry.set("hasShownClickStoreInstruction", true);
+						this.registry.set("hasClickedStore", true);
+						PlayFabClient.UpdateUserData({ Data: { hasClickedStore: "true" } }, () => {});
 						this.add.tween({
 							targets: [this.clickStoreInstruction],
 							duration: 200,
@@ -288,20 +289,18 @@ class GameScene extends Phaser.Scene {
 	}
 
 	update() {
-		if (this.registry.get("isNewPlayer")) {
-			if (!this.registry.get("hasShownClickPenguinInstruction")) {
-				this.clickPenguinInstruction.setAlpha(1);
-			}
+		if (!this.registry.get("hasClickedPenguin")) {
+			this.clickPenguinInstruction.setAlpha(1);
+		}
 
-			if (
-				!this.registry.get("hasShownClickStoreInstruction") &&
-				this.firstItemPrice !== undefined &&
-				this.registry.get("SB") >= this.firstItemPrice
-			) {
-				this.clickStoreInstruction.setAlpha(1);
-			} else {
-				this.clickStoreInstruction.setAlpha(0);
-			}
+		if (
+			!this.registry.get("hasClickedStore") &&
+			this.firstItemPrice !== undefined &&
+			this.registry.get("SB") >= this.firstItemPrice
+		) {
+			this.clickStoreInstruction.setAlpha(1);
+		} else {
+			this.clickStoreInstruction.setAlpha(0);
 		}
 
 		if (!this.registry.has("IsSignedIn") || !this.registry.get("IsSignedIn")) {
@@ -526,7 +525,8 @@ class GameScene extends Phaser.Scene {
 			.setInteractive({ useHandCursor: true })
 			.on("pointerup", (pointer: Phaser.Input.Pointer) => {
 				if (this.clickPenguinInstruction.alpha === 1) {
-					this.registry.set("hasShownClickPenguinInstruction", true);
+					this.registry.set("hasClickedPenguin", true);
+					PlayFabClient.UpdateUserData({ Data: { hasClickedPenguin: "true" } }, () => {});
 					this.add.tween({
 						targets: [this.clickPenguinInstruction],
 						duration: 200,
