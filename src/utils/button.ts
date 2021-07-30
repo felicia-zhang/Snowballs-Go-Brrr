@@ -40,8 +40,9 @@ export default class Button extends Phaser.GameObjects.Container {
 			.setOrigin(0.5, 0.5)
 			.setAlpha(0)
 			.setDepth(toastDepth);
-		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, isBlue ? lightBlue : lightRed)
-			.setInteractive({ useHandCursor: true })
+		this.background = new RoundRectangle(scene, 0, 0, 0, 0, 10, isBlue ? lightBlue : lightRed);
+
+		this.add([this.highlight, this.background, this.textObject, this.hoverBackground, this.hoverText])
 			.on("pointerover", () => this.background.setFillStyle(isBlue ? normalBlue : normalRed, 1))
 			.on("pointerout", () => this.resetButton())
 			.on("pointerdown", () => {
@@ -68,8 +69,6 @@ export default class Button extends Phaser.GameObjects.Container {
 					},
 				});
 			});
-
-		this.add([this.highlight, this.background, this.textObject, this.hoverBackground, this.hoverText]);
 	}
 
 	resetButton(): this {
@@ -124,10 +123,14 @@ export default class Button extends Phaser.GameObjects.Container {
 	}
 
 	addCallback(callback: () => any): this {
-		this.background.on("pointerup", () => {
-			this.resetButton();
-			callback();
-		});
+		this.setSize(this.background.width, this.background.height)
+			.setInteractive({
+				useHandCursor: true,
+			})
+			.on("pointerup", () => {
+				this.resetButton();
+				callback();
+			});
 
 		return this;
 	}
@@ -137,19 +140,23 @@ export default class Button extends Phaser.GameObjects.Container {
 		interactiveObjects: Phaser.GameObjects.GameObject[],
 		callback: () => any
 	): this {
-		this.background.on("pointerup", () => {
-			this.scene.add.tween({
-				targets: [container],
-				ease: "Sine.easeIn",
-				duration: 300,
-				alpha: 0,
-				onComplete: () => {
-					interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
-					this.resetButton();
-					callback();
-				},
+		this.setSize(this.background.width, this.background.height)
+			.setInteractive({
+				useHandCursor: true,
+			})
+			.on("pointerup", () => {
+				this.scene.add.tween({
+					targets: [container],
+					ease: "Sine.easeIn",
+					duration: 300,
+					alpha: 0,
+					onComplete: () => {
+						interactiveObjects.forEach(object => object.setInteractive({ useHandCursor: true }));
+						this.resetButton();
+						callback();
+					},
+				});
 			});
-		});
 
 		return this;
 	}
@@ -159,31 +166,14 @@ export default class Button extends Phaser.GameObjects.Container {
 		this.hoverBackground.setSize(this.hoverText.width + 8, this.hoverText.height + 8);
 		this.hoverBackground.y = -32;
 
-		this.background
-			.on("pointerover", () => {
-				this.hoverText.setAlpha(1);
-				this.hoverBackground.setAlpha(1);
-			})
-			.on("pointerout", () => {
-				this.hoverText.setAlpha(0);
-				this.hoverBackground.setAlpha(0);
-			});
+		this.on("pointerover", () => {
+			this.hoverText.setAlpha(1);
+			this.hoverBackground.setAlpha(1);
+		}).on("pointerout", () => {
+			this.hoverText.setAlpha(0);
+			this.hoverBackground.setAlpha(0);
+		});
 
-		return this;
-	}
-
-	removeListener(event: string): this {
-		this.background.removeListener(event);
-		return this;
-	}
-
-	disableInteractive(): this {
-		this.background.disableInteractive();
-		return this;
-	}
-
-	setInteractive(hitArea?: Phaser.Types.Input.InputConfiguration | any): this {
-		this.background.setInteractive(hitArea);
 		return this;
 	}
 
@@ -197,7 +187,7 @@ export default class Button extends Phaser.GameObjects.Container {
 			this.textObject.setX(-textX);
 
 			this.background.setFillStyle(this.isBlue ? darkBlue : darkRed, 1);
-			this.background.disableInteractive().removeListener("pointerout");
+			this.disableInteractive().removeListener("pointerout");
 
 			if (this.icon !== undefined) {
 				this.icon.setAlpha(0);
@@ -217,7 +207,7 @@ export default class Button extends Phaser.GameObjects.Container {
 			}
 
 			this.background.setFillStyle(this.isBlue ? lightBlue : lightRed, 1);
-			this.background.setInteractive({ useHandCursor: true }).on("pointerout", () => this.resetButton());
+			this.setInteractive({ useHandCursor: true }).on("pointerout", () => this.resetButton());
 
 			this.scene.add.tween({
 				targets: [this.highlight],
