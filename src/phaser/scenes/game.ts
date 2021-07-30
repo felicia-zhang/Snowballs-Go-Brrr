@@ -173,9 +173,9 @@ class GameScene extends Phaser.Scene {
 
 		const storeButton = this.add.existing(
 			new Button(this, 310, 575)
-				.addIcon("store")
-				.addHoverText("Store")
-				.addCallback(() => {
+				.setIcon("store")
+				.setHoverText("Store")
+				.setAction(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
 					if (this.clickStoreInstruction.alpha === 1) {
 						this.registry.set("hasClickedStore", true);
@@ -193,9 +193,9 @@ class GameScene extends Phaser.Scene {
 
 		const mapButton = this.add.existing(
 			new Button(this, 355, 575)
-				.addIcon("map")
-				.addHoverText("Map")
-				.addCallback(() => {
+				.setIcon("map")
+				.setHoverText("Map")
+				.setAction(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
 					this.mapContainer.show();
 				})
@@ -204,9 +204,9 @@ class GameScene extends Phaser.Scene {
 
 		const leaderboardButton = this.add.existing(
 			new Button(this, 400, 575)
-				.addIcon("leaderboard")
-				.addHoverText("Leaderboard")
-				.addCallback(() => {
+				.setIcon("leaderboard")
+				.setHoverText("Leaderboard")
+				.setAction(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
 					this.leaderboardContainer.show();
 				})
@@ -215,9 +215,9 @@ class GameScene extends Phaser.Scene {
 
 		const resetButton = this.add.existing(
 			new Button(this, 445, 575)
-				.addIcon("reset")
-				.addHoverText("Reset")
-				.addCallback(() => {
+				.setIcon("reset")
+				.setHoverText("Reset")
+				.setAction(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
 					this.resetContainer.show();
 				})
@@ -226,9 +226,9 @@ class GameScene extends Phaser.Scene {
 
 		const iapButton = this.add.existing(
 			new Button(this, 490, 575)
-				.addIcon("iap")
-				.addHoverText("In-app Purchase")
-				.addCallback(() => {
+				.setIcon("iap")
+				.setHoverText("In-app Purchase")
+				.setAction(() => {
 					this.interactiveObjects.forEach(object => object.disableInteractive());
 					this.bundleContainer.show();
 				})
@@ -317,7 +317,7 @@ class GameScene extends Phaser.Scene {
 		button: Button,
 		storeId: string
 	) {
-		button.toggleLoading(true);
+		button.setLoading(true);
 		this.syncData(() => {
 			PlayFabClient.PurchaseItem(
 				{
@@ -331,7 +331,7 @@ class GameScene extends Phaser.Scene {
 						this.time.addEvent({
 							delay: 400,
 							callback: () => {
-								button.toggleLoading(false);
+								button.setLoading(false);
 								currencyType === "SB"
 									? showToast(this, "Not enough snowballs", true)
 									: showToast(this, "Not enough icicles", true);
@@ -341,7 +341,7 @@ class GameScene extends Phaser.Scene {
 						this.time.addEvent({
 							delay: 400,
 							callback: () => {
-								button.toggleLoading(false);
+								button.setLoading(false);
 								currencyType === "SB"
 									? (this.registry.values.SB -= maybeDiscountPrice)
 									: (this.registry.values.IC -= maybeDiscountPrice);
@@ -365,7 +365,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	purchaseBundle(bundleDetail: BundleDetail, usd: number, button: Button) {
-		button.toggleLoading(true);
+		button.setLoading(true);
 		PlayFabClient.ExecuteCloudScript(
 			{
 				FunctionName: "grantIcicleBundle",
@@ -375,7 +375,7 @@ class GameScene extends Phaser.Scene {
 				this.time.addEvent({
 					delay: 200,
 					callback: () => {
-						button.toggleLoading(false);
+						button.setLoading(false);
 						this.registry.values.IC += bundleDetail.Icicles;
 						showToast(this, `${bundleDetail.DisplayName} successfully purchased`, false);
 					},
@@ -388,7 +388,7 @@ class GameScene extends Phaser.Scene {
 		if (Object.keys(itemDetail.Instances).length === 6) {
 			showToast(this, "Not enough room", true);
 		} else {
-			button.toggleLoading(true);
+			button.setLoading(true);
 			this.syncData(() => {
 				PlayFabClient.PurchaseItem(
 					{
@@ -402,7 +402,7 @@ class GameScene extends Phaser.Scene {
 							this.time.addEvent({
 								delay: 400,
 								callback: () => {
-									button.toggleLoading(false);
+									button.setLoading(false);
 									showToast(this, "Not enough snowballs", true);
 								},
 							});
@@ -416,7 +416,7 @@ class GameScene extends Phaser.Scene {
 									},
 								},
 								(error, result) => {
-									button.toggleLoading(false);
+									button.setLoading(false);
 									this.registry.values.SB -= maybeItemDiscountPrice;
 									const inventory: PlayFabClientModels.ItemInstance = result.data.FunctionResult;
 									this.registry.values.Inventories.push(inventory); // mutating array does not invoke `changedata`
@@ -433,7 +433,7 @@ class GameScene extends Phaser.Scene {
 	}
 
 	reset(button: Button) {
-		button.toggleLoading(true);
+		button.setLoading(true);
 		this.inventoryObjects.forEach((object: Phaser.GameObjects.GameObject) => {
 			object.destroy(true);
 		});
@@ -480,7 +480,7 @@ class GameScene extends Phaser.Scene {
 					console.log("Added reset bonus statistics", bonus);
 					console.log("Cleared biomes LastUpdated data");
 					console.log("Revoked all snowballs: ", result.subtractSBResult);
-					button.toggleLoading(false);
+					button.setLoading(false);
 					this.add.tween({
 						targets: [this.resetContainer],
 						ease: "Sine.easeIn",

@@ -84,10 +84,7 @@ export default class Button extends Phaser.GameObjects.Container {
 		return this;
 	}
 
-	addIcon(imageKey: string): this {
-		if (this.icon !== undefined) {
-			return this;
-		}
+	setIcon(imageKey: string): this {
 		this.icon = new Phaser.GameObjects.Image(this.scene, 0, 0, imageKey).setScale(0.15);
 		const textX = (this.textObject.width + 36) / 2;
 		this.textObject.setX(-textX);
@@ -126,7 +123,7 @@ export default class Button extends Phaser.GameObjects.Container {
 		return this;
 	}
 
-	addCallback(callback: () => any): this {
+	setAction(callback: () => any): this {
 		this.setSize(this.background.width, this.background.height)
 			.setInteractive({
 				useHandCursor: true,
@@ -139,7 +136,7 @@ export default class Button extends Phaser.GameObjects.Container {
 		return this;
 	}
 
-	addCloseCallback(
+	setCloseAction(
 		container: Phaser.GameObjects.Container,
 		interactiveObjects: Phaser.GameObjects.GameObject[],
 		callback: () => any
@@ -165,9 +162,9 @@ export default class Button extends Phaser.GameObjects.Container {
 		return this;
 	}
 
-	addHoverText(text: string): this {
+	setHoverText(text: string): this {
 		this.hoverText.setText(text).setY(-32);
-		this.hoverBackground.setSize(this.hoverText.width + 8, this.hoverText.height + 8);
+		this.hoverBackground.resize(this.hoverText.width + 8, this.hoverText.height + 8);
 		this.hoverBackground.y = -32;
 
 		this.on("pointerover", () => {
@@ -181,7 +178,7 @@ export default class Button extends Phaser.GameObjects.Container {
 		return this;
 	}
 
-	toggleLoading(isLoading: boolean) {
+	setLoading(isLoading: boolean) {
 		if (isLoading) {
 			this.textObject
 				.setText(". . .")

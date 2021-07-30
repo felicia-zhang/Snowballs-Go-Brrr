@@ -32,8 +32,8 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 		this.background = new RoundRectangle(scene, 0, 0, 410, 570, 15, darkDarkBlue);
 		this.itemList = new Phaser.GameObjects.Container(scene, 0, 0, []);
 		this.closeButton = new Button(scene, 192, -272, false)
-			.addIcon("close")
-			.addCloseCallback(this, this.scene.interactiveObjects, () => {
+			.setIcon("close")
+			.setCloseAction(this, this.scene.interactiveObjects, () => {
 				this.itemList.removeAll(true);
 				this.storeItems = [];
 			});
@@ -90,9 +90,9 @@ export default class StoreContainer extends Phaser.GameObjects.Container {
 		const background = new RoundRectangle(this.scene, 0, y, 380, 95, 15, darkBlue);
 
 		const button = new Button(this.scene, 170, y - 12)
-			.addIcon("snowball")
+			.setIcon("snowball")
 			.setText(`${numberWithCommas(maybeItemDiscountPrice / 100)} x`)
-			.addCallback(() => this.scene.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button));
+			.setAction(() => this.scene.purchaseItem(itemDetail, maybeItemDiscountPrice, storeId, button));
 		button.setX(170 - button.background.width / 2);
 		this.itemList.add([background, image, nameText, descriptionText, effectText, button]);
 

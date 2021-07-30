@@ -40,8 +40,8 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 		this.title = new Phaser.GameObjects.Text(scene, 0, -130, "", normalTextStyle)
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
-		this.snowballButton = new Button(scene, 0, 70).addIcon("snowball");
-		this.icicleButton = new Button(scene, 0, 120).addIcon("icicle");
+		this.snowballButton = new Button(scene, 0, 70).setIcon("snowball");
+		this.icicleButton = new Button(scene, 0, 120).setIcon("icicle");
 		this.description = new Phaser.GameObjects.Text(scene, -84, -110, "", normalTextStyle)
 			.setAlign("left")
 			.setOrigin(0, 0);
@@ -56,8 +56,8 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 		]);
 
 		this.closeButton = new Button(scene, 247, -157, false)
-			.addIcon("close")
-			.addCloseCallback(this, this.scene.interactiveMapObjects, () => {
+			.setIcon("close")
+			.setCloseAction(this, this.scene.interactiveMapObjects, () => {
 				this.snowballButton.removeListener("pointerup").resetButton();
 				this.icicleButton.removeListener("pointerup").resetButton();
 				this.discounts.removeAll(true);
@@ -74,10 +74,10 @@ export default class BiomeNotOwnedContainer extends Phaser.GameObjects.Container
 		const maybeDiscountIciclePrice = biome.VirtualCurrencyPrices.IC;
 
 		this.title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
-		this.snowballButton.setText(`${numberWithCommas(maybeDiscountSnowballPrice / 100)} x`).addCallback(() => {
+		this.snowballButton.setText(`${numberWithCommas(maybeDiscountSnowballPrice / 100)} x`).setAction(() => {
 			this.scene.purchaseBiome(biomeDetail, maybeDiscountSnowballPrice, "SB", this.snowballButton, storeId);
 		});
-		this.icicleButton.setText(`${numberWithCommas(maybeDiscountIciclePrice)} x`).addCallback(() => {
+		this.icicleButton.setText(`${numberWithCommas(maybeDiscountIciclePrice)} x`).setAction(() => {
 			this.scene.purchaseBiome(biomeDetail, maybeDiscountIciclePrice, "IC", this.icicleButton, storeId);
 		});
 

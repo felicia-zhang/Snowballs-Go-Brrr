@@ -39,8 +39,8 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 			.setAlign("center")
 			.setOrigin(0.5, 0.5);
 		this.closeButton = new Button(scene, 319.5, -122, false)
-			.addIcon("close")
-			.addCloseCallback(this, this.scene.interactiveObjects, () => {
+			.setIcon("close")
+			.setCloseAction(this, this.scene.interactiveObjects, () => {
 				this.bundleList.removeAll(true);
 			});
 
@@ -104,7 +104,7 @@ export default class BundleContainer extends Phaser.GameObjects.Container {
 			.setOrigin(0.5, 0.5);
 		const button = new Button(this.scene, x, 80)
 			.setText(`$ ${usd}.00`)
-			.addCallback(() => this.scene.purchaseBundle(bundleDetail, usd, button));
+			.setAction(() => this.scene.purchaseBundle(bundleDetail, usd, button));
 		this.bundleList.add([background, image, nameText, button]);
 	}
 }

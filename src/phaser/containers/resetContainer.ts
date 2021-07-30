@@ -71,10 +71,10 @@ export default class ResetContainer extends Phaser.GameObjects.Container {
 		)
 			.setAlign("center")
 			.setOrigin(0.5, 0);
-		this.resetButton = new Button(scene, 0, 45).setText("RESET").addCallback(() => scene.reset(this.resetButton));
+		this.resetButton = new Button(scene, 0, 45).setText("RESET").setAction(() => scene.reset(this.resetButton));
 		this.closeButton = new Button(scene, 242, -104.5, false)
-			.addIcon("close")
-			.addCloseCallback(this, this.scene.interactiveObjects, () => {
+			.setIcon("close")
+			.setCloseAction(this, this.scene.interactiveObjects, () => {
 				this.resetButton.resetButton();
 			});
 

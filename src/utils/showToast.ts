@@ -13,7 +13,7 @@ export const showToast = (scene: Phaser.Scene, message: string, isError: boolean
 		.setDepth(toastDepth)
 		.setAlign("center")
 		.setOrigin(0.5, 0);
-	toastBackground.setSize(toastText.width + 20, toastText.height + 20);
+	toastBackground.resize(toastText.width + 20, toastText.height + 20);
 	toastBackground.y = (toastText.height + 40) / 2;
 	if (isError) {
 		toastBackground.setFillStyle(lightRed);

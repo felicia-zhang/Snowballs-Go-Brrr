@@ -45,8 +45,8 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 			this.description,
 		]);
 		this.closeButton = new Button(scene, 247, -157, false)
-			.addIcon("close")
-			.addCloseCallback(this, this.scene.interactiveMapObjects, () => {
+			.setIcon("close")
+			.setCloseAction(this, this.scene.interactiveMapObjects, () => {
 				this.visitButton.removeListener("pointerup").resetButton();
 				this.itemCounter.removeAll(true);
 			});
@@ -60,7 +60,7 @@ export default class BiomeOwnedContainer extends Phaser.GameObjects.Container {
 		const biomeDetail: BiomeDetail = this.scene.biomeMap[biome.ItemId];
 
 		this.title.setText(`${biomeDetail.DisplayName.toUpperCase()}`);
-		this.visitButton.addCallback(() => {
+		this.visitButton.setAction(() => {
 			this.scene.syncData(() => {
 				this.scene.cameras.main.fadeOut(500, 0, 0, 0);
 				this.scene.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
