@@ -71,6 +71,10 @@ export default class Button extends Phaser.GameObjects.Container {
 			});
 	}
 
+	invoke() {
+		this.listeners("pointerup").forEach(event => event());
+	}
+
 	resetButton(): this {
 		this.background.setFillStyle(this.isBlue ? lightBlue : lightRed, 1);
 		this.highlight.setAlpha(0);

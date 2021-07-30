@@ -36,7 +36,10 @@ export default class MapContainer extends Phaser.GameObjects.Container {
 		this.magmabiome = this.makeBiomeContainer(110, 100, "magmabiome");
 		this.closeButton = new Button(scene, 307, -197, false)
 			.addIcon("close")
-			.addCloseCallback(this, [...this.scene.interactiveObjects, ...this.scene.interactiveMapObjects], () => {});
+			.addCloseCallback(this, [...this.scene.interactiveObjects, ...this.scene.interactiveMapObjects], () => {
+				this.biomeOwnedContainer.closeButton.invoke();
+				this.biomeNotOwnedContainer.closeButton.invoke();
+			});
 
 		this.add([
 			this.overlay,
