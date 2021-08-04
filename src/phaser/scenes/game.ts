@@ -153,12 +153,8 @@ class GameScene extends Phaser.Scene {
 			callback: () => this.syncData(() => showToast(this, "Saved", false)),
 		});
 
-		this.snowballText = this.add.text(
-			50,
-			16,
-			`: ${numberWithCommas(this.registry.get("SB") / 100)}`,
-			normalTextStyle
-		);
+		const sb = this.registry.get("SB");
+		this.snowballText = this.add.text(50, 16, `: ${numberWithCommas(sb / 100)}`, normalTextStyle);
 		this.snowballIcon = this.add.image(31, 25, "snowball").setScale(0.15);
 		this.icicleText = this.add.text(50, 56, `: ${numberWithCommas(this.registry.get("IC"))}`, normalTextStyle);
 		this.icicleIcon = this.add.image(31, 65, "icicle").setScale(0.15);
@@ -269,6 +265,9 @@ class GameScene extends Phaser.Scene {
 		this.resetContainer = this.add.existing(new ResetContainer(this, 400, 300));
 		this.bundleContainer = this.add.existing(new BundleContainer(this, 400, 300));
 		this.leaderboardContainer = this.add.existing(new LeaderboardContainer(this, 400, 300));
+
+		this.resetContainer.snowballText.setText(`: ${numberWithCommas(sb / 100)}`);
+		this.resetContainer.resetBonusText.setText(`: ${numberWithCommas(Math.floor(sb / 1000000) / 100)}`);
 	}
 
 	updateData(parent, key, data) {
