@@ -636,7 +636,7 @@ class GameScene extends Phaser.Scene {
 		if (totalAdded === 0) {
 			console.log("No change to snowballs since last sync");
 			if (func !== undefined) {
-				func(0);
+				func(this.registry.get("SB"));
 			}
 		} else {
 			PlayFabClient.ExecuteCloudScript(
